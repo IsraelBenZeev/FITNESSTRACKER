@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Bash(ls -la \"C:\\\\Users\\\\i0548\\\\Documents\\\\FITNESSTRACKER\\\\\" && find \"C:\\\\Users\\\\i0548\\\\Documents\\\\FITNESSTRACKER\" -name \"*\" 2>/dev/null)",
+      "Bash(npm create:*)",
+      "Bash(npx create-vite@latest --template react-ts .)",
+      "Bash(npm install:*)"
+    ]
+  }
+}
