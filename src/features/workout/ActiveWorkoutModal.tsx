@@ -12,6 +12,7 @@ interface SetEntry {
 interface ExerciseEntry {
   exercise_id: string
   exercise_name: string
+  gif_url?: string
   sets: SetEntry[]
 }
 
@@ -32,6 +33,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
     (plan?.exercises ?? []).map((ex) => ({
       exercise_id: ex.exercise_id,
       exercise_name: ex.exercise_name,
+      gif_url: ex.gif_url,
       sets: Array.from({ length: ex.target_sets }, () => ({
         reps: ex.target_reps != null ? String(ex.target_reps) : '',
         weight: ex.target_weight_kg != null ? String(ex.target_weight_kg) : '',
@@ -51,6 +53,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
       (plan?.exercises ?? []).map((ex) => ({
         exercise_id: ex.exercise_id,
         exercise_name: ex.exercise_name,
+        gif_url: ex.gif_url,
         sets: Array.from({ length: ex.target_sets }, () => ({
           reps: ex.target_reps != null ? String(ex.target_reps) : '',
           weight: ex.target_weight_kg != null ? String(ex.target_weight_kg) : '',
@@ -154,15 +157,28 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
         {entries.map((ex, exIdx) => (
           <div key={ex.exercise_id} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '17px',
-              fontWeight: 600,
-              color: '#D7FF00',
-              textAlign: 'right',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              gap: '10px',
               paddingBottom: '6px',
               borderBottom: '1px solid #1a1a1a',
             }}>
-              {ex.exercise_name}
+              <span style={{
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontSize: '17px',
+                fontWeight: 600,
+                color: '#D7FF00',
+              }}>
+                {ex.exercise_name}
+              </span>
+              {ex.gif_url && (
+                <img
+                  src={ex.gif_url}
+                  alt={ex.exercise_name}
+                  style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: '#111' }}
+                />
+              )}
             </div>
 
             {/* Column headers */}

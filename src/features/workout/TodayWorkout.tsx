@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Play, Dumbbell } from 'lucide-react'
 import { Card } from '../../shared/components/Card'
-import { ActiveWorkoutModal } from './ActiveWorkoutModal'
 import { useWorkoutPlans } from './useWorkoutPlans'
+import { hasActiveSession } from './workoutSession'
 import type { WorkoutPlan } from '../../types/workout'
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
@@ -97,7 +97,7 @@ function PlanCard({ plan, onStart }: { plan: WorkoutPlan; onStart: () => void })
             }}
           >
             <Play size={14} strokeWidth={2.5} fill="#0a0a0a" />
-            התחל אימון
+            לפרטי תכנית
           </button>
           <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>
             {days}
@@ -109,8 +109,9 @@ function PlanCard({ plan, onStart }: { plan: WorkoutPlan; onStart: () => void })
 }
 
 export function TodayWorkout() {
+  const navigate = useNavigate()
   const { data: plans = [], isLoading } = useWorkoutPlans()
-  const [activePlan, setActivePlan] = useState<WorkoutPlan | null>(null)
+  const hasSession = hasActiveSession()
 
   const todayDay = new Date().getDay() // 0=Sun ... 6=Sat
   const todayPlans = plans.filter((p) => p.training_days.includes(todayDay))
@@ -139,6 +140,27 @@ export function TodayWorkout() {
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {hasSession && (
+          <button
+            onClick={() => navigate('/workout/session')}
+            style={{
+              width: '100%',
+              padding: '12px 14px',
+              background: 'rgba(215,255,0,0.1)',
+              border: '1px solid rgba(215,255,0,0.25)',
+              borderRadius: '10px',
+              color: '#D7FF00',
+              fontFamily: '"Rubik", sans-serif',
+              fontSize: '13px',
+              textAlign: 'right',
+              cursor: 'pointer',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            יש אימון פעיל. לחץ כדי להמשיך
+          </button>
+        )}
+
         {todayPlans.length > 0 && (
           <>
             <h3 style={{
@@ -153,7 +175,7 @@ export function TodayWorkout() {
               אימון היום
             </h3>
             {todayPlans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} onStart={() => setActivePlan(plan)} />
+              <PlanCard key={plan.id} plan={plan} onStart={() => navigate(`/workout/plan/${plan.id}`)} />
             ))}
           </>
         )}
@@ -186,17 +208,11 @@ export function TodayWorkout() {
               תכניות נוספות
             </h3>
             {otherPlans.map((plan) => (
-              <PlanCard key={plan.id} plan={plan} onStart={() => setActivePlan(plan)} />
+              <PlanCard key={plan.id} plan={plan} onStart={() => navigate(`/workout/plan/${plan.id}`)} />
             ))}
           </>
         )}
       </div>
-
-      <ActiveWorkoutModal
-        isOpen={activePlan != null}
-        onClose={() => setActivePlan(null)}
-        plan={activePlan}
-      />
     </>
   )
 }

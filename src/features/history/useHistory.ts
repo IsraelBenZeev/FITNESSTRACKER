@@ -94,6 +94,22 @@ interface UseDayMealsResult {
   loading: boolean
 }
 
+export async function fetchNutritionForExport(sinceDate: string | null): Promise<NutritionLog[]> {
+  let query = supabase
+    .from('nutrition_log')
+    .select('*')
+    .order('date', { ascending: true })
+    .order('time', { ascending: true })
+
+  if (sinceDate != null) {
+    query = query.gte('date', sinceDate)
+  }
+
+  const { data, error: err } = await query
+  if (err) throw new Error(err.message)
+  return (data ?? []) as NutritionLog[]
+}
+
 export function useDayMeals(date: string | null): UseDayMealsResult {
   const { data: meals = [], isLoading } = useQuery({
     queryKey: ['nutrition', 'day', date],

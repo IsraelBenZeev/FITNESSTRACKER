@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, Trash2, Dumbbell } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { Card } from '../../shared/components/Card'
 import { CreatePlanModal } from './CreatePlanModal'
 import { useWorkoutPlans } from './useWorkoutPlans'
@@ -14,16 +15,22 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 }
 
 function PlanRow({ plan }: { plan: WorkoutPlan }) {
+  const navigate = useNavigate()
   const { mutate: deletePlan, isPending } = useDeletePlan()
   const [confirm, setConfirm] = useState(false)
 
-  function handleDelete() {
+  function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
+    e.stopPropagation()
     if (!confirm) { setConfirm(true); return }
     deletePlan(plan.id)
   }
 
   return (
-    <Card style={{ padding: '14px 16px' }}>
+    <div
+      onClick={() => navigate(`/workout/plan/${plan.id}`)}
+      style={{ cursor: 'pointer' }}
+    >
+    <Card style={{ padding: '14px 16px' }} hover>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -112,6 +119,7 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
         )}
       </div>
     </Card>
+    </div>
   )
 }
 

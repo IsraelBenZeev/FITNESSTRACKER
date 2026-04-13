@@ -6,8 +6,12 @@ export interface Exercise {
   bodyParts_he: string[]
   targetMuscles: string[]
   targetMuscles_he: string[]
+  secondaryMuscles: string[]
+  secondaryMuscles_he: string[]
   equipments: string[]
   equipments_he: string[]
+  instructions: string[]
+  instructions_he: string[]
   gifUrl?: string
   gif_available?: boolean
 }
@@ -27,6 +31,7 @@ export interface WorkoutPlanExercise {
   workout_plan_id: string
   exercise_id: string
   exercise_name: string
+  gif_url?: string
   target_sets: number
   target_reps: number | null
   target_weight_kg: number | null
