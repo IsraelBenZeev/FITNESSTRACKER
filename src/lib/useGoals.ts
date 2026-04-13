@@ -2,58 +2,93 @@ import { useState, useEffect } from 'react'
 import { GOAL_CALORIES, GOAL_PROTEIN } from './constants'
 import { supabase } from './supabase'
 
-type Goals = { calories: number; protein: number }
-type Listener = (goals: Goals) => void
-
-// Module-level store — shared across all hook instances
-const listeners = new Set<Listener>()
-let currentGoals: Goals = { calories: GOAL_CALORIES, protein: GOAL_PROTEIN }
-
-function notifyAll(goals: Goals) {
-  currentGoals = goals
-  listeners.forEach((fn) => fn(goals))
+export type GoalsConfig = {
+  trainingCalories: number
+  trainingProtein: number
+  restCalories: number
+  restProtein: number
+  trainingDays: number[] // 0 = Sunday … 6 = Saturday
 }
 
-export async function fetchGoals(): Promise<Goals> {
+type Listener = (config: GoalsConfig) => void
+
+const DEFAULT_CONFIG: GoalsConfig = {
+  trainingCalories: GOAL_CALORIES,
+  trainingProtein: GOAL_PROTEIN,
+  restCalories: 1650,
+  restProtein: 100,
+  trainingDays: [1, 3, 5],
+}
+
+// Module-level store
+const listeners = new Set<Listener>()
+let currentConfig: GoalsConfig = DEFAULT_CONFIG
+
+function notifyAll(config: GoalsConfig) {
+  currentConfig = config
+  listeners.forEach((fn) => fn(config))
+}
+
+function rowToConfig(row: Record<string, unknown>): GoalsConfig {
+  return {
+    trainingCalories: row.training_calories as number,
+    trainingProtein:  row.training_protein  as number,
+    restCalories:     row.rest_calories     as number,
+    restProtein:      row.rest_protein      as number,
+    trainingDays:     (row.training_days    as number[]) ?? [],
+  }
+}
+
+export async function fetchGoalsConfig(): Promise<GoalsConfig> {
   const { data, error } = await supabase
     .from('user_goals')
-    .select('calories, protein')
+    .select('training_calories, training_protein, rest_calories, rest_protein, training_days')
     .single()
-  if (error || !data) return { calories: GOAL_CALORIES, protein: GOAL_PROTEIN }
-  return { calories: data.calories, protein: data.protein }
+  if (error || !data) return DEFAULT_CONFIG
+  return rowToConfig(data)
 }
 
-export async function saveGoals(calories: number, protein: number): Promise<void> {
+export async function saveGoalsConfig(config: GoalsConfig): Promise<void> {
   await supabase
     .from('user_goals')
-    .update({ calories, protein, updated_at: new Date().toISOString() })
+    .update({
+      training_calories: config.trainingCalories,
+      training_protein:  config.trainingProtein,
+      rest_calories:     config.restCalories,
+      rest_protein:      config.restProtein,
+      training_days:     config.trainingDays,
+      updated_at:        new Date().toISOString(),
+    })
     .eq('id', 1)
-  notifyAll({ calories, protein })
+  notifyAll(config)
 }
 
 export function useGoals() {
-  const [goals, setGoalsState] = useState<Goals>(currentGoals)
+  const [config, setConfig] = useState<GoalsConfig>(currentConfig)
   const [loaded, setLoaded] = useState(false)
 
-  // Subscribe to in-memory updates (cross-component sync)
   useEffect(() => {
-    const listener: Listener = (next) => setGoalsState(next)
+    const listener: Listener = (next) => setConfig(next)
     listeners.add(listener)
     return () => { listeners.delete(listener) }
   }, [])
 
-  // Load from DB on first mount
   useEffect(() => {
     if (loaded) return
-    fetchGoals().then((g) => {
-      notifyAll(g)
+    fetchGoalsConfig().then((c) => {
+      notifyAll(c)
       setLoaded(true)
     })
   }, [loaded])
 
+  const todayDow = new Date().getDay() // 0–6
+  const isTrainingDay = config.trainingDays.includes(todayDow)
+
   return {
-    goalCalories: goals.calories,
-    goalProtein: goals.protein,
-    setGoals: (calories: number, protein: number) => saveGoals(calories, protein),
+    goalCalories:  isTrainingDay ? config.trainingCalories : config.restCalories,
+    goalProtein:   isTrainingDay ? config.trainingProtein  : config.restProtein,
+    isTrainingDay,
+    goalsConfig:   config,
+    setGoals:      saveGoalsConfig,
   }
 }
