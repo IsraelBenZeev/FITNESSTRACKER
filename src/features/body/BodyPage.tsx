@@ -1,10 +1,15 @@
+import { useState } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
-import { TrendingDown, TrendingUp } from 'lucide-react'
+import { TrendingDown, TrendingUp, CalendarDays, BarChart2, Copy, FileDown, Check, Pencil, Plus } from 'lucide-react'
 import { useBodyStats } from './useBodyStats'
+import type { BodyStat } from '../../types/body'
 import { START_WEIGHT, START_WAIST, chartTheme } from '../../lib/constants'
 import { Card } from '../../shared/components/Card'
+import { AddBodyStatModal } from './AddBodyStatModal'
+import { BodyHistoryCalendar } from './BodyHistoryCalendar'
+import { copyStatsAsJson, downloadStatsPdf } from './exportBodyStats'
 
 function formatDate(dateStr: string): string {
   const d = new Date(dateStr)
@@ -15,7 +20,7 @@ function SectionTitle({ children }: { children: string }) {
   return (
     <h2
       style={{
-        fontFamily: '"Bebas Neue", cursive',
+        fontFamily: '"Barlow Condensed", sans-serif',
         fontSize: '18px',
         color: '#888',
         margin: '0 0 14px 0',
@@ -47,7 +52,7 @@ function DeltaBadge({ delta, unit }: { delta: number; unit: string }) {
       }}
     >
       <Icon size={12} color={color} strokeWidth={2} />
-      <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color, fontWeight: 600 }}>
+      <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color, fontWeight: 600 }}>
         {sign}{delta.toFixed(1)}{unit}
       </span>
     </div>
@@ -67,7 +72,7 @@ function BigStatCard({ label, value, unit, delta, deltaUnit }: BigStatCardProps)
     <Card style={{ padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
       <span
         style={{
-          fontFamily: '"DM Sans", sans-serif',
+          fontFamily: '"Rubik", sans-serif',
           fontSize: '11px',
           color: '#555',
           fontWeight: 500,
@@ -80,7 +85,7 @@ function BigStatCard({ label, value, unit, delta, deltaUnit }: BigStatCardProps)
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
         <span
           style={{
-            fontFamily: '"Bebas Neue", cursive',
+            fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '36px',
             color: '#D7FF00',
             lineHeight: 1,
@@ -89,14 +94,14 @@ function BigStatCard({ label, value, unit, delta, deltaUnit }: BigStatCardProps)
           {value != null ? value.toFixed(1) : '—'}
         </span>
         {value != null && (
-          <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#555' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#555' }}>
             {unit}
           </span>
         )}
       </div>
       {delta != null && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '11px', color: '#444' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>
             מהתחלה
           </span>
           <DeltaBadge delta={delta} unit={deltaUnit} />
@@ -107,11 +112,35 @@ function BigStatCard({ label, value, unit, delta, deltaUnit }: BigStatCardProps)
 }
 
 export function BodyPage() {
-  const { stats, latest, loading } = useBodyStats()
+  const { stats, latest, todayStat, loading } = useBodyStats()
+  const [addStatOpen, setAddStatOpen] = useState(false)
+  const [editStat, setEditStat] = useState<BodyStat | null>(null)
+  const [view, setView] = useState<'charts' | 'calendar'>('charts')
+  const [toast, setToast] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  function showToast(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 2800)
+  }
+
+  async function handleCopyJson() {
+    if (stats.length === 0) return
+    await copyStatsAsJson(stats)
+    setCopied(true)
+    showToast('הועתק בהצלחה')
+    setTimeout(() => setCopied(false), 2800)
+  }
+
+  function handleDownloadPdf() {
+    if (stats.length === 0) return
+    downloadStatsPdf(stats)
+    showToast('PDF הורד בהצלחה')
+  }
 
   if (loading) {
     return (
-      <div style={{ padding: '32px 16px', textAlign: 'center', color: '#555', fontFamily: '"DM Sans", sans-serif' }}>
+      <div style={{ padding: '32px 16px', textAlign: 'center', color: '#555', fontFamily: '"Rubik", sans-serif' }}>
         טוען...
       </div>
     )
@@ -142,7 +171,168 @@ export function BodyPage() {
     : undefined
 
   return (
+    <>
+    {/* Toast notification */}
+    {toast && (
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '80px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 200,
+          background: '#1a1a1a',
+          border: '1px solid rgba(215,255,0,0.35)',
+          borderRadius: '12px',
+          padding: '10px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+          animation: 'slideUp 0.2s cubic-bezier(0.32,0.72,0,1) forwards',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        <Check size={14} color="#D7FF00" strokeWidth={2.5} />
+        <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#D7FF00' }}>
+          {toast}
+        </span>
+      </div>
+    )}
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+      {/* Top action bar */}
+      <div style={{ display: 'flex', gap: '10px' }}>
+        <button
+          onClick={() => {
+            if (todayStat) {
+              setEditStat(todayStat)
+            } else {
+              setAddStatOpen(true)
+            }
+          }}
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            padding: '13px',
+            background: 'transparent',
+            border: '1px solid rgba(215,255,0,0.3)',
+            borderRadius: '12px',
+            color: '#D7FF00',
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontSize: '16px',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            cursor: 'pointer',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          {todayStat ? (
+            <>
+              <Pencil size={15} strokeWidth={2} />
+              ערוך מדידה היום
+            </>
+          ) : (
+            <>
+              <Plus size={15} strokeWidth={2.5} />
+              הוסף מדידה
+            </>
+          )}
+        </button>
+
+        {/* View toggle */}
+        <div
+          style={{
+            display: 'flex',
+            background: '#1a1a1a',
+            border: '1px solid #222',
+            borderRadius: '12px',
+            padding: '4px',
+            gap: '4px',
+          }}
+        >
+          {(['charts', 'calendar'] as const).map((v) => {
+            const Icon = v === 'charts' ? BarChart2 : CalendarDays
+            const active = view === v
+            return (
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                style={{
+                  width: '40px',
+                  height: '40px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: active ? 'rgba(215,255,0,0.12)' : 'transparent',
+                  border: active ? '1px solid rgba(215,255,0,0.3)' : '1px solid transparent',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  color: active ? '#D7FF00' : '#555',
+                  transition: 'all 0.15s',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                <Icon size={16} strokeWidth={2} />
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Export buttons */}
+      {stats.length > 0 && (
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={handleCopyJson}
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '10px',
+              background: copied ? 'rgba(74,222,128,0.08)' : '#1a1a1a',
+              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid #222',
+              borderRadius: '10px',
+              color: copied ? '#4ade80' : '#666',
+              fontFamily: '"Rubik", sans-serif',
+              fontSize: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            {copied ? <Check size={14} strokeWidth={2.5} /> : <Copy size={14} strokeWidth={2} />}
+            {copied ? 'הועתק!' : 'העתק JSON'}
+          </button>
+          <button
+            onClick={handleDownloadPdf}
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '10px',
+              background: '#1a1a1a',
+              border: '1px solid #222',
+              borderRadius: '10px',
+              color: '#666',
+              fontFamily: '"Rubik", sans-serif',
+              fontSize: '12px',
+              cursor: 'pointer',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            <FileDown size={14} strokeWidth={2} />
+            הורד PDF
+          </button>
+        </div>
+      )}
+
       {/* Stats grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
         <BigStatCard
@@ -161,84 +351,95 @@ export function BodyPage() {
         />
       </div>
 
-      {/* Weight chart */}
-      {weightData.length > 1 && (
-        <Card style={{ padding: '16px' }}>
-          <SectionTitle>ירידת משקל</SectionTitle>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={weightData} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
-              <CartesianGrid stroke={chartTheme.gridColor} />
-              <XAxis
-                dataKey="label"
-                tick={{ fill: chartTheme.tickColor, fontSize: 10, fontFamily: '"DM Sans", sans-serif' }}
-                axisLine={{ stroke: chartTheme.axisColor }}
-                tickLine={false}
-              />
-              <YAxis
-                domain={weightDomain}
-                tick={{ fill: chartTheme.tickColor, fontSize: 10, fontFamily: '"DM Sans", sans-serif' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={chartTheme.tooltip.contentStyle}
-                formatter={(value: number) => [`${value} ק"ג`, 'משקל']}
-                labelFormatter={(label) => `${label}`}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={chartTheme.lineColor}
-                strokeWidth={2}
-                dot={{ fill: '#D7FF00', r: 4, strokeWidth: 0 }}
-                activeDot={{ r: 6, fill: '#D7FF00' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
+      {view === 'charts' && (
+        <>
+          {/* Weight chart */}
+          {weightData.length > 1 && (
+            <Card style={{ padding: '16px' }}>
+              <SectionTitle>ירידת משקל</SectionTitle>
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={weightData} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
+                  <CartesianGrid stroke={chartTheme.gridColor} />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fill: chartTheme.tickColor, fontSize: 10, fontFamily: '"Rubik", sans-serif' }}
+                    axisLine={{ stroke: chartTheme.axisColor }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    domain={weightDomain}
+                    tick={{ fill: chartTheme.tickColor, fontSize: 10, fontFamily: '"Rubik", sans-serif' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={chartTheme.tooltip.contentStyle}
+                    formatter={(value: number) => [`${value} ק"ג`, 'משקל']}
+                    labelFormatter={(label) => `${label}`}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={chartTheme.lineColor}
+                    strokeWidth={2}
+                    dot={{ fill: '#D7FF00', r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: '#D7FF00' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Card>
+          )}
+
+          {/* Waist chart */}
+          {waistData.length > 1 && (
+            <Card style={{ padding: '16px' }}>
+              <SectionTitle>היקף בטן</SectionTitle>
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={waistData} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
+                  <CartesianGrid stroke={chartTheme.gridColor} />
+                  <XAxis
+                    dataKey="label"
+                    tick={{ fill: chartTheme.tickColor, fontSize: 10, fontFamily: '"Rubik", sans-serif' }}
+                    axisLine={{ stroke: chartTheme.axisColor }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    domain={waistDomain}
+                    tick={{ fill: chartTheme.tickColor, fontSize: 10, fontFamily: '"Rubik", sans-serif' }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    contentStyle={chartTheme.tooltip.contentStyle}
+                    formatter={(value: number) => [`${value} ס"מ`, 'היקף בטן']}
+                    labelFormatter={(label) => `${label}`}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="value"
+                    stroke={chartTheme.lineColor}
+                    strokeWidth={2}
+                    dot={{ fill: '#D7FF00', r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: '#D7FF00' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </Card>
+          )}
+        </>
       )}
 
-      {/* Waist chart */}
-      {waistData.length > 1 && (
-        <Card style={{ padding: '16px' }}>
-          <SectionTitle>היקף בטן</SectionTitle>
-          <ResponsiveContainer width="100%" height={180}>
-            <LineChart data={waistData} margin={{ top: 8, right: 4, left: -24, bottom: 0 }}>
-              <CartesianGrid stroke={chartTheme.gridColor} />
-              <XAxis
-                dataKey="label"
-                tick={{ fill: chartTheme.tickColor, fontSize: 10, fontFamily: '"DM Sans", sans-serif' }}
-                axisLine={{ stroke: chartTheme.axisColor }}
-                tickLine={false}
-              />
-              <YAxis
-                domain={waistDomain}
-                tick={{ fill: chartTheme.tickColor, fontSize: 10, fontFamily: '"DM Sans", sans-serif' }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <Tooltip
-                contentStyle={chartTheme.tooltip.contentStyle}
-                formatter={(value: number) => [`${value} ס"מ`, 'היקף בטן']}
-                labelFormatter={(label) => `${label}`}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={chartTheme.lineColor}
-                strokeWidth={2}
-                dot={{ fill: '#D7FF00', r: 4, strokeWidth: 0 }}
-                activeDot={{ r: 6, fill: '#D7FF00' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
+      {view === 'calendar' && (
+        <BodyHistoryCalendar
+          stats={stats}
+          onEditStat={(stat) => setEditStat(stat)}
+        />
       )}
 
       {stats.length === 0 && (
         <div
           style={{
-            fontFamily: '"DM Sans", sans-serif',
+            fontFamily: '"Rubik", sans-serif',
             fontSize: '14px',
             color: '#444',
             textAlign: 'center',
@@ -249,5 +450,12 @@ export function BodyPage() {
         </div>
       )}
     </div>
+    <AddBodyStatModal isOpen={addStatOpen} onClose={() => setAddStatOpen(false)} />
+    <AddBodyStatModal
+      isOpen={editStat != null}
+      onClose={() => setEditStat(null)}
+      editStat={editStat}
+    />
+    </>
   )
 }
