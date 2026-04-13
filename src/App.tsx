@@ -4,6 +4,7 @@ import { TabBar } from './shared/components/TabBar'
 import { TodayPage } from './features/today/TodayPage'
 import { HistoryPage } from './features/history/HistoryPage'
 import { BodyPage } from './features/body/BodyPage'
+import { WorkoutPage } from './features/workout/WorkoutPage'
 
 function AnimatedRoutes() {
   const { pathname } = useLocation()
@@ -23,6 +24,7 @@ function AnimatedRoutes() {
         <Route path="/today" element={<TodayPage />} />
         <Route path="/history" element={<HistoryPage />} />
         <Route path="/body" element={<BodyPage />} />
+        <Route path="/workout" element={<WorkoutPage />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Routes>
     </main>

@@ -1,1 +1,1 @@
-export type Tab = 'today' | 'history' | 'body'
+export type Tab = 'today' | 'history' | 'body' | 'workout'
