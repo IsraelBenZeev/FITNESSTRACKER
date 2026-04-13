@@ -1,9 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { GOAL_CALORIES, GOAL_PROTEIN } from './constants'
 
 const STORAGE_KEY = 'ft_goals'
 
-function readGoals(): { calories: number; protein: number } {
+type Goals = { calories: number; protein: number }
+type Listener = (goals: Goals) => void
+
+// Module-level store — shared across all hook instances
+const listeners = new Set<Listener>()
+
+let currentGoals: Goals = (() => {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (raw) {
@@ -16,20 +22,26 @@ function readGoals(): { calories: number; protein: number } {
     // ignore
   }
   return { calories: GOAL_CALORIES, protein: GOAL_PROTEIN }
+})()
+
+function setGoalsGlobal(calories: number, protein: number) {
+  currentGoals = { calories, protein }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(currentGoals))
+  listeners.forEach((fn) => fn(currentGoals))
 }
 
 export function useGoals() {
-  const [goals, setGoalsState] = useState(readGoals)
+  const [goals, setGoalsState] = useState<Goals>(currentGoals)
 
-  const setGoals = (calories: number, protein: number) => {
-    const next = { calories, protein }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-    setGoalsState(next)
-  }
+  useEffect(() => {
+    const listener: Listener = (next) => setGoalsState(next)
+    listeners.add(listener)
+    return () => { listeners.delete(listener) }
+  }, [])
 
   return {
     goalCalories: goals.calories,
     goalProtein: goals.protein,
-    setGoals,
+    setGoals: setGoalsGlobal,
   }
 }
