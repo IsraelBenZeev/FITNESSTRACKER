@@ -1,4 +1,4 @@
-import { Zap, BarChart2, Activity } from 'lucide-react'
+import { Zap, BarChart2, Activity, Dumbbell } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import type { Tab } from '../../types/common'
 
@@ -6,6 +6,7 @@ const tabs: { id: Tab; label: string; path: string; Icon: React.FC<{ size: numbe
   { id: 'today', label: 'היום', path: '/today', Icon: Zap },
   { id: 'history', label: 'היסטוריה', path: '/history', Icon: BarChart2 },
   { id: 'body', label: 'גוף', path: '/body', Icon: Activity },
+  { id: 'workout', label: 'כושר', path: '/workout', Icon: Dumbbell },
 ]
 
 export function TabBar() {
@@ -16,7 +17,9 @@ export function TabBar() {
     ? 'history'
     : pathname.startsWith('/body')
       ? 'body'
-      : 'today'
+      : pathname.startsWith('/workout')
+        ? 'workout'
+        : 'today'
 
   return (
     <nav
