@@ -1,5 +1,6 @@
 import { buildCalendarCells, getDayColor, HEBREW_DAY_NAMES } from './calendarUtils'
 import { CalendarDay } from './CalendarDay'
+import type { GoalsConfig } from '../../lib/useGoals'
 import type { DayTotals } from '../../types/nutrition'
 
 interface CalendarGridProps {
@@ -7,11 +8,12 @@ interface CalendarGridProps {
   month: number
   dayMap: Map<string, DayTotals>
   onDayPress: (dateStr: string, totals: DayTotals) => void
+  goalsConfig?: GoalsConfig
 }
 
 const todayStr = new Date().toISOString().split('T')[0]
 
-export function CalendarGrid({ year, month, dayMap, onDayPress }: CalendarGridProps) {
+export function CalendarGrid({ year, month, dayMap, onDayPress, goalsConfig }: CalendarGridProps) {
   const cells = buildCalendarCells(year, month)
 
   return (
@@ -56,7 +58,7 @@ export function CalendarGrid({ year, month, dayMap, onDayPress }: CalendarGridPr
 
           const { dateStr, dayNumber } = cell
           const totals = dayMap.get(dateStr)
-          const color = getDayColor(totals)
+          const color = getDayColor(totals, dateStr, goalsConfig)
           const isToday = dateStr === todayStr
           const isFuture = dateStr > todayStr
 

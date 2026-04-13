@@ -2,18 +2,22 @@ import { useState } from 'react'
 import { Plus, Settings2 } from 'lucide-react'
 import { useToday } from './useToday'
 import { useGoals } from '../../lib/useGoals'
+import { useDeleteMeal } from './useDeleteMeal'
 import { StatCard } from '../../shared/components/StatCard'
 import { ProgressBar } from '../../shared/components/ProgressBar'
 import { Card } from '../../shared/components/Card'
 import { MealCard } from './MealCard'
 import { AddMealModal } from './AddMealModal'
 import { EditGoalsModal } from './EditGoalsModal'
+import type { NutritionLog } from '../../types/nutrition'
 
 export function TodayPage() {
   const { meals, totals, loading } = useToday()
   const { goalCalories, goalProtein } = useGoals()
+  const { mutate: deleteMeal } = useDeleteMeal()
   const [addMealOpen, setAddMealOpen] = useState(false)
   const [editGoalsOpen, setEditGoalsOpen] = useState(false)
+  const [editingMeal, setEditingMeal] = useState<NutritionLog | null>(null)
 
   const remaining = goalCalories - totals.calories
   const isOver = totals.calories > goalCalories
@@ -115,7 +119,14 @@ export function TodayPage() {
               אין ארוחות רשומות להיום עדיין
             </div>
           ) : (
-            meals.map((meal) => <MealCard key={meal.id} meal={meal} />)
+            meals.map((meal) => (
+              <MealCard
+                key={meal.id}
+                meal={meal}
+                onEdit={(m) => setEditingMeal(m)}
+                onDelete={(m) => deleteMeal(m.id)}
+              />
+            ))
           )}
         </div>
 
@@ -148,6 +159,11 @@ export function TodayPage() {
       </button>
 
       <AddMealModal isOpen={addMealOpen} onClose={() => setAddMealOpen(false)} />
+      <AddMealModal
+        isOpen={!!editingMeal}
+        onClose={() => setEditingMeal(null)}
+        initialMeal={editingMeal ?? undefined}
+      />
       <EditGoalsModal isOpen={editGoalsOpen} onClose={() => setEditGoalsOpen(false)} />
     </>
   )

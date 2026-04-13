@@ -1,12 +1,18 @@
+import { useState } from 'react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { Card } from '../../shared/components/Card'
 import { MealIcon } from '../../shared/icons/MealIcon'
 import type { NutritionLog } from '../../types/nutrition'
 
 interface MealCardProps {
   meal: NutritionLog
+  onEdit?: (meal: NutritionLog) => void
+  onDelete?: (meal: NutritionLog) => void
 }
 
-export function MealCard({ meal }: MealCardProps) {
+export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
   return (
     <Card hover style={{ padding: '14px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
       {/* Icon */}
@@ -29,7 +35,7 @@ export function MealCard({ meal }: MealCardProps) {
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '6px' }}>
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
                 fontFamily: '"Rubik", sans-serif',
@@ -54,22 +60,23 @@ export function MealCard({ meal }: MealCardProps) {
               </div>
             )}
           </div>
-          <span
-            style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '20px',
-              color: '#D7FF00',
-              letterSpacing: '0.03em',
-              flexShrink: 0,
-              lineHeight: 1,
-            }}
-          >
-            {meal.calories}
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+            <span
+              style={{
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontSize: '20px',
+                color: '#D7FF00',
+                letterSpacing: '0.03em',
+                lineHeight: 1,
+              }}
+            >
+              {meal.calories}
+            </span>
+          </div>
         </div>
 
         {/* Macro pills */}
-        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: (onEdit || onDelete) ? '10px' : 0 }}>
           {meal.protein_g != null && (
             <MacroPill label="חלבון" value={meal.protein_g} accent />
           )}
@@ -80,6 +87,37 @@ export function MealCard({ meal }: MealCardProps) {
             <MacroPill label="שומן" value={meal.fat_g} />
           )}
         </div>
+
+        {/* Actions */}
+        {(onEdit || onDelete) && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
+            {confirmDelete ? (
+              <>
+                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#ff4757', alignSelf: 'center' }}>
+                  למחוק?
+                </span>
+                <ActionButton
+                  onClick={() => { onDelete?.(meal); setConfirmDelete(false) }}
+                  danger
+                  label="כן"
+                />
+                <ActionButton
+                  onClick={() => setConfirmDelete(false)}
+                  label="ביטול"
+                />
+              </>
+            ) : (
+              <>
+                {onEdit && (
+                  <ActionButton onClick={() => onEdit(meal)} icon={<Pencil size={13} strokeWidth={2} />} />
+                )}
+                {onDelete && (
+                  <ActionButton onClick={() => setConfirmDelete(true)} icon={<Trash2 size={13} strokeWidth={2} />} danger />
+                )}
+              </>
+            )}
+          </div>
+        )}
       </div>
     </Card>
   )
@@ -102,5 +140,42 @@ function MacroPill({ label, value, accent = false }: { label: string; value: num
     >
       {label} {Math.round(value)}g
     </span>
+  )
+}
+
+function ActionButton({
+  onClick,
+  icon,
+  label,
+  danger = false,
+}: {
+  onClick: () => void
+  icon?: React.ReactNode
+  label?: string
+  danger?: boolean
+}) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '3px',
+        background: danger ? 'rgba(255,71,87,0.08)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${danger ? 'rgba(255,71,87,0.2)' : '#2a2a2a'}`,
+        borderRadius: '6px',
+        color: danger ? '#ff4757' : '#555',
+        padding: '4px 8px',
+        cursor: 'pointer',
+        fontFamily: '"Rubik", sans-serif',
+        fontSize: '11px',
+        fontWeight: 500,
+        WebkitTapHighlightColor: 'transparent',
+        transition: 'opacity 0.15s',
+      }}
+    >
+      {icon}
+      {label}
+    </button>
   )
 }

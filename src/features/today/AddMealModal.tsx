@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Modal } from '../../shared/components/Modal'
 import { Stepper } from '../../shared/components/Stepper'
 import { useAddMeal } from './useAddMeal'
+import { useEditMeal } from './useEditMeal'
+import type { NutritionLog } from '../../types/nutrition'
 
 const MEAL_OPTIONS = [
   'ארוחת בוקר',
@@ -15,9 +17,12 @@ const MEAL_OPTIONS = [
 interface AddMealModalProps {
   isOpen: boolean
   onClose: () => void
+  initialMeal?: NutritionLog
 }
 
-export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
+export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps) {
+  const isEditing = !!initialMeal
+
   const [mealName, setMealName] = useState(MEAL_OPTIONS[0]!)
   const [foodItems, setFoodItems] = useState('')
   const [calories, setCalories] = useState(0)
@@ -25,24 +30,45 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
   const [carbsG, setCarbsG] = useState(0)
   const [fatG, setFatG] = useState(0)
 
-  const { mutate, isPending } = useAddMeal()
+  const { mutate: addMeal, isPending: isAdding } = useAddMeal()
+  const { mutate: editMeal, isPending: isEditing_ } = useEditMeal()
+  const isPending = isAdding || isEditing_
 
   useEffect(() => {
     if (isOpen) {
-      setMealName(MEAL_OPTIONS[0]!)
-      setFoodItems('')
-      setCalories(0)
-      setProteinG(0)
-      setCarbsG(0)
-      setFatG(0)
+      if (initialMeal) {
+        setMealName(initialMeal.meal_name)
+        setFoodItems(initialMeal.food_items ?? '')
+        setCalories(initialMeal.calories)
+        setProteinG(initialMeal.protein_g ?? 0)
+        setCarbsG(initialMeal.carbs_g ?? 0)
+        setFatG(initialMeal.fat_g ?? 0)
+      } else {
+        setMealName(MEAL_OPTIONS[0]!)
+        setFoodItems('')
+        setCalories(0)
+        setProteinG(0)
+        setCarbsG(0)
+        setFatG(0)
+      }
     }
-  }, [isOpen])
+  }, [isOpen, initialMeal])
 
   const handleSubmit = () => {
-    mutate(
-      { meal_name: mealName, food_items: foodItems, calories, protein_g: proteinG, carbs_g: carbsG, fat_g: fatG },
-      { onSuccess: onClose }
-    )
+    const payload = {
+      meal_name: mealName,
+      food_items: foodItems,
+      calories,
+      protein_g: proteinG,
+      carbs_g: carbsG,
+      fat_g: fatG,
+    }
+
+    if (isEditing && initialMeal) {
+      editMeal({ id: initialMeal.id, ...payload }, { onSuccess: onClose })
+    } else {
+      addMeal(payload, { onSuccess: onClose })
+    }
   }
 
   const inputStyle: React.CSSProperties = {
@@ -58,8 +84,10 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
     boxSizing: 'border-box',
   }
 
+  const canSubmit = calories > 0 && !isPending
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="הוספת ארוחה">
+    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'עריכת ארוחה' : 'הוספת ארוחה'}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         {/* Meal type */}
@@ -104,24 +132,24 @@ export function AddMealModal({ isOpen, onClose }: AddMealModalProps) {
         {/* Submit */}
         <button
           onClick={handleSubmit}
-          disabled={calories === 0 || isPending}
+          disabled={!canSubmit}
           style={{
             marginTop: '4px',
             width: '100%',
             padding: '14px',
-            background: calories === 0 || isPending ? '#1a1a1a' : '#D7FF00',
-            color: calories === 0 || isPending ? '#333' : '#0a0a0a',
+            background: !canSubmit ? '#1a1a1a' : '#D7FF00',
+            color: !canSubmit ? '#333' : '#0a0a0a',
             border: 'none',
             borderRadius: '12px',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '18px',
             fontWeight: 600,
             letterSpacing: '0.04em',
-            cursor: calories === 0 || isPending ? 'not-allowed' : 'pointer',
+            cursor: !canSubmit ? 'not-allowed' : 'pointer',
             transition: 'background 0.15s, color 0.15s',
           }}
         >
-          {isPending ? 'שומר...' : 'שמור ארוחה'}
+          {isPending ? 'שומר...' : isEditing ? 'שמור שינויים' : 'שמור ארוחה'}
         </button>
       </div>
     </Modal>

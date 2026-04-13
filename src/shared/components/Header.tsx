@@ -1,4 +1,9 @@
+import { Flame } from 'lucide-react'
+import { useStreak } from '../../features/today/useStreak'
+
 export function Header() {
+  const streak = useStreak()
+
   return (
     <header
       style={{
@@ -29,20 +34,50 @@ export function Header() {
       >
         FITNESS
       </span>
-      <span
-        style={{
-          fontFamily: '"Rubik", sans-serif',
-          fontSize: '13px',
-          color: '#666',
-          fontWeight: 400,
-        }}
-      >
-        {new Date().toLocaleDateString('he-IL', {
-          weekday: 'long',
-          day: 'numeric',
-          month: 'long',
-        })}
-      </span>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {streak > 0 && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              background: 'rgba(255, 100, 30, 0.1)',
+              border: '1px solid rgba(255, 100, 30, 0.2)',
+              borderRadius: '20px',
+              padding: '3px 9px 3px 7px',
+            }}
+          >
+            <Flame size={13} color="#ff641e" strokeWidth={2} />
+            <span
+              style={{
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontSize: '15px',
+                color: '#ff641e',
+                letterSpacing: '0.04em',
+                lineHeight: 1,
+              }}
+            >
+              {streak}
+            </span>
+          </div>
+        )}
+
+        <span
+          style={{
+            fontFamily: '"Rubik", sans-serif',
+            fontSize: '13px',
+            color: '#666',
+            fontWeight: 400,
+          }}
+        >
+          {new Date().toLocaleDateString('he-IL', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+          })}
+        </span>
+      </div>
     </header>
   )
 }

@@ -1,4 +1,5 @@
 import { GOAL_CALORIES, GOAL_PROTEIN } from '../../lib/constants'
+import type { GoalsConfig } from '../../lib/useGoals'
 import type { DayTotals } from '../../types/nutrition'
 
 export const HEBREW_MONTHS = [
@@ -11,10 +12,29 @@ export const HEBREW_DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביע
 
 export type DayColor = 'green' | 'orange' | 'red' | 'gray'
 
-export function getDayColor(totals: DayTotals | undefined): DayColor {
+/**
+ * מחשב צבע יום לפי הישגי הארוחות מול היעד הרלוונטי לאותו יום (אימון / מנוחה).
+ * @param dateStr  תאריך בפורמט YYYY-MM-DD
+ */
+export function getDayColor(
+  totals: DayTotals | undefined,
+  dateStr: string,
+  goalsConfig?: GoalsConfig
+): DayColor {
   if (!totals) return 'gray'
-  const cal = totals.calories / GOAL_CALORIES
-  const pro = totals.protein / GOAL_PROTEIN
+
+  let goalCal = GOAL_CALORIES
+  let goalPro = GOAL_PROTEIN
+
+  if (goalsConfig) {
+    const dow = new Date(dateStr + 'T00:00:00').getDay()
+    const isTraining = goalsConfig.trainingDays.includes(dow)
+    goalCal = isTraining ? goalsConfig.trainingCalories : goalsConfig.restCalories
+    goalPro = isTraining ? goalsConfig.trainingProtein  : goalsConfig.restProtein
+  }
+
+  const cal = totals.calories / goalCal
+  const pro = totals.protein / goalPro
   if (cal >= 0.85 && cal <= 1.10 && pro >= 0.90) return 'green'
   if (cal >= 0.70 && cal <= 1.30) return 'orange'
   return 'red'

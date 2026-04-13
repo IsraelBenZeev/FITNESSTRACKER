@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useCalendarMonth } from './useHistory'
+import { useGoals } from '../../lib/useGoals'
 import { CalendarHeader } from './CalendarHeader'
 import { CalendarGrid } from './CalendarGrid'
 import { DayDetailSheet } from './DayDetailSheet'
@@ -14,6 +15,7 @@ export function HistoryPage() {
   const [selectedTotals, setSelectedTotals] = useState<DayTotals | null>(null)
 
   const { dayMap, loading } = useCalendarMonth(year, month)
+  const { goalsConfig } = useGoals()
 
   const disableNext =
     year === today.getFullYear() && month === today.getMonth() + 1
@@ -67,6 +69,7 @@ export function HistoryPage() {
         month={month}
         dayMap={dayMap}
         onDayPress={handleDayPress}
+        goalsConfig={goalsConfig}
       />
 
       {/* Legend */}

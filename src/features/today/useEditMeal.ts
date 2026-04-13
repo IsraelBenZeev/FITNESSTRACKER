@@ -1,0 +1,36 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '../../lib/supabase'
+
+interface EditMealPayload {
+  id: string
+  meal_name: string
+  food_items: string
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+}
+
+export function useEditMeal() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (payload: EditMealPayload) => {
+      const { error } = await supabase
+        .from('nutrition_log')
+        .update({
+          meal_name: payload.meal_name,
+          food_items: payload.food_items || null,
+          calories: payload.calories,
+          protein_g: payload.protein_g,
+          carbs_g: payload.carbs_g,
+          fat_g: payload.fat_g,
+        })
+        .eq('id', payload.id)
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['nutrition'] })
+    },
+  })
+}
