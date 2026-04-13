@@ -1,0 +1,39 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { supabase } from '../../lib/supabase'
+
+function todayDateString(): string {
+  return new Date().toISOString().split('T')[0] ?? ''
+}
+
+interface AddMealPayload {
+  meal_name: string
+  food_items: string
+  calories: number
+  protein_g: number
+  carbs_g: number
+  fat_g: number
+}
+
+export function useAddMeal() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (payload: AddMealPayload) => {
+      const now = new Date()
+      const { error } = await supabase.from('nutrition_log').insert({
+        date: todayDateString(),
+        time: now.toTimeString().slice(0, 5),
+        meal_name: payload.meal_name,
+        food_items: payload.food_items || null,
+        calories: payload.calories,
+        protein_g: payload.protein_g,
+        carbs_g: payload.carbs_g,
+        fat_g: payload.fat_g,
+      })
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['nutrition', 'today'] })
+    },
+  })
+}

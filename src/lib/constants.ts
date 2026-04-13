@@ -16,7 +16,7 @@ export const chartTheme = {
       borderRadius: '8px',
       color: '#f0f0f0',
       fontSize: '13px',
-      fontFamily: "'DM Sans', sans-serif",
+      fontFamily: "'Rubik', sans-serif",
     },
     cursor: { fill: 'rgba(215,255,0,0.04)' },
   },

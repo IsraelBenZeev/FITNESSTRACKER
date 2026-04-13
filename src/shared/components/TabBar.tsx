@@ -61,7 +61,7 @@ export function TabBar() {
             <Icon size={20} color={color} strokeWidth={isActive ? 2 : 1.5} />
             <span
               style={{
-                fontFamily: '"DM Sans", sans-serif',
+                fontFamily: '"Rubik", sans-serif',
                 fontSize: '11px',
                 fontWeight: isActive ? 600 : 400,
                 letterSpacing: '0.02em',

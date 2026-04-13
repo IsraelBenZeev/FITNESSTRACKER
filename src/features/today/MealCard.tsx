@@ -32,7 +32,7 @@ export function MealCard({ meal }: MealCardProps) {
           <div>
             <div
               style={{
-                fontFamily: '"DM Sans", sans-serif',
+                fontFamily: '"Rubik", sans-serif',
                 fontSize: '14px',
                 fontWeight: 600,
                 color: '#f0f0f0',
@@ -44,7 +44,7 @@ export function MealCard({ meal }: MealCardProps) {
             {meal.food_items && (
               <div
                 style={{
-                  fontFamily: '"DM Sans", sans-serif',
+                  fontFamily: '"Rubik", sans-serif',
                   fontSize: '12px',
                   color: '#555',
                   lineHeight: 1.4,
@@ -56,7 +56,7 @@ export function MealCard({ meal }: MealCardProps) {
           </div>
           <span
             style={{
-              fontFamily: '"Bebas Neue", cursive',
+              fontFamily: '"Barlow Condensed", sans-serif',
               fontSize: '20px',
               color: '#D7FF00',
               letterSpacing: '0.03em',
@@ -89,7 +89,7 @@ function MacroPill({ label, value, accent = false }: { label: string; value: num
   return (
     <span
       style={{
-        fontFamily: '"DM Sans", sans-serif',
+        fontFamily: '"Rubik", sans-serif',
         fontSize: '11px',
         padding: '2px 7px',
         borderRadius: '20px',

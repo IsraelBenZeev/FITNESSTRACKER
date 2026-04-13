@@ -25,7 +25,7 @@ html, body, #root {
 }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Rubik', sans-serif;
   background-color: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -35,7 +35,7 @@ body {
 
 @layer utilities {
   .font-display {
-    font-family: 'Bebas Neue', cursive;
+    font-family: 'Barlow Condensed', sans-serif;
   }
 
   .card-lime-top {
@@ -44,6 +44,17 @@ body {
 
   .page-enter {
     animation: pageEnter 0.2s ease forwards;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 

@@ -18,8 +18,8 @@ export default {
         danger: '#ff4757',
       },
       fontFamily: {
-        display: ['"Bebas Neue"', 'cursive'],
-        body: ['"DM Sans"', 'sans-serif'],
+        display: ['"Barlow Condensed"', 'sans-serif'],
+        body: ['"Rubik"', 'sans-serif'],
       },
     },
   },

@@ -15,7 +15,7 @@ export function ProgressBar({ value, goal, label, unit = '' }: ProgressBarProps)
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span
           style={{
-            fontFamily: '"DM Sans", sans-serif',
+            fontFamily: '"Rubik", sans-serif',
             fontSize: '13px',
             color: '#f0f0f0',
             fontWeight: 500,
@@ -25,7 +25,7 @@ export function ProgressBar({ value, goal, label, unit = '' }: ProgressBarProps)
         </span>
         <span
           style={{
-            fontFamily: '"Bebas Neue", cursive',
+            fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '16px',
             color: isOver ? '#ff4757' : '#D7FF00',
             letterSpacing: '0.03em',
@@ -48,7 +48,7 @@ export function ProgressBar({ value, goal, label, unit = '' }: ProgressBarProps)
       </div>
 
       {isOver && (
-        <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '11px', color: '#ff4757' }}>
+        <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#ff4757' }}>
           חרגת ב-{Math.round(overBy)}{unit}
         </span>
       )}

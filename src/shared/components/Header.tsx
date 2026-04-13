@@ -17,7 +17,7 @@ export function Header() {
     >
       <span
         style={{
-          fontFamily: '"Bebas Neue", cursive',
+          fontFamily: '"Barlow Condensed", sans-serif',
           fontSize: '24px',
           color: '#D7FF00',
           letterSpacing: '0.05em',
@@ -28,7 +28,7 @@ export function Header() {
       </span>
       <span
         style={{
-          fontFamily: '"DM Sans", sans-serif',
+          fontFamily: '"Rubik", sans-serif',
           fontSize: '13px',
           color: '#666',
           fontWeight: 400,
