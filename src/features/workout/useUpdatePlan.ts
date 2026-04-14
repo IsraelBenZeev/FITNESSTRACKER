@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import { getCurrentUserId } from '../../lib/auth-helpers'
 import { useToast } from '../../shared/context/ToastContext'
 import type { WorkoutPlan, WorkoutPlanExercise } from '../../types/workout'
 
-interface PlanPayload {
+interface UpdatePlanPayload {
+  planId: string
   name: string
   description: string
   difficulty: WorkoutPlan['difficulty']
@@ -12,42 +12,46 @@ interface PlanPayload {
   exercises: Omit<WorkoutPlanExercise, 'id' | 'workout_plan_id' | 'created_at'>[]
 }
 
-export function useAddPlan() {
+export function useUpdatePlan() {
   const queryClient = useQueryClient()
   const { showSuccess, showError } = useToast()
   return useMutation({
-    mutationFn: async (payload: PlanPayload) => {
-      const { data: plan, error } = await supabase
+    mutationFn: async (payload: UpdatePlanPayload) => {
+      const { error: updateErr } = await supabase
         .from('workout_plans')
-        .insert({
+        .update({
           name: payload.name,
           description: payload.description || null,
           difficulty: payload.difficulty,
           training_days: payload.training_days,
-          user_id: await getCurrentUserId(),
         })
-        .select()
-        .single()
-      if (error) throw new Error(error.message)
+        .eq('id', payload.planId)
+      if (updateErr) throw new Error(updateErr.message)
+
+      const { error: deleteErr } = await supabase
+        .from('workout_plan_exercises')
+        .delete()
+        .eq('workout_plan_id', payload.planId)
+      if (deleteErr) throw new Error(deleteErr.message)
 
       if (payload.exercises.length > 0) {
         const rows = payload.exercises.map((ex) => ({
           ...ex,
-          workout_plan_id: plan.id,
+          workout_plan_id: payload.planId,
         }))
-        const { error: exErr } = await supabase
+        const { error: insertErr } = await supabase
           .from('workout_plan_exercises')
           .insert(rows)
-        if (exErr) throw new Error(exErr.message)
+        if (insertErr) throw new Error(insertErr.message)
       }
-      return plan
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workout', 'plans'] })
-      showSuccess('התכנית נוצרה בהצלחה')
+      queryClient.invalidateQueries({ queryKey: ['workout', 'plan'] })
+      showSuccess('התכנית עודכנה בהצלחה')
     },
     onError: () => {
-      showError('שגיאה ביצירת התכנית')
+      showError('שגיאה בעדכון התכנית')
     },
   })
 }

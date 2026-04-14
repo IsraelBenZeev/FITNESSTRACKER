@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus, Trash2, Dumbbell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../shared/components/Card'
+import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
 import { CreatePlanModal } from './CreatePlanModal'
 import { useWorkoutPlans } from './useWorkoutPlans'
 import { useDeletePlan } from './useDeletePlan'
@@ -17,15 +18,10 @@ const DIFFICULTY_COLOR: Record<string, string> = {
 function PlanRow({ plan }: { plan: WorkoutPlan }) {
   const navigate = useNavigate()
   const { mutate: deletePlan, isPending } = useDeletePlan()
-  const [confirm, setConfirm] = useState(false)
-
-  function handleDelete(e: React.MouseEvent<HTMLButtonElement>) {
-    e.stopPropagation()
-    if (!confirm) { setConfirm(true); return }
-    deletePlan(plan.id)
-  }
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   return (
+    <>
     <div
       onClick={() => navigate(`/workout/plan/${plan.id}`)}
       style={{ cursor: 'pointer' }}
@@ -35,15 +31,14 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <button
-              onClick={handleDelete}
+              onClick={(e) => { e.stopPropagation(); setConfirmOpen(true) }}
               disabled={isPending}
-              onBlur={() => setConfirm(false)}
               style={{
                 width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: confirm ? 'rgba(255,71,87,0.1)' : 'none',
-                border: confirm ? '1px solid rgba(255,71,87,0.3)' : 'none',
+                background: 'none',
+                border: 'none',
                 borderRadius: '8px',
-                cursor: 'pointer', color: confirm ? '#ff4757' : '#333',
+                cursor: 'pointer', color: '#333',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
@@ -101,14 +96,9 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
         {(plan.exercises ?? []).length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             {(plan.exercises ?? []).slice(0, 4).map((ex) => (
-              <div key={ex.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#333' }}>
-                  {ex.target_sets}×{ex.target_reps ?? '—'}
-                </span>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666' }}>
-                  {ex.exercise_name}
-                </span>
-              </div>
+              <span key={ex.id} style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666', textAlign: 'right' }}>
+                {ex.exercise_name}
+              </span>
             ))}
             {(plan.exercises ?? []).length > 4 && (
               <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#333', textAlign: 'right' }}>
@@ -120,6 +110,13 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
       </div>
     </Card>
     </div>
+    <ConfirmDialog
+      isOpen={confirmOpen}
+      message="האם למחוק את התכנית?"
+      onConfirm={() => { setConfirmOpen(false); deletePlan(plan.id) }}
+      onCancel={() => setConfirmOpen(false)}
+    />
+    </>
   )
 }
 

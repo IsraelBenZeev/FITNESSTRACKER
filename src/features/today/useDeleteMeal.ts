@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useToast } from '../../shared/context/ToastContext'
 
 export function useDeleteMeal() {
   const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
 
   return useMutation({
     mutationFn: async (id: string) => {
@@ -14,6 +16,10 @@ export function useDeleteMeal() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nutrition'] })
+      showSuccess('הארוחה נמחקה')
+    },
+    onError: () => {
+      showError('שגיאה במחיקת הארוחה')
     },
   })
 }

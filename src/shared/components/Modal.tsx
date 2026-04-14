@@ -52,7 +52,9 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
           borderRadius: '18px 18px 0 0',
           borderTop: '2px solid #D7FF00',
           maxHeight: '92dvh',
-          overflowY: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
           paddingBottom: 'env(safe-area-inset-bottom, 20px)',
           animation: 'slideUp 0.22s cubic-bezier(0.32,0.72,0,1) forwards',
         }}
@@ -60,6 +62,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         {/* Header */}
         <div
           style={{
+            flexShrink: 0,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -99,7 +102,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         </div>
 
         {/* Content */}
-        <div style={{ padding: '20px' }}>
+        <div style={{ padding: '20px', flex: 1, overflowY: 'auto', minHeight: 0 }}>
           {children}
         </div>
       </div>

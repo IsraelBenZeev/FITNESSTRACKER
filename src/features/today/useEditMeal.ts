@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useToast } from '../../shared/context/ToastContext'
 
 interface EditMealPayload {
   id: string
@@ -13,6 +14,7 @@ interface EditMealPayload {
 
 export function useEditMeal() {
   const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
 
   return useMutation({
     mutationFn: async (payload: EditMealPayload) => {
@@ -31,6 +33,10 @@ export function useEditMeal() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nutrition'] })
+      showSuccess('הארוחה עודכנה בהצלחה')
+    },
+    onError: () => {
+      showError('שגיאה בעדכון הארוחה')
     },
   })
 }

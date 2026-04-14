@@ -1,8 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useToast } from '../../shared/context/ToastContext'
 
 export function useDeletePlan() {
   const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
   return useMutation({
     mutationFn: async (planId: string) => {
       const { error } = await supabase
@@ -13,6 +15,10 @@ export function useDeletePlan() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workout', 'plans'] })
+      showSuccess('התכנית נמחקה')
+    },
+    onError: () => {
+      showError('שגיאה במחיקת התכנית')
     },
   })
 }

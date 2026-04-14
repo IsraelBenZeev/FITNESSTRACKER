@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { getCurrentUserId } from '../../lib/auth-helpers'
+import { useToast } from '../../shared/context/ToastContext'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0] ?? ''
@@ -16,6 +17,7 @@ interface BodyStatPayload {
 
 export function useAddBodyStat() {
   const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
 
   return useMutation({
     mutationFn: async (payload: BodyStatPayload) => {
@@ -42,6 +44,10 @@ export function useAddBodyStat() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['body-stats'] })
+      showSuccess('הנתונים נשמרו בהצלחה')
+    },
+    onError: () => {
+      showError('שגיאה בשמירת הנתונים')
     },
   })
 }

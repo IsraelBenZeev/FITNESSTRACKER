@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowRight, Play, Dumbbell, Calendar } from 'lucide-react'
+import { ArrowRight, Play, Dumbbell, Calendar, Pencil } from 'lucide-react'
 import { usePlanDetail } from './usePlanDetail'
 import { initSession, hasActiveSession } from './workoutSession'
+import { CreatePlanModal } from './CreatePlanModal'
 
 const DAY_NAMES = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -14,6 +16,7 @@ export function PlanDetailPage() {
   const { planId } = useParams<{ planId: string }>()
   const navigate = useNavigate()
   const { data: plan, isLoading, error } = usePlanDetail(planId)
+  const [editOpen, setEditOpen] = useState(false)
 
   function handleStart() {
     if (!plan) return
@@ -78,7 +81,18 @@ export function PlanDetailPage() {
         }}>
           {plan.name}
         </span>
-        <div style={{ width: 36 }} />
+        <button
+          onClick={() => setEditOpen(true)}
+          style={{
+            width: 36, height: 36,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: '#1a1a1a', border: '1px solid #222', borderRadius: '10px',
+            cursor: 'pointer', color: '#888',
+            WebkitTapHighlightColor: 'transparent',
+          }}
+        >
+          <Pencil size={16} strokeWidth={2} />
+        </button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -199,15 +213,9 @@ export function PlanDetailPage() {
               )}
 
               {/* Info */}
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#f0f0f0', textAlign: 'right' }}>
-                  {ex.exercise_name}
-                </span>
-                <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '14px', color: '#666' }}>
-                  {ex.target_sets} × {ex.target_reps ?? '—'}
-                  {ex.target_weight_kg ? ` · ${ex.target_weight_kg}ק"ג` : ''}
-                </span>
-              </div>
+              <span style={{ flex: 1, fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#f0f0f0', textAlign: 'right' }}>
+                {ex.exercise_name}
+              </span>
             </div>
           ))}
         </div>
@@ -240,6 +248,12 @@ export function PlanDetailPage() {
           התחל אימון
         </button>
       </div>
+
+      <CreatePlanModal
+        isOpen={editOpen}
+        onClose={() => setEditOpen(false)}
+        initialPlan={plan}
+      />
     </div>
   )
 }

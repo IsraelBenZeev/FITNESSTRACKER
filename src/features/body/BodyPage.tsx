@@ -2,7 +2,8 @@ import { useState } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
-import { TrendingDown, TrendingUp, CalendarDays, BarChart2, Copy, FileDown, Check, Pencil, Plus } from 'lucide-react'
+import { TrendingDown, TrendingUp, CalendarDays, BarChart2, Copy, FileDown, Pencil, Plus } from 'lucide-react'
+import { useToast } from '../../shared/context/ToastContext'
 import { useBodyStats } from './useBodyStats'
 import type { BodyStat } from '../../types/body'
 import { START_WEIGHT, START_WAIST, chartTheme } from '../../lib/constants'
@@ -116,26 +117,21 @@ export function BodyPage() {
   const [addStatOpen, setAddStatOpen] = useState(false)
   const [editStat, setEditStat] = useState<BodyStat | null>(null)
   const [view, setView] = useState<'charts' | 'calendar'>('charts')
-  const [toast, setToast] = useState<string | null>(null)
+  const { showSuccess } = useToast()
   const [copied, setCopied] = useState(false)
-
-  function showToast(msg: string) {
-    setToast(msg)
-    setTimeout(() => setToast(null), 2800)
-  }
 
   async function handleCopyJson() {
     if (stats.length === 0) return
     await copyStatsAsJson(stats)
     setCopied(true)
-    showToast('הועתק בהצלחה')
+    showSuccess('הועתק בהצלחה')
     setTimeout(() => setCopied(false), 2800)
   }
 
   function handleDownloadPdf() {
     if (stats.length === 0) return
     downloadStatsPdf(stats)
-    showToast('PDF הורד בהצלחה')
+    showSuccess('PDF הורד בהצלחה')
   }
 
   if (loading) {
@@ -172,33 +168,6 @@ export function BodyPage() {
 
   return (
     <>
-    {/* Toast notification */}
-    {toast && (
-      <div
-        style={{
-          position: 'fixed',
-          bottom: '80px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 200,
-          background: '#1a1a1a',
-          border: '1px solid rgba(215,255,0,0.35)',
-          borderRadius: '12px',
-          padding: '10px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-          animation: 'slideUp 0.2s cubic-bezier(0.32,0.72,0,1) forwards',
-          whiteSpace: 'nowrap',
-        }}
-      >
-        <Check size={14} color="#D7FF00" strokeWidth={2.5} />
-        <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#D7FF00' }}>
-          {toast}
-        </span>
-      </div>
-    )}
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
       {/* Top action bar */}
       <div style={{ display: 'flex', gap: '10px' }}>

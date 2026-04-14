@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
 import { getCurrentUserId } from '../../lib/auth-helpers'
+import { useToast } from '../../shared/context/ToastContext'
 import type { WorkoutLog, WorkoutSetLog } from '../../types/workout'
 
 interface SetPayload {
@@ -56,6 +57,7 @@ export function useWorkoutHistory() {
 
 export function useLogWorkout() {
   const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
   return useMutation({
     mutationFn: async (payload: LogWorkoutPayload) => {
       const { data: log, error } = await supabase
@@ -84,6 +86,10 @@ export function useLogWorkout() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workout', 'logs'] })
+      showSuccess('האימון נשמר בהצלחה')
+    },
+    onError: () => {
+      showError('שגיאה בשמירת האימון')
     },
   })
 }

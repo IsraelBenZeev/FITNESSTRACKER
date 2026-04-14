@@ -61,10 +61,7 @@ export function initSession(plan: WorkoutPlan): WorkoutSessionData {
       target_sets: ex.target_sets,
       target_reps: ex.target_reps,
       target_weight_kg: ex.target_weight_kg,
-      sets: Array.from({ length: ex.target_sets }, () => ({
-        reps: ex.target_reps != null ? String(ex.target_reps) : '',
-        weight: ex.target_weight_kg != null ? String(ex.target_weight_kg) : '',
-      })),
+      sets: [{ reps: '', weight: '' }],
     })),
   }
   saveSession(data)

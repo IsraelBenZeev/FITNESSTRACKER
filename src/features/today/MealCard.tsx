@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pencil, Trash2 } from 'lucide-react'
 import { Card } from '../../shared/components/Card'
+import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
 import { MealIcon } from '../../shared/icons/MealIcon'
 import type { NutritionLog } from '../../types/nutrition'
 
@@ -11,9 +12,10 @@ interface MealCardProps {
 }
 
 export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
-  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   return (
+    <>
     <Card hover style={{ padding: '14px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
       {/* Icon */}
       <div
@@ -91,35 +93,23 @@ export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
         {/* Actions */}
         {(onEdit || onDelete) && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
-            {confirmDelete ? (
-              <>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#ff4757', alignSelf: 'center' }}>
-                  למחוק?
-                </span>
-                <ActionButton
-                  onClick={() => { onDelete?.(meal); setConfirmDelete(false) }}
-                  danger
-                  label="כן"
-                />
-                <ActionButton
-                  onClick={() => setConfirmDelete(false)}
-                  label="ביטול"
-                />
-              </>
-            ) : (
-              <>
-                {onEdit && (
-                  <ActionButton onClick={() => onEdit(meal)} icon={<Pencil size={13} strokeWidth={2} />} />
-                )}
-                {onDelete && (
-                  <ActionButton onClick={() => setConfirmDelete(true)} icon={<Trash2 size={13} strokeWidth={2} />} danger />
-                )}
-              </>
+            {onEdit && (
+              <ActionButton onClick={() => onEdit(meal)} icon={<Pencil size={13} strokeWidth={2} />} />
+            )}
+            {onDelete && (
+              <ActionButton onClick={() => setConfirmOpen(true)} icon={<Trash2 size={13} strokeWidth={2} />} danger />
             )}
           </div>
         )}
       </div>
     </Card>
+    <ConfirmDialog
+      isOpen={confirmOpen}
+      message="האם למחוק את הארוחה?"
+      onConfirm={() => { setConfirmOpen(false); onDelete?.(meal) }}
+      onCancel={() => setConfirmOpen(false)}
+    />
+    </>
   )
 }
 

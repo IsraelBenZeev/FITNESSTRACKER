@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Search, Plus, X, GripVertical, Info } from 'lucide-react'
+import { Search, Plus, X, Info } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
 import { ExerciseDetailModal } from './ExerciseDetailModal'
 import { useExercises } from './useExercises'
 import { useAddPlan } from './useAddPlan'
-import type { WorkoutPlan, Exercise } from '../../types/workout'
+import { useUpdatePlan } from './useUpdatePlan'
+import type { WorkoutPlan, WorkoutPlanExercise, Exercise } from '../../types/workout'
 
 interface PlanExerciseRow {
   exercise_id: string
@@ -19,11 +20,13 @@ interface PlanExerciseRow {
 interface Props {
   isOpen: boolean
   onClose: () => void
+  initialPlan?: WorkoutPlan
 }
 
 const DAYS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 const DIFFICULTIES: WorkoutPlan['difficulty'][] = ['קל', 'בינוני', 'קשה']
 const BODY_PARTS_FILTER = ['הכל', 'חזה', 'גב', 'כתפיים', 'רגליים', 'ידיים', 'בטן', 'קרדיו']
+const DRAFT_KEY = 'ft_plan_draft'
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -40,20 +43,7 @@ const inputStyle: React.CSSProperties = {
   direction: 'rtl',
 }
 
-const numFieldStyle: React.CSSProperties = {
-  width: '52px',
-  padding: '6px 4px',
-  background: '#1a1a1a',
-  border: '1px solid #2a2a2a',
-  borderRadius: '6px',
-  color: '#f0f0f0',
-  fontFamily: '"Barlow Condensed", sans-serif',
-  fontSize: '15px',
-  textAlign: 'center',
-  outline: 'none',
-}
-
-export function CreatePlanModal({ isOpen, onClose }: Props) {
+export function CreatePlanModal({ isOpen, onClose, initialPlan }: Props) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [difficulty, setDifficulty] = useState<WorkoutPlan['difficulty']>(null)
@@ -77,7 +67,9 @@ export function CreatePlanModal({ isOpen, onClose }: Props) {
 
   const allExercises = data?.pages.flatMap((p) => p.data) ?? []
 
-  const { mutate: addPlan, isPending } = useAddPlan()
+  const { mutate: addPlan, isPending: isAdding } = useAddPlan()
+  const { mutate: updatePlan, isPending: isUpdating } = useUpdatePlan()
+  const isPending = isAdding || isUpdating
 
   // Infinite scroll via IntersectionObserver
   useEffect(() => {
@@ -108,8 +100,51 @@ export function CreatePlanModal({ isOpen, onClose }: Props) {
       setBodyPartFilter('הכל')
       setStep('details')
       setDetailEx(null)
+      return
     }
-  }, [isOpen])
+    if (initialPlan) {
+      // מצב עריכה — טען מהתכנית הקיימת
+      setName(initialPlan.name)
+      setDescription(initialPlan.description ?? '')
+      setDifficulty(initialPlan.difficulty)
+      setTrainingDays(initialPlan.training_days)
+      setExercises(
+        (initialPlan.exercises ?? []).map((ex: WorkoutPlanExercise) => ({
+          exercise_id: ex.exercise_id,
+          exercise_name: ex.exercise_name,
+          gif_url: ex.gif_url,
+          order_index: ex.order_index,
+          target_sets: 1,
+          target_reps: null,
+          target_weight_kg: null,
+        }))
+      )
+      setStep('details')
+      return
+    }
+    // מצב יצירה — שחזור טיוטה אם קיימת
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY)
+      if (raw) {
+        const d = JSON.parse(raw)
+        if (d.name || d.exercises?.length > 0) {
+          setName(d.name ?? '')
+          setDescription(d.description ?? '')
+          setDifficulty(d.difficulty ?? null)
+          setTrainingDays(d.trainingDays ?? [])
+          setExercises(d.exercises ?? [])
+          setStep(d.step ?? 'details')
+        }
+      }
+    } catch {}
+  }, [isOpen, initialPlan])
+
+  // שמירת טיוטה ב-localStorage (רק במצב יצירה)
+  useEffect(() => {
+    if (!isOpen || initialPlan) return
+    const draft = { name, description, difficulty, trainingDays, exercises, step }
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(draft))
+  }, [name, description, difficulty, trainingDays, exercises, step, isOpen, initialPlan])
 
   function toggleDay(d: number) {
     setTrainingDays((prev) =>
@@ -143,45 +178,37 @@ export function CreatePlanModal({ isOpen, onClose }: Props) {
     )
   }
 
-  function updateExercise(id: string, field: keyof PlanExerciseRow, val: string) {
-    setExercises((prev) =>
-      prev.map((e) =>
-        e.exercise_id !== id
-          ? e
-          : { ...e, [field]: val === '' ? null : Number(val) }
-      )
-    )
-  }
+const exercisesPayload = exercises.map(
+    ({ exercise_id, exercise_name, gif_url, order_index, target_sets, target_reps, target_weight_kg }) => ({
+      exercise_id, exercise_name, gif_url, order_index, target_sets, target_reps, target_weight_kg,
+    })
+  )
 
   function handleSave() {
     if (!name.trim()) return
-    addPlan(
-      {
-        name: name.trim(),
-        description: description.trim(),
-        difficulty,
-        training_days: trainingDays,
-        exercises: exercises.map(
-          ({ exercise_id, exercise_name, gif_url, order_index, target_sets, target_reps, target_weight_kg }) => ({
-            exercise_id,
-            exercise_name,
-            gif_url,
-            order_index,
-            target_sets,
-            target_reps,
-            target_weight_kg,
-          })
-        ),
-      },
-      { onSuccess: onClose }
-    )
+    if (initialPlan) {
+      updatePlan(
+        { planId: initialPlan.id, name: name.trim(), description: description.trim(), difficulty, training_days: trainingDays, exercises: exercisesPayload },
+        { onSuccess: onClose }
+      )
+    } else {
+      addPlan(
+        { name: name.trim(), description: description.trim(), difficulty, training_days: trainingDays, exercises: exercisesPayload },
+        { onSuccess: () => { localStorage.removeItem(DRAFT_KEY); onClose() } }
+      )
+    }
+  }
+
+  function handleClose() {
+    if (!initialPlan) localStorage.removeItem(DRAFT_KEY)
+    onClose()
   }
 
   const canSave = name.trim().length > 0
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} title="תכנית אימון חדשה">
+      <Modal isOpen={isOpen} onClose={handleClose} title={initialPlan ? 'עריכת תכנית' : 'תכנית אימון חדשה'}>
         {/* Step tabs */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
           {(['details', 'exercises'] as const).map((s) => (
@@ -351,56 +378,25 @@ export function CreatePlanModal({ isOpen, onClose }: Props) {
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '8px',
+                      gap: '10px',
                       padding: '10px',
                       background: '#1a1a1a',
                       borderRadius: '10px',
                       border: '1px solid #2a2a2a',
                     }}
                   >
-                    {ex.gif_url && (
+                    {ex.gif_url ? (
                       <img
                         src={ex.gif_url}
                         alt={ex.exercise_name}
                         style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: '#111' }}
                       />
+                    ) : (
+                      <div style={{ width: 40, height: 40, borderRadius: 6, background: '#111', flexShrink: 0 }} />
                     )}
-                    {!ex.gif_url && <GripVertical size={14} color="#333" />}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-end' }}>
-                      <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#f0f0f0' }}>
-                        {ex.exercise_name}
-                      </span>
-                      <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                        <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>ק"ג</span>
-                        <input
-                          type="number"
-                          placeholder="—"
-                          value={ex.target_weight_kg ?? ''}
-                          onChange={(e) => updateExercise(ex.exercise_id, 'target_weight_kg', e.target.value)}
-                          style={numFieldStyle}
-                          inputMode="decimal"
-                        />
-                        <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>חזרות</span>
-                        <input
-                          type="number"
-                          placeholder="12"
-                          value={ex.target_reps ?? ''}
-                          onChange={(e) => updateExercise(ex.exercise_id, 'target_reps', e.target.value)}
-                          style={numFieldStyle}
-                          inputMode="numeric"
-                        />
-                        <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>סטים</span>
-                        <input
-                          type="number"
-                          min={1}
-                          max={10}
-                          value={ex.target_sets}
-                          onChange={(e) => updateExercise(ex.exercise_id, 'target_sets', e.target.value)}
-                          style={numFieldStyle}
-                          inputMode="numeric"
-                        />
-                      </div>
-                    </div>
+                    <span style={{ flex: 1, fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#f0f0f0', textAlign: 'right' }}>
+                      {ex.exercise_name}
+                    </span>
                     <button
                       onClick={() => removeExercise(ex.exercise_id)}
                       style={{
@@ -455,7 +451,7 @@ export function CreatePlanModal({ isOpen, onClose }: Props) {
             {/* Exercise list with infinite scroll */}
             <div
               ref={listRef}
-              style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '320px', overflowY: 'auto' }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '6px', minHeight: '180px', overflowY: 'auto' }}
             >
               {loadingEx && (
                 <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#444', textAlign: 'center', margin: '12px 0' }}>
@@ -562,27 +558,29 @@ export function CreatePlanModal({ isOpen, onClose }: Props) {
               )}
             </div>
 
-            {/* Save */}
-            <button
-              onClick={handleSave}
-              disabled={isPending || !canSave}
-              style={{
-                width: '100%',
-                padding: '14px',
-                background: canSave ? '#D7FF00' : '#1a1a1a',
-                border: 'none',
-                borderRadius: '12px',
-                color: canSave ? '#0a0a0a' : '#333',
-                fontFamily: '"Barlow Condensed", sans-serif',
-                fontSize: '17px',
-                fontWeight: 700,
-                cursor: canSave && !isPending ? 'pointer' : 'not-allowed',
-                WebkitTapHighlightColor: 'transparent',
-                transition: 'all 0.15s',
-              }}
-            >
-              {isPending ? 'שומר...' : 'שמור תכנית'}
-            </button>
+            {/* Save — sticky so it's always reachable */}
+            <div style={{ position: 'sticky', bottom: 0, background: '#111', paddingTop: '10px' }}>
+              <button
+                onClick={handleSave}
+                disabled={isPending || !canSave}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  background: canSave ? '#D7FF00' : '#1a1a1a',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: canSave ? '#0a0a0a' : '#333',
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontSize: '17px',
+                  fontWeight: 700,
+                  cursor: canSave && !isPending ? 'pointer' : 'not-allowed',
+                  WebkitTapHighlightColor: 'transparent',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {isPending ? 'שומר...' : 'שמור תכנית'}
+              </button>
+            </div>
           </div>
         )}
       </Modal>

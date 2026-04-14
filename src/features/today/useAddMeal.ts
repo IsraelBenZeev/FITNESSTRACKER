@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { getCurrentUserId } from '../../lib/auth-helpers'
+import { useToast } from '../../shared/context/ToastContext'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0] ?? ''
@@ -17,6 +18,7 @@ interface AddMealPayload {
 
 export function useAddMeal() {
   const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
 
   return useMutation({
     mutationFn: async (payload: AddMealPayload) => {
@@ -36,6 +38,10 @@ export function useAddMeal() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['nutrition', 'today'] })
+      showSuccess('הארוחה נוספה בהצלחה')
+    },
+    onError: () => {
+      showError('שגיאה בהוספת הארוחה')
     },
   })
 }

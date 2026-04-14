@@ -9,6 +9,7 @@ import { PlanDetailPage } from './features/workout/PlanDetailPage'
 import { WorkoutSessionPage } from './features/workout/WorkoutSessionPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { AuthProvider, useAuth } from './lib/AuthContext'
+import { ToastProvider } from './shared/context/ToastContext'
 
 // Routes that hide the TabBar and Header for a focused experience
 const FULLSCREEN_ROUTES = ['/workout/session']
@@ -85,7 +86,9 @@ export default function App() {
   return (
     <AuthProvider>
       <div style={{ minHeight: '100dvh', background: '#0a0a0a', display: 'flex', flexDirection: 'column' }}>
-        <AppContent />
+        <ToastProvider>
+          <AppContent />
+        </ToastProvider>
       </div>
     </AuthProvider>
   )
