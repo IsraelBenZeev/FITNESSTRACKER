@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useForm, useFieldArray, Control, UseFormRegister } from 'react-hook-form'
+import { useForm, useFieldArray, useWatch, Control, Controller } from 'react-hook-form'
 import { ChevronRight, ChevronLeft, Plus, Trash2, Check, X } from 'lucide-react'
 import { getSession, saveSession, clearSession, WorkoutSessionData } from './workoutSession'
 import { useLogWorkout } from './useWorkoutLog'
@@ -36,16 +36,89 @@ function buildDefaultValues(session: WorkoutSessionData): FormValues {
   }
 }
 
+// ─── StepperInput ─────────────────────────────────────────────────────────────
+
+interface StepperProps {
+  value: string
+  onChange: (v: string) => void
+  step: number
+  min: number
+  decimals?: boolean
+  label: string
+}
+
+function StepperInput({ value, onChange, step, min, decimals, label }: StepperProps) {
+  const num = parseFloat(value) || 0
+  const display = decimals ? num.toFixed(1) : String(num)
+
+  const btnStyle: React.CSSProperties = {
+    width: 44,
+    height: 44,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: '#1a1a1a',
+    border: '1px solid #2a2a2a',
+    borderRadius: '10px',
+    color: '#888',
+    fontSize: '20px',
+    lineHeight: 1,
+    cursor: 'pointer',
+    flexShrink: 0,
+    WebkitTapHighlightColor: 'transparent',
+    userSelect: 'none',
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+      <span style={{
+        fontFamily: '"Rubik", sans-serif',
+        fontSize: '10px',
+        color: '#444',
+        letterSpacing: '0.03em',
+      }}>
+        {label}
+      </span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <button
+          type="button"
+          onClick={() => onChange(String(Math.max(min, parseFloat((num - step).toFixed(10)))))}
+          style={btnStyle}
+        >
+          −
+        </button>
+        <span style={{
+          fontFamily: '"Bebas Neue", sans-serif',
+          fontSize: '26px',
+          color: '#f0f0f0',
+          width: '56px',
+          textAlign: 'center',
+          letterSpacing: '0.02em',
+          lineHeight: 1,
+        }}>
+          {display}
+        </span>
+        <button
+          type="button"
+          onClick={() => onChange(String(parseFloat((num + step).toFixed(10))))}
+          style={btnStyle}
+        >
+          +
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── ExerciseSlide ────────────────────────────────────────────────────────────
 
 interface SlideProps {
   exerciseIndex: number
   session: WorkoutSessionData
   control: Control<FormValues>
-  register: UseFormRegister<FormValues>
 }
 
-function ExerciseSlide({ exerciseIndex, session, control, register }: SlideProps) {
+function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
   const ex = session.exercises[exerciseIndex]!
 
   const { fields, append, remove } = useFieldArray<FormValues>({
@@ -53,19 +126,7 @@ function ExerciseSlide({ exerciseIndex, session, control, register }: SlideProps
     name: `exercises.${exerciseIndex}.sets`,
   })
 
-  const inputStyle: React.CSSProperties = {
-    width: '80px',
-    padding: '10px 6px',
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
-    borderRadius: '10px',
-    color: '#f0f0f0',
-    fontFamily: '"Bebas Neue", sans-serif',
-    fontSize: '22px',
-    textAlign: 'center',
-    outline: 'none',
-    letterSpacing: '0.03em',
-  }
+  const currentSets = useWatch({ control, name: `exercises.${exerciseIndex}.sets` })
 
   return (
     <div
@@ -85,86 +146,105 @@ function ExerciseSlide({ exerciseIndex, session, control, register }: SlideProps
           <img
             src={ex.gif_url}
             alt={ex.exercise_name}
-            style={{ width: '100%', maxHeight: '200px', objectFit: 'contain', display: 'block' }}
+            style={{ width: '100%', maxHeight: '180px', objectFit: 'contain', display: 'block' }}
           />
         </div>
       )}
 
-      {/* Name + target */}
-      <div style={{ textAlign: 'right' }}>
+      {/* Name */}
+      <div style={{ textAlign: 'center' }}>
         <div style={{
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontSize: '26px',
+          fontSize: '24px',
           fontWeight: 700,
           color: '#f0f0f0',
           lineHeight: 1.1,
         }}>
           {ex.exercise_name}
         </div>
-        <div style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#555', marginTop: '4px' }}>
-          יעד: {ex.target_sets} × {ex.target_reps ?? '—'}
-          {ex.target_weight_kg ? ` · ${ex.target_weight_kg}ק"ג` : ''}
-        </div>
       </div>
 
       {/* Sets */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-        {/* Header row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
-          <div style={{ width: 28 }} />
-          <span style={{
-            width: 80, textAlign: 'center',
-            fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444',
-          }}>חזרות</span>
-          <span style={{
-            width: 80, textAlign: 'center',
-            fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444',
-          }}>ק"ג</span>
-          <div style={{ width: 32 }} />
-        </div>
-
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {fields.map((field, setIdx) => (
           <div
             key={field.id}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}
+            style={{
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              gap: '12px',
+            }}
           >
             {/* Set number */}
             <span style={{
-              width: 28, height: 28,
+              width: 28,
+              height: 44,
               borderRadius: '50%',
               background: 'rgba(215,255,0,0.08)',
               border: '1px solid rgba(215,255,0,0.15)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#D7FF00',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: '"Rubik", sans-serif',
+              fontSize: '12px',
+              color: '#D7FF00',
               flexShrink: 0,
+              alignSelf: 'flex-end',
+              marginBottom: '2px',
             }}>
               {setIdx + 1}
             </span>
 
-            <input
-              type="number"
-              inputMode="numeric"
-              placeholder={ex.target_reps != null ? String(ex.target_reps) : '—'}
-              style={inputStyle}
-              {...register(`exercises.${exerciseIndex}.sets.${setIdx}.reps`)}
+            {/* Reps stepper */}
+            <Controller
+              control={control}
+              name={`exercises.${exerciseIndex}.sets.${setIdx}.reps`}
+              render={({ field: f }) => (
+                <StepperInput
+                  value={f.value}
+                  onChange={f.onChange}
+                  step={1}
+                  min={0}
+                  decimals={false}
+                  label="חזרות"
+                />
+              )}
             />
 
-            <input
-              type="number"
-              inputMode="decimal"
-              placeholder={ex.target_weight_kg != null ? String(ex.target_weight_kg) : '0'}
-              style={inputStyle}
-              {...register(`exercises.${exerciseIndex}.sets.${setIdx}.weight`)}
+            {/* Weight stepper */}
+            <Controller
+              control={control}
+              name={`exercises.${exerciseIndex}.sets.${setIdx}.weight`}
+              render={({ field: f }) => (
+                <StepperInput
+                  value={f.value}
+                  onChange={f.onChange}
+                  step={1}
+                  min={0}
+                  decimals={true}
+                  label='ק"ג'
+                />
+              )}
             />
 
+            {/* Delete */}
             <button
               type="button"
               onClick={() => remove(setIdx)}
               style={{
-                width: 32, height: 32,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'none', border: 'none', cursor: 'pointer', color: '#333',
-                flexShrink: 0, WebkitTapHighlightColor: 'transparent',
+                width: 36,
+                height: 44,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                color: '#333',
+                flexShrink: 0,
+                WebkitTapHighlightColor: 'transparent',
+                alignSelf: 'flex-end',
               }}
             >
               <Trash2 size={14} strokeWidth={2} />
@@ -175,15 +255,25 @@ function ExerciseSlide({ exerciseIndex, session, control, register }: SlideProps
         {/* Add set */}
         <button
           type="button"
-          onClick={() => append({ reps: '', weight: '' })}
+          onClick={() => {
+            const last = currentSets?.[currentSets.length - 1]
+            append({
+              reps: last?.reps ?? String(ex.target_reps ?? 10),
+              weight: last?.weight ?? String(ex.target_weight_kg ?? 0),
+            })
+          }}
           style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            padding: '10px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            padding: '12px',
             background: 'none',
             border: '1px dashed #2a2a2a',
             borderRadius: '10px',
             color: '#555',
-            fontFamily: '"Rubik", sans-serif', fontSize: '13px',
+            fontFamily: '"Rubik", sans-serif',
+            fontSize: '13px',
             cursor: 'pointer',
             WebkitTapHighlightColor: 'transparent',
           }}
@@ -202,7 +292,6 @@ export function WorkoutSessionPage() {
   const navigate = useNavigate()
   const { mutate: logWorkout, isPending: isSaving } = useLogWorkout()
 
-  // Read session synchronously on first render
   const [session] = useState<WorkoutSessionData | null>(() => getSession())
   const [currentIndex, setCurrentIndex] = useState(() => getSession()?.currentExerciseIndex ?? 0)
   const [elapsed, setElapsed] = useState(0)
@@ -210,12 +299,10 @@ export function WorkoutSessionPage() {
 
   const carouselRef = useRef<HTMLDivElement>(null)
 
-  // Redirect if no session
   useEffect(() => {
     if (!session) navigate('/workout', { replace: true })
   }, [session, navigate])
 
-  // Elapsed timer
   useEffect(() => {
     if (!session) return
     const startMs = new Date(session.startedAt).getTime()
@@ -225,8 +312,7 @@ export function WorkoutSessionPage() {
     return () => clearInterval(id)
   }, [session])
 
-  // ── RHF ──
-  const { control, register, watch, handleSubmit } = useForm<FormValues>({
+  const { control, watch, handleSubmit } = useForm<FormValues>({
     defaultValues: session ? buildDefaultValues(session) : { exercises: [], notes: '' },
   })
 
@@ -255,6 +341,7 @@ export function WorkoutSessionPage() {
   }, [formValues, currentIndex, session])
 
   // ── Carousel navigation ──
+  // dir="ltr" on the carousel container fixes RTL scrollLeft issues on mobile browsers
   const goTo = useCallback((idx: number) => {
     setCurrentIndex(idx)
     const container = carouselRef.current
@@ -331,7 +418,6 @@ export function WorkoutSessionPage() {
         borderBottom: '1px solid #1a1a1a',
         flexShrink: 0,
       }}>
-        {/* Cancel */}
         <button
           type="button"
           onClick={() => setShowCancel(true)}
@@ -346,7 +432,6 @@ export function WorkoutSessionPage() {
           <X size={16} strokeWidth={2} />
         </button>
 
-        {/* Plan name + timer */}
         <div style={{ textAlign: 'center' }}>
           <div style={{
             fontFamily: '"Barlow Condensed", sans-serif',
@@ -362,7 +447,6 @@ export function WorkoutSessionPage() {
           </div>
         </div>
 
-        {/* Finish */}
         <button
           type="button"
           onClick={onFinish}
@@ -386,7 +470,7 @@ export function WorkoutSessionPage() {
         </button>
       </div>
 
-      {/* ── Exercise counter ── */}
+      {/* ── Dots navigation ── */}
       {totalEx > 0 && (
         <div style={{
           display: 'flex',
@@ -417,21 +501,19 @@ export function WorkoutSessionPage() {
         </div>
       )}
 
-      {/* ── Carousel ── */}
+      {/* ── Carousel (dir=ltr fixes RTL scrollLeft bug on mobile) ── */}
       <div
         ref={carouselRef}
+        dir="ltr"
         style={{
           flex: 1,
           display: 'flex',
           overflowX: 'auto',
           overflowY: 'hidden',
           scrollSnapType: 'x mandatory',
-          scrollBehavior: 'smooth',
           WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
-          // Hide scrollbar
           msOverflowStyle: 'none',
           scrollbarWidth: 'none',
-          gap: 0,
         } as React.CSSProperties}
         onScroll={(e) => {
           const container = e.currentTarget
@@ -442,6 +524,7 @@ export function WorkoutSessionPage() {
         {exercises.map((_, exIdx) => (
           <div
             key={exIdx}
+            dir="rtl"
             style={{
               flexShrink: 0,
               width: '100%',
@@ -455,7 +538,6 @@ export function WorkoutSessionPage() {
               exerciseIndex={exIdx}
               session={session}
               control={control}
-              register={register}
             />
           </div>
         ))}
@@ -525,22 +607,28 @@ export function WorkoutSessionPage() {
       {/* Notes - below last exercise */}
       {currentIndex === totalEx - 1 && (
         <div style={{ padding: '0 16px 12px', flexShrink: 0 }}>
-          <textarea
-            placeholder="הערות לאימון..."
-            rows={2}
-            style={{
-              width: '100%',
-              padding: '10px 12px',
-              background: '#111',
-              border: '1px solid #1a1a1a',
-              borderRadius: '10px',
-              color: '#888',
-              fontFamily: '"Rubik", sans-serif', fontSize: '13px',
-              resize: 'none', outline: 'none',
-              boxSizing: 'border-box',
-              textAlign: 'right', direction: 'rtl',
-            }}
-            {...register('notes')}
+          <Controller
+            control={control}
+            name="notes"
+            render={({ field }) => (
+              <textarea
+                {...field}
+                placeholder="הערות לאימון..."
+                rows={2}
+                style={{
+                  width: '100%',
+                  padding: '10px 12px',
+                  background: '#111',
+                  border: '1px solid #1a1a1a',
+                  borderRadius: '10px',
+                  color: '#888',
+                  fontFamily: '"Rubik", sans-serif', fontSize: '13px',
+                  resize: 'none', outline: 'none',
+                  boxSizing: 'border-box',
+                  textAlign: 'right', direction: 'rtl',
+                }}
+              />
+            )}
           />
         </div>
       )}
