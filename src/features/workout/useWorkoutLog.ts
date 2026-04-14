@@ -1,5 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/AuthContext'
+import { getCurrentUserId } from '../../lib/auth-helpers'
 import type { WorkoutLog, WorkoutSetLog } from '../../types/workout'
 
 interface SetPayload {
@@ -18,8 +20,12 @@ interface LogWorkoutPayload {
 }
 
 export function useWorkoutHistory() {
+  const { user } = useAuth()
+  const userId = user?.id
+
   return useQuery({
-    queryKey: ['workout', 'logs'],
+    queryKey: ['workout', 'logs', userId],
+    enabled: !!userId,
     queryFn: async (): Promise<WorkoutLog[]> => {
       const { data: logs, error } = await supabase
         .from('workout_logs')
@@ -58,6 +64,7 @@ export function useLogWorkout() {
           date: payload.date,
           workout_plan_id: payload.workout_plan_id,
           notes: payload.notes || null,
+          user_id: await getCurrentUserId(),
         })
         .select()
         .single()

@@ -1,10 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/AuthContext'
 import type { WorkoutPlan, WorkoutPlanExercise } from '../../types/workout'
 
 export function useWorkoutPlans() {
+  const { user } = useAuth()
+  const userId = user?.id
+
   return useQuery({
-    queryKey: ['workout', 'plans'],
+    queryKey: ['workout', 'plans', userId],
+    enabled: !!userId,
     queryFn: async (): Promise<WorkoutPlan[]> => {
       const { data: plans, error } = await supabase
         .from('workout_plans')

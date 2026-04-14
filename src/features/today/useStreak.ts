@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/AuthContext'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0] ?? ''
@@ -7,8 +8,12 @@ function todayDateString(): string {
 
 /** מחזיר את מספר הימים הרצופים שנוסף לוג תזונה (כולל היום אם הוגדר) */
 export function useStreak(): number {
+  const { user } = useAuth()
+  const userId = user?.id
+
   const { data = 0 } = useQuery({
-    queryKey: ['nutrition', 'streak'],
+    queryKey: ['nutrition', 'streak', userId],
+    enabled: !!userId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('nutrition_log')

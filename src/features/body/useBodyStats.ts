@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/AuthContext'
 import type { BodyStat } from '../../types/body'
 
 interface UseBodyStatsResult {
@@ -15,8 +16,12 @@ function todayDateString(): string {
 }
 
 export function useBodyStats(): UseBodyStatsResult {
+  const { user } = useAuth()
+  const userId = user?.id
+
   const { data: stats = [], isLoading, error } = useQuery({
-    queryKey: ['body-stats'],
+    queryKey: ['body-stats', userId],
+    enabled: !!userId,
     queryFn: async () => {
       const { data, error: err } = await supabase
         .from('body_stats')

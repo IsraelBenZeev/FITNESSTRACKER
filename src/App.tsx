@@ -7,6 +7,8 @@ import { BodyPage } from './features/body/BodyPage'
 import { WorkoutPage } from './features/workout/WorkoutPage'
 import { PlanDetailPage } from './features/workout/PlanDetailPage'
 import { WorkoutSessionPage } from './features/workout/WorkoutSessionPage'
+import { LoginPage } from './features/auth/LoginPage'
+import { AuthProvider, useAuth } from './lib/AuthContext'
 
 // Routes that hide the TabBar and Header for a focused experience
 const FULLSCREEN_ROUTES = ['/workout/session']
@@ -46,10 +48,45 @@ function AnimatedRoutes() {
   )
 }
 
+function AppContent() {
+  const { user, loading } = useAuth()
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: '100dvh',
+          background: '#0a0a0a',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <div
+          style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontSize: '28px',
+            color: '#D7FF00',
+            letterSpacing: '0.05em',
+          }}
+        >
+          FITNESS
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) return <LoginPage />
+
+  return <AnimatedRoutes />
+}
+
 export default function App() {
   return (
-    <div style={{ minHeight: '100dvh', background: '#0a0a0a', display: 'flex', flexDirection: 'column' }}>
-      <AnimatedRoutes />
-    </div>
+    <AuthProvider>
+      <div style={{ minHeight: '100dvh', background: '#0a0a0a', display: 'flex', flexDirection: 'column' }}>
+        <AppContent />
+      </div>
+    </AuthProvider>
   )
 }

@@ -4,7 +4,7 @@ import { GOAL_CALORIES, GOAL_PROTEIN } from '../../lib/constants'
 
 // ─── JSON copy ────────────────────────────────────────────────────────────────
 
-export async function copyNutritionAsJson(logs: NutritionLog[]): Promise<void> {
+export function buildNutritionJsonText(logs: NutritionLog[]): string {
   const payload = logs.map((l) => ({
     date: l.date,
     time: l.time ?? undefined,
@@ -16,7 +16,48 @@ export async function copyNutritionAsJson(logs: NutritionLog[]): Promise<void> {
     fat_g: l.fat_g ?? undefined,
     notes: l.notes ?? undefined,
   }))
-  await navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+  return JSON.stringify(payload, null, 2)
+}
+
+export async function copyNutritionAsJson(logs: NutritionLog[]): Promise<void> {
+  await writeToClipboard(buildNutritionJsonText(logs))
+}
+
+// iOS Safari loses gesture trust after any network await, so we must start
+// the clipboard write synchronously. Pass a Promise<Blob> to ClipboardItem —
+// iOS waits for the data while keeping the gesture alive.
+export async function copyNutritionAsJsonFromPromise(
+  logsPromise: Promise<NutritionLog[]>,
+): Promise<void> {
+  if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+    const blobPromise = logsPromise.then((logs) => {
+      if (logs.length === 0) throw new Error('empty')
+      return new Blob([buildNutritionJsonText(logs)], { type: 'text/plain' })
+    })
+    await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blobPromise })])
+  } else {
+    // Fallback for browsers without ClipboardItem (Android, older desktop)
+    const logs = await logsPromise
+    if (logs.length === 0) throw new Error('empty')
+    await writeToClipboard(buildNutritionJsonText(logs))
+  }
+}
+
+async function writeToClipboard(text: string): Promise<void> {
+  if (navigator.clipboard?.writeText) {
+    await navigator.clipboard.writeText(text)
+    return
+  }
+  // Legacy fallback (very old browsers)
+  const ta = document.createElement('textarea')
+  ta.value = text
+  ta.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0'
+  document.body.appendChild(ta)
+  ta.focus()
+  ta.select()
+  const ok = document.execCommand('copy')
+  document.body.removeChild(ta)
+  if (!ok) throw new Error('copy failed')
 }
 
 // ─── PDF helpers ──────────────────────────────────────────────────────────────

@@ -49,17 +49,19 @@ export async function fetchGoalsConfig(): Promise<GoalsConfig> {
 }
 
 export async function saveGoalsConfig(config: GoalsConfig): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
   await supabase
     .from('user_goals')
-    .update({
+    .upsert({
+      user_id:           user.id,
       training_calories: config.trainingCalories,
       training_protein:  config.trainingProtein,
       rest_calories:     config.restCalories,
       rest_protein:      config.restProtein,
       training_days:     config.trainingDays,
       updated_at:        new Date().toISOString(),
-    })
-    .eq('id', 1)
+    }, { onConflict: 'user_id' })
   notifyAll(config)
 }
 

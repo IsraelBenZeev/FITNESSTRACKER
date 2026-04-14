@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { getCurrentUserId } from '../../lib/auth-helpers'
 
 function todayDateString(): string {
   return new Date().toISOString().split('T')[0] ?? ''
@@ -29,6 +30,7 @@ export function useAddMeal() {
         protein_g: payload.protein_g,
         carbs_g: payload.carbs_g,
         fat_g: payload.fat_g,
+        user_id: await getCurrentUserId(),
       })
       if (error) throw new Error(error.message)
     },

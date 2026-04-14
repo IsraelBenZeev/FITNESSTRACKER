@@ -8,7 +8,7 @@ import { CalendarGrid } from './CalendarGrid'
 import { DayDetailSheet } from './DayDetailSheet'
 import { ExportRangeModal } from './ExportRangeModal'
 import type { ExportRange } from './ExportRangeModal'
-import { copyNutritionAsJson, downloadNutritionPdf } from './exportNutrition'
+import { copyNutritionAsJsonFromPromise, downloadNutritionPdf } from './exportNutrition'
 import type { DayTotals } from '../../types/nutrition'
 
 export function HistoryPage() {
@@ -56,22 +56,25 @@ export function HistoryPage() {
 
   async function handleExportSelect(range: ExportRange) {
     try {
-      const logs = await fetchNutritionForExport(range.sinceDate)
-      if (logs.length === 0) {
-        showToast('אין נתונים בטווח זה')
-        return
-      }
       if (exportTarget === 'json') {
-        await copyNutritionAsJson(logs)
+        // Start clipboard write synchronously (within the gesture) and pass the
+        // fetch as a Promise — iOS Safari keeps gesture trust alive this way.
+        await copyNutritionAsJsonFromPromise(fetchNutritionForExport(range.sinceDate))
         setCopied(true)
         showToast('הועתק בהצלחה')
         setTimeout(() => setCopied(false), 2800)
       } else if (exportTarget === 'pdf') {
+        const logs = await fetchNutritionForExport(range.sinceDate)
+        if (logs.length === 0) { showToast('אין נתונים בטווח זה'); return }
         await downloadNutritionPdf(logs, range.label)
         showToast('PDF הורד בהצלחה')
       }
-    } catch {
-      showToast('שגיאה בייצוא הנתונים')
+    } catch (e) {
+      if (e instanceof Error && e.message === 'empty') {
+        showToast('אין נתונים בטווח זה')
+      } else {
+        showToast('שגיאה בייצוא הנתונים')
+      }
     }
   }
 

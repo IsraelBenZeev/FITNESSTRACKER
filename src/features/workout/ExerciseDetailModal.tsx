@@ -12,7 +12,7 @@ interface Props {
 function TagList({ items, color = '#888' }: { items: string[]; color?: string }) {
   if (!items.length) return null
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'flex-end' }}>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'flex-start' }}>
       {items.map((item) => (
         <span
           key={item}
@@ -120,7 +120,6 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd }: Pr
                     display: 'flex',
                     gap: '10px',
                     alignItems: 'flex-start',
-                    flexDirection: 'row-reverse',
                   }}
                 >
                   <span

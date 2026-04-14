@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/AuthContext'
 import type { DayTotals, NutritionLog } from '../../types/nutrition'
 import { getDaysInMonth, localDateStr } from './calendarUtils'
 
@@ -10,8 +11,12 @@ interface UseHistoryResult {
 }
 
 export function useHistory(daysBack = 14): UseHistoryResult {
+  const { user } = useAuth()
+  const userId = user?.id
+
   const { data: days = [], isLoading, error } = useQuery({
-    queryKey: ['nutrition', 'history', daysBack],
+    queryKey: ['nutrition', 'history', daysBack, userId],
+    enabled: !!userId,
     queryFn: async () => {
       const since = new Date()
       since.setDate(since.getDate() - daysBack)
@@ -55,11 +60,14 @@ interface UseCalendarMonthResult {
 }
 
 export function useCalendarMonth(year: number, month: number): UseCalendarMonthResult {
+  const { user } = useAuth()
+  const userId = user?.id
   const firstDay = localDateStr(year, month, 1)
   const lastDay = localDateStr(year, month, getDaysInMonth(year, month))
 
   const { data: dayMap = new Map(), isLoading } = useQuery({
-    queryKey: ['nutrition', 'calendar', year, month],
+    queryKey: ['nutrition', 'calendar', year, month, userId],
+    enabled: !!userId,
     staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const { data, error: err } = await supabase
@@ -111,9 +119,12 @@ export async function fetchNutritionForExport(sinceDate: string | null): Promise
 }
 
 export function useDayMeals(date: string | null): UseDayMealsResult {
+  const { user } = useAuth()
+  const userId = user?.id
+
   const { data: meals = [], isLoading } = useQuery({
-    queryKey: ['nutrition', 'day', date],
-    enabled: !!date,
+    queryKey: ['nutrition', 'day', date, userId],
+    enabled: !!date && !!userId,
     queryFn: async () => {
       const { data, error: err } = await supabase
         .from('nutrition_log')

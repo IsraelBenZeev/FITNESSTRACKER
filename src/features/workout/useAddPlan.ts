@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { getCurrentUserId } from '../../lib/auth-helpers'
 import type { WorkoutPlan, WorkoutPlanExercise } from '../../types/workout'
 
 interface PlanPayload {
@@ -21,6 +22,7 @@ export function useAddPlan() {
           description: payload.description || null,
           difficulty: payload.difficulty,
           training_days: payload.training_days,
+          user_id: await getCurrentUserId(),
         })
         .select()
         .single()

@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/AuthContext'
 import type { NutritionLog } from '../../types/nutrition'
 
 interface Totals {
@@ -23,9 +24,12 @@ function todayDateString(): string {
 
 export function useToday(): UseTodayResult {
   const today = todayDateString()
+  const { user } = useAuth()
+  const userId = user?.id
 
   const { data: meals = [], isLoading, error } = useQuery({
-    queryKey: ['nutrition', 'today', today],
+    queryKey: ['nutrition', 'today', today, userId],
+    enabled: !!userId,
     queryFn: async () => {
       const { data, error: err } = await supabase
         .from('nutrition_log')
