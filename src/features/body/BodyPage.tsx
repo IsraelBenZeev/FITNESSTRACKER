@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts'
-import { TrendingDown, TrendingUp, CalendarDays, BarChart2, Copy, FileDown, Pencil, Plus } from 'lucide-react'
+import { TrendingDown, TrendingUp, CalendarDays, BarChart2, Copy, FileDown, Check, Pencil, Plus } from 'lucide-react'
 import { useToast } from '../../shared/context/ToastContext'
 import { useBodyStats } from './useBodyStats'
 import type { BodyStat } from '../../types/body'
