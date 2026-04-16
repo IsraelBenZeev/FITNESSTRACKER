@@ -73,7 +73,6 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
 
   drawPage(true)
   let y = 66
-  let isFirst = true
 
   for (const log of logs) {
     const grouped = groupByExercise(log)
@@ -82,7 +81,6 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
     if (y + 20 > PAGE_BOTTOM) {
       doc.addPage()
       drawPage(false)
-      isFirst = false
       y = 30
     }
 
@@ -109,7 +107,6 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
       if (y + 7 > PAGE_BOTTOM) {
         doc.addPage()
         drawPage(false)
-        isFirst = false
         y = 30
       }
 
@@ -123,7 +120,6 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
         if (y + 6 > PAGE_BOTTOM) {
           doc.addPage()
           drawPage(false)
-          isFirst = false
           y = 30
         }
 
@@ -157,7 +153,6 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
       if (y + 6 > PAGE_BOTTOM) {
         doc.addPage()
         drawPage(false)
-        isFirst = false
         y = 30
       }
       doc.setFont('NotoSansHebrew', 'normal')
