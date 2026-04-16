@@ -102,7 +102,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
         </div>
 
         {/* Content */}
-        <div style={{ padding: '20px', flex: 1, overflowY: 'auto', minHeight: 0 }}>
+        <div style={{ padding: '20px', flex: 1, overflow: 'hidden', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
           {children}
         </div>
       </div>

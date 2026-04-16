@@ -5,6 +5,40 @@ import { getCurrentUserId } from '../../lib/auth-helpers'
 import { useToast } from '../../shared/context/ToastContext'
 import type { WorkoutLog, WorkoutSetLog } from '../../types/workout'
 
+export function useTodayWorkoutLog() {
+  const { user } = useAuth()
+  const today = new Date().toISOString().split('T')[0]!
+
+  return useQuery({
+    queryKey: ['workout', 'logs', 'today', user?.id, today],
+    enabled: !!user?.id,
+    queryFn: async (): Promise<WorkoutLog[]> => {
+      const { data: logs, error } = await supabase
+        .from('workout_logs')
+        .select('*')
+        .eq('date', today)
+        .order('created_at', { ascending: false })
+      if (error) throw new Error(error.message)
+      if (!logs?.length) return []
+
+      const logIds = logs.map((l) => l.id)
+      const { data: sets, error: setErr } = await supabase
+        .from('workout_set_logs')
+        .select('*')
+        .in('workout_log_id', logIds)
+        .order('set_number', { ascending: true })
+      if (setErr) throw new Error(setErr.message)
+
+      return logs.map((log) => ({
+        ...log,
+        set_logs: (sets ?? []).filter(
+          (s: WorkoutSetLog) => s.workout_log_id === log.id
+        ),
+      })) as WorkoutLog[]
+    },
+  })
+}
+
 interface SetPayload {
   exercise_id: string
   exercise_name: string

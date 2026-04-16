@@ -81,6 +81,11 @@ body {
   border-radius: 2px;
 }
 
+/* Hide scrollbar utility */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Recharts tooltip override */
 .recharts-tooltip-wrapper {
   outline: none !important;

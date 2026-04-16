@@ -128,9 +128,9 @@ export function BodyPage() {
     setTimeout(() => setCopied(false), 2800)
   }
 
-  function handleDownloadPdf() {
+  async function handleDownloadPdf() {
     if (stats.length === 0) return
-    downloadStatsPdf(stats)
+    await downloadStatsPdf(stats)
     showSuccess('PDF הורד בהצלחה')
   }
 

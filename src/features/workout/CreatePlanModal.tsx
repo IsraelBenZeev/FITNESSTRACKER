@@ -236,7 +236,7 @@ const exercisesPayload = exercises.map(
 
         {/* ── DETAILS STEP ── */}
         {step === 'details' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', minHeight: 0 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right' }}>
                 שם האימון *
@@ -365,10 +365,10 @@ const exercisesPayload = exercises.map(
 
         {/* ── EXERCISES STEP ── */}
         {step === 'exercises' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: 0 }}>
             {/* Selected exercises */}
             {exercises.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '120px', overflowY: 'auto', flexShrink: 0 }}>
                 <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right' }}>
                   תרגילים שנבחרו
                 </span>
@@ -389,6 +389,7 @@ const exercisesPayload = exercises.map(
                       <img
                         src={ex.gif_url}
                         alt={ex.exercise_name}
+                        loading="lazy"
                         style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: '#111' }}
                       />
                     ) : (
@@ -413,7 +414,7 @@ const exercisesPayload = exercises.map(
             )}
 
             {/* Search */}
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', flexShrink: 0 }}>
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -424,7 +425,7 @@ const exercisesPayload = exercises.map(
             </div>
 
             {/* Body part filter */}
-            <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px' }}>
+            <div className="hide-scrollbar" style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px', flexShrink: 0, scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}>
               {BODY_PARTS_FILTER.map((bp) => (
                 <button
                   key={bp}
@@ -451,7 +452,7 @@ const exercisesPayload = exercises.map(
             {/* Exercise list with infinite scroll */}
             <div
               ref={listRef}
-              style={{ display: 'flex', flexDirection: 'column', gap: '6px', minHeight: '180px', overflowY: 'auto' }}
+              style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minHeight: 0, overflowY: 'auto' }}
             >
               {loadingEx && (
                 <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#444', textAlign: 'center', margin: '12px 0' }}>
@@ -484,6 +485,7 @@ const exercisesPayload = exercises.map(
                       <img
                         src={ex.gifUrl}
                         alt={ex.name_he}
+                        loading="lazy"
                         style={{ width: 52, height: 52, borderRadius: 7, objectFit: 'cover', flexShrink: 0, background: '#111' }}
                       />
                     ) : (
@@ -548,7 +550,7 @@ const exercisesPayload = exercises.map(
               })}
 
               {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} style={{ height: 1 }} />
+              <div ref={sentinelRef} style={{ height: 8 }} />
 
               {/* Loading next page */}
               {isFetchingNextPage && (

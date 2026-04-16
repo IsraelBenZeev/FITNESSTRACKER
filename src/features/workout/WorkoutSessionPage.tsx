@@ -52,8 +52,8 @@ function StepperInput({ value, onChange, step, min, decimals, label }: StepperPr
   const display = decimals ? num.toFixed(1) : String(num)
 
   const btnStyle: React.CSSProperties = {
-    width: 44,
-    height: 44,
+    width: 36,
+    height: 36,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -79,7 +79,7 @@ function StepperInput({ value, onChange, step, min, decimals, label }: StepperPr
       }}>
         {label}
       </span>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         <button
           type="button"
           onClick={() => onChange(String(Math.max(min, parseFloat((num - step).toFixed(10)))))}
@@ -91,7 +91,7 @@ function StepperInput({ value, onChange, step, min, decimals, label }: StepperPr
           fontFamily: '"Bebas Neue", sans-serif',
           fontSize: '26px',
           color: '#f0f0f0',
-          width: '56px',
+          width: '44px',
           textAlign: 'center',
           letterSpacing: '0.02em',
           lineHeight: 1,
@@ -173,7 +173,7 @@ function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
               display: 'flex',
               alignItems: 'flex-end',
               justifyContent: 'center',
-              gap: '12px',
+              gap: '8px',
             }}
           >
             {/* Set number */}
@@ -233,15 +233,15 @@ function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
               type="button"
               onClick={() => remove(setIdx)}
               style={{
-                width: 36,
-                height: 44,
+                width: 32,
+                height: 36,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#333',
+                color: '#ff4757',
                 flexShrink: 0,
                 WebkitTapHighlightColor: 'transparent',
                 alignSelf: 'flex-end',
@@ -514,6 +514,7 @@ export function WorkoutSessionPage() {
           WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
           msOverflowStyle: 'none',
           scrollbarWidth: 'none',
+          touchAction: 'pan-x',
         } as React.CSSProperties}
         onScroll={(e) => {
           const container = e.currentTarget
@@ -532,6 +533,7 @@ export function WorkoutSessionPage() {
               overflowY: 'auto',
               padding: '16px',
               boxSizing: 'border-box',
+              touchAction: 'pan-y',
             }}
           >
             <ExerciseSlide
