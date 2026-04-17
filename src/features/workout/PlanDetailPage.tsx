@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ArrowRight, Play, Dumbbell, Calendar, Pencil } from 'lucide-react'
+import { ArrowRight, Play, Dumbbell, Calendar, Pencil, Download, Copy, Check } from 'lucide-react'
 import { usePlanDetail } from './usePlanDetail'
 import { initSession, hasActiveSession, clearSession, getSession, formatSessionAge } from './workoutSession'
 import { CreatePlanModal } from './CreatePlanModal'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { downloadPlanPdf, copyPlanAsJson } from './exportWorkoutPlan'
 
 const DAY_NAMES = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -19,6 +20,21 @@ export function PlanDetailPage() {
   const { data: plan, isLoading, error } = usePlanDetail(planId)
   const [editOpen, setEditOpen] = useState(false)
   const [confirmNewOpen, setConfirmNewOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [downloading, setDownloading] = useState(false)
+
+  async function handleDownloadPdf() {
+    if (!plan || downloading) return
+    setDownloading(true)
+    try { await downloadPlanPdf(plan) } finally { setDownloading(false) }
+  }
+
+  async function handleCopyJson() {
+    if (!plan || copied) return
+    await copyPlanAsJson(plan)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   function handleStart() {
     if (!plan) return
@@ -57,7 +73,7 @@ export function PlanDetailPage() {
   const exercises = plan.exercises ?? []
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Top bar */}
       <div style={{
         display: 'flex',
@@ -87,21 +103,57 @@ export function PlanDetailPage() {
         }}>
           {plan.name}
         </span>
-        <button
-          onClick={() => setEditOpen(true)}
-          style={{
-            width: 36, height: 36,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#1a1a1a', border: '1px solid #222', borderRadius: '10px',
-            cursor: 'pointer', color: '#888',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
-          <Pencil size={16} strokeWidth={2} />
-        </button>
+        <div style={{ display: 'flex', gap: '6px' }}>
+          <button
+            onClick={handleCopyJson}
+            title="העתק כ-JSON"
+            style={{
+              width: 36, height: 36,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: copied ? 'rgba(74,222,128,0.12)' : '#1a1a1a',
+              border: `1px solid ${copied ? 'rgba(74,222,128,0.3)' : '#222'}`,
+              borderRadius: '10px',
+              cursor: 'pointer',
+              color: copied ? '#4ade80' : '#888',
+              WebkitTapHighlightColor: 'transparent',
+              transition: 'all 0.2s',
+            }}
+          >
+            {copied ? <Check size={15} strokeWidth={2.5} /> : <Copy size={15} strokeWidth={2} />}
+          </button>
+          <button
+            onClick={handleDownloadPdf}
+            title="הורד PDF"
+            style={{
+              width: 36, height: 36,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: downloading ? 'rgba(215,255,0,0.08)' : '#1a1a1a',
+              border: `1px solid ${downloading ? 'rgba(215,255,0,0.2)' : '#222'}`,
+              borderRadius: '10px',
+              cursor: downloading ? 'default' : 'pointer',
+              color: downloading ? '#D7FF00' : '#888',
+              WebkitTapHighlightColor: 'transparent',
+              transition: 'all 0.2s',
+            }}
+          >
+            <Download size={15} strokeWidth={2} />
+          </button>
+          <button
+            onClick={() => setEditOpen(true)}
+            style={{
+              width: 36, height: 36,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: '#1a1a1a', border: '1px solid #222', borderRadius: '10px',
+              cursor: 'pointer', color: '#888',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            <Pencil size={16} strokeWidth={2} />
+          </button>
+        </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 120px', display: 'flex', flexDirection: 'column', gap: '20px', minHeight: 0 }}>
         {/* Plan meta */}
         <div style={{
           background: '#111',
@@ -227,8 +279,8 @@ export function PlanDetailPage() {
         </div>
       </div>
 
-      {/* Start button — sticky bottom */}
-      <div style={{ padding: '16px', borderTop: '1px solid #1a1a1a', background: '#0a0a0a' }}>
+      {/* Start button — fixed to viewport, always above TabBar */}
+      <div className="fixed bottom-24 left-5 right-5 z-50">
         <button
           onClick={handleStart}
           style={{
@@ -236,7 +288,7 @@ export function PlanDetailPage() {
             padding: '16px',
             background: '#D7FF00',
             border: 'none',
-            borderRadius: '14px',
+            borderRadius: '16px',
             color: '#0a0a0a',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '20px',
@@ -248,6 +300,7 @@ export function PlanDetailPage() {
             justifyContent: 'center',
             gap: '8px',
             WebkitTapHighlightColor: 'transparent',
+            boxShadow: '0 8px 32px rgba(215, 255, 0, 0.35), 0 2px 8px rgba(0,0,0,0.6)',
           }}
         >
           <Play size={18} strokeWidth={2.5} fill="#0a0a0a" />

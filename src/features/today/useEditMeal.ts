@@ -10,6 +10,7 @@ interface EditMealPayload {
   protein_g: number
   carbs_g: number
   fat_g: number
+  time: string
 }
 
 export function useEditMeal() {
@@ -27,6 +28,7 @@ export function useEditMeal() {
           protein_g: payload.protein_g,
           carbs_g: payload.carbs_g,
           fat_g: payload.fat_g,
+          time: payload.time,
         })
         .eq('id', payload.id)
       if (error) throw new Error(error.message)

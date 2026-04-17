@@ -13,10 +13,13 @@ import { ToastProvider } from './shared/context/ToastContext'
 
 // Routes that hide the TabBar and Header for a focused experience
 const FULLSCREEN_ROUTES = ['/workout/session']
+// Routes where the page manages its own internal scroll (main must not overflow)
+const CONTAINED_ROUTES = ['/workout/plan/']
 
 function AnimatedRoutes() {
   const { pathname } = useLocation()
   const isFullscreen = FULLSCREEN_ROUTES.some((r) => pathname.startsWith(r))
+  const isContained = CONTAINED_ROUTES.some((r) => pathname.startsWith(r))
 
   return (
     <>
@@ -25,7 +28,7 @@ function AnimatedRoutes() {
         key={pathname}
         style={{
           flex: 1,
-          overflowY: isFullscreen ? 'hidden' : 'auto',
+          overflowY: isFullscreen || isContained ? 'hidden' : 'auto',
           overflowX: 'hidden',
           paddingBottom: isFullscreen ? 0 : '80px',
           animation: 'pageEnter 0.2s ease forwards',

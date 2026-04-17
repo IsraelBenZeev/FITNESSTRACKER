@@ -1,7 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
+.bd {
+  @apply border-2 border-red-700;
+}
 :root {
   --bg: #0a0a0a;
   --surface: #111111;
@@ -13,6 +15,7 @@
   --muted: #666666;
   --danger: #ff4757;
 }
+
 
 * {
   box-sizing: border-box;

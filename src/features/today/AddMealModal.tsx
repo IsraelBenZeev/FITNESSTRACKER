@@ -29,6 +29,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
   const [proteinG, setProteinG] = useState(0)
   const [carbsG, setCarbsG] = useState(0)
   const [fatG, setFatG] = useState(0)
+  const [eatTime, setEatTime] = useState(() => new Date().toTimeString().slice(0, 5))
 
   const { mutate: addMeal, isPending: isAdding } = useAddMeal()
   const { mutate: editMeal, isPending: isEditing_ } = useEditMeal()
@@ -43,6 +44,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
         setProteinG(initialMeal.protein_g ?? 0)
         setCarbsG(initialMeal.carbs_g ?? 0)
         setFatG(initialMeal.fat_g ?? 0)
+        setEatTime(initialMeal.time ?? new Date().toTimeString().slice(0, 5))
       } else {
         setMealName(MEAL_OPTIONS[0]!)
         setFoodItems('')
@@ -50,6 +52,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
         setProteinG(0)
         setCarbsG(0)
         setFatG(0)
+        setEatTime(new Date().toTimeString().slice(0, 5))
       }
     }
   }, [isOpen, initialMeal])
@@ -62,6 +65,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
       protein_g: proteinG,
       carbs_g: carbsG,
       fat_g: fatG,
+      time: eatTime,
     }
 
     if (isEditing && initialMeal) {
@@ -104,6 +108,19 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
               <option key={opt} value={opt}>{opt}</option>
             ))}
           </select>
+        </div>
+
+        {/* Eating time */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            שעת אכילה
+          </span>
+          <input
+            type="time"
+            value={eatTime}
+            onChange={(e) => setEatTime(e.target.value)}
+            style={{ ...inputStyle, colorScheme: 'dark' }}
+          />
         </div>
 
         {/* Food items */}

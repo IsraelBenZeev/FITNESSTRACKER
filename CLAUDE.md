@@ -2,7 +2,7 @@
 
 ## Stack
 - **Vite + React 19 + TypeScript** (strict mode)
-- **Tailwind CSS v3** — utility classes + custom tokens
+- **Tailwind CSS v3.4.1+** — utility classes + custom tokens (**חובה** — כל סטיילינג דרך Tailwind בלבד, ללא inline styles או CSS modules)
 - **Supabase** — `@supabase/supabase-js`, anon key, no auth
 - **Recharts** — bar/line charts with dark theme
 - **lucide-react** — SVG icons (no emojis in UI)
@@ -29,22 +29,29 @@ START_WEIGHT  = 70    // kg
 START_WAIST   = 88    // cm
 ```
 
-## Design Tokens
-```
-bg:       #0a0a0a
-surface:  #111111
-surface2: #1a1a1a
-border:   #222222
-lime:     #D7FF00   ← primary accent
-muted:    #666666
-danger:   #ff4757
+## Design Tokens (Tailwind)
+הצבעים מוגדרים ב-`tailwind.config.js` תחת `theme.extend.colors` ומשמשים ישירות כ-Tailwind classes:
 
-font-display: "Bebas Neue"   ← numbers, headings
-font-body:    "DM Sans"      ← all UI text
 ```
-- All cards: `borderTop: 2px solid #D7FF00`
-- Hover cards: border transitions to lime in 0.2s
-- Page tab switch: fade-in animation (pageEnter keyframe in index.css)
+bg-bg        → #0a0a0a   (background)
+bg-surface   → #111111
+bg-surface2  → #1a1a1a
+border-col   → #222222   (border-[border-col] / border-border-col)
+lime         → #D7FF00   ← accent ראשי: text-lime, bg-lime, border-lime
+bg-lime-dim  → rgba(215,255,0,0.12)
+text-muted   → #666666
+bg-danger / text-danger → #ff4757
+
+font-display: "Barlow Condensed"  → class: font-display
+font-body:    "Rubik"             → class: font-body (ברירת מחדל)
+```
+
+### כללי סטיילינג
+- **כל** סטיילינג — Tailwind utility classes בלבד
+- **אסור** `style={{}}` inline, CSS modules, או קבצי `.css` חדשים
+- כרטיסים: `border-t-2 border-lime`
+- hover כרטיסים: `hover:border-lime transition-colors duration-200`
+- אנימציית מעבר עמוד: class `page-enter` (מוגדר ב-`index.css`)
 
 ## Folder Structure
 ```

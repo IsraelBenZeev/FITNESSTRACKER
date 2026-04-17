@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Clock } from 'lucide-react'
 import { Card } from '../../shared/components/Card'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
 import { MealIcon } from '../../shared/icons/MealIcon'
@@ -38,16 +38,25 @@ export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '6px' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div
-              style={{
-                fontFamily: '"Rubik", sans-serif',
-                fontSize: '14px',
-                fontWeight: 600,
-                color: '#f0f0f0',
-                marginBottom: '2px',
-              }}
-            >
-              {meal.meal_name}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
+              <span
+                style={{
+                  fontFamily: '"Rubik", sans-serif',
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#f0f0f0',
+                }}
+              >
+                {meal.meal_name}
+              </span>
+              {meal.time && (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+                  <Clock size={11} color="#D7FF00" strokeWidth={2} />
+                  <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#D7FF00', fontWeight: 500 }}>
+                    {meal.time.slice(0, 5)}
+                  </span>
+                </span>
+              )}
             </div>
             {meal.food_items && (
               <div
@@ -59,6 +68,11 @@ export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
                 }}
               >
                 {meal.food_items}
+              </div>
+            )}
+            {meal.created_at && (
+              <div style={{ fontFamily: '"Rubik", sans-serif', fontSize: '10px', color: '#333', marginTop: '3px' }}>
+                הוכנס: {new Date(meal.created_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
               </div>
             )}
           </div>

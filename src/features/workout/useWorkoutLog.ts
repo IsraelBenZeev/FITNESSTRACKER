@@ -89,6 +89,33 @@ export function useWorkoutHistory() {
   })
 }
 
+export function useDeleteWorkoutLog() {
+  const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
+  return useMutation({
+    mutationFn: async (logId: string) => {
+      const { error: setErr } = await supabase
+        .from('workout_set_logs')
+        .delete()
+        .eq('workout_log_id', logId)
+      if (setErr) throw new Error(setErr.message)
+
+      const { error } = await supabase
+        .from('workout_logs')
+        .delete()
+        .eq('id', logId)
+      if (error) throw new Error(error.message)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['workout', 'logs'] })
+      showSuccess('האימון נמחק')
+    },
+    onError: () => {
+      showError('שגיאה במחיקת האימון')
+    },
+  })
+}
+
 export function useLogWorkout() {
   const queryClient = useQueryClient()
   const { showSuccess, showError } = useToast()
