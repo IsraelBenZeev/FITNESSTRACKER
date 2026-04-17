@@ -91,7 +91,10 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '16px 20px 14px',
+          paddingTop: 'calc(env(safe-area-inset-top, 0px) + 16px)',
+          paddingRight: '20px',
+          paddingBottom: '14px',
+          paddingLeft: '20px',
           borderBottom: '1px solid #1a1a1a',
           background: '#111',
         }}
