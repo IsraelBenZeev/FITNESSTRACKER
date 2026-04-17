@@ -427,7 +427,10 @@ export function WorkoutSessionPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '12px 16px',
+        paddingTop: 'calc(env(safe-area-inset-top) + 12px)',
+        paddingBottom: '12px',
+        paddingLeft: '16px',
+        paddingRight: '16px',
         borderBottom: '1px solid #1a1a1a',
         flexShrink: 0,
       }}>
