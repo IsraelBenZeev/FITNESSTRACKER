@@ -120,9 +120,13 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
   )
 }
 
-export function PlanList() {
+interface PlanListProps {
+  createOpen: boolean
+  onCreateChange: (v: boolean) => void
+}
+
+export function PlanList({ createOpen, onCreateChange }: PlanListProps) {
   const { data: plans = [], isLoading } = useWorkoutPlans()
-  const [createOpen, setCreateOpen] = useState(false)
 
   if (isLoading) {
     return (
@@ -150,7 +154,7 @@ export function PlanList() {
 
       {/* FAB */}
       <button
-        onClick={() => setCreateOpen(true)}
+        onClick={() => onCreateChange(true)}
         style={{
           position: 'fixed',
           bottom: '80px',
@@ -172,7 +176,7 @@ export function PlanList() {
         <Plus size={22} color="#0a0a0a" strokeWidth={2.5} />
       </button>
 
-      <CreatePlanModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />
+      <CreatePlanModal isOpen={createOpen} onClose={() => onCreateChange(false)} />
     </>
   )
 }

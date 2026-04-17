@@ -3,6 +3,8 @@ import { TodayWorkout } from './TodayWorkout'
 import { PlanList } from './PlanList'
 import { WorkoutHistory } from './WorkoutHistory'
 import { ActiveWorkoutBanner } from './ActiveWorkoutBanner'
+import { DraftResumeDialog } from './DraftResumeDialog'
+import { usePlanDraft } from './usePlanDraft'
 
 type SubTab = 'today' | 'plans' | 'history'
 
@@ -14,6 +16,20 @@ const SUBTABS: { id: SubTab; label: string }[] = [
 
 export function WorkoutPage() {
   const [tab, setTab] = useState<SubTab>('today')
+  const [createOpen, setCreateOpen] = useState(false)
+  const { draft, clearDraft } = usePlanDraft()
+  const [showDraftPrompt, setShowDraftPrompt] = useState(() => !!draft)
+
+  function handleResume() {
+    setShowDraftPrompt(false)
+    setTab('plans')
+    setCreateOpen(true)
+  }
+
+  function handleDiscard() {
+    clearDraft()
+    setShowDraftPrompt(false)
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
@@ -59,13 +75,25 @@ export function WorkoutPage() {
         })}
       </div>
 
-      {/* Content */}
+      {/* Content — always mount all tabs so PlanList/CreatePlanModal portal works */}
       <div style={{ padding: '16px', flex: 1 }}>
         <ActiveWorkoutBanner />
-        {tab === 'today' && <TodayWorkout />}
-        {tab === 'plans' && <PlanList />}
-        {tab === 'history' && <WorkoutHistory />}
+        <div className={tab === 'today' ? '' : 'hidden'}><TodayWorkout /></div>
+        <div className={tab === 'plans' ? '' : 'hidden'}>
+          <PlanList createOpen={createOpen} onCreateChange={setCreateOpen} />
+        </div>
+        <div className={tab === 'history' ? '' : 'hidden'}><WorkoutHistory /></div>
       </div>
+
+      {showDraftPrompt && draft && (
+        <DraftResumeDialog
+          draftName={draft.name}
+          exerciseCount={draft.exerciseCount}
+          onResume={handleResume}
+          onDiscard={handleDiscard}
+          onDismiss={() => setShowDraftPrompt(false)}
+        />
+      )}
     </div>
   )
 }

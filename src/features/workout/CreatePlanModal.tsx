@@ -1,8 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Search, Plus, X, Info } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Plus, ChevronLeft } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
-import { ExerciseDetailModal } from './ExerciseDetailModal'
-import { useExercises } from './useExercises'
+import { ExercisePickerSheet } from './ExercisePickerSheet'
 import { useAddPlan } from './useAddPlan'
 import { useUpdatePlan } from './useUpdatePlan'
 import type { WorkoutPlan, WorkoutPlanExercise, Exercise } from '../../types/workout'
@@ -22,7 +21,6 @@ interface Props {
 
 const DAYS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 const DIFFICULTIES: WorkoutPlan['difficulty'][] = ['קל', 'בינוני', 'קשה']
-const BODY_PARTS_FILTER = ['הכל', 'חזה', 'גב', 'כתפיים', 'רגליים', 'ידיים', 'בטן', 'קרדיו']
 const DRAFT_KEY = 'ft_plan_draft'
 
 const inputStyle: React.CSSProperties = {
@@ -46,45 +44,12 @@ export function CreatePlanModal({ isOpen, onClose, initialPlan }: Props) {
   const [difficulty, setDifficulty] = useState<WorkoutPlan['difficulty']>(null)
   const [trainingDays, setTrainingDays] = useState<number[]>([])
   const [exercises, setExercises] = useState<PlanExerciseRow[]>([])
-  const [search, setSearch] = useState('')
-  const [bodyPartFilter, setBodyPartFilter] = useState('הכל')
   const [step, setStep] = useState<'details' | 'exercises'>('details')
-  const [detailEx, setDetailEx] = useState<Exercise | null>(null)
-
-  const listRef = useRef<HTMLDivElement>(null)
-  const sentinelRef = useRef<HTMLDivElement>(null)
-
-  const {
-    data,
-    isLoading: loadingEx,
-    isFetchingNextPage,
-    hasNextPage,
-    fetchNextPage,
-  } = useExercises(search, bodyPartFilter)
-
-  const allExercises = data?.pages.flatMap((p) => p.data) ?? []
+  const [pickerOpen, setPickerOpen] = useState(false)
 
   const { mutate: addPlan, isPending: isAdding } = useAddPlan()
   const { mutate: updatePlan, isPending: isUpdating } = useUpdatePlan()
   const isPending = isAdding || isUpdating
-
-  // Infinite scroll via IntersectionObserver
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-    const list = listRef.current
-    if (!sentinel || !list) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage()
-        }
-      },
-      { root: list, threshold: 0.1 }
-    )
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   useEffect(() => {
     if (!isOpen) {
@@ -93,10 +58,8 @@ export function CreatePlanModal({ isOpen, onClose, initialPlan }: Props) {
       setDifficulty(null)
       setTrainingDays([])
       setExercises([])
-      setSearch('')
-      setBodyPartFilter('הכל')
       setStep('details')
-      setDetailEx(null)
+      setPickerOpen(false)
       return
     }
     if (initialPlan) {
@@ -333,7 +296,7 @@ const exercisesPayload = exercises.map(
                 {isPending ? 'שומר...' : 'שמור'}
               </button>
               <button
-                onClick={() => setStep('exercises')}
+                onClick={() => { setStep('exercises'); setPickerOpen(true) }}
                 style={{
                   flex: 2,
                   padding: '14px',
@@ -346,9 +309,14 @@ const exercisesPayload = exercises.map(
                   fontWeight: 700,
                   cursor: 'pointer',
                   WebkitTapHighlightColor: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
                 }}
               >
-                הוסף תרגילים
+                <Plus size={17} strokeWidth={2.5} color="#0a0a0a" />
+                {exercises.length > 0 ? `תרגילים (${exercises.length})` : 'הוסף תרגילים'}
               </button>
             </div>
           </div>
@@ -356,234 +324,103 @@ const exercisesPayload = exercises.map(
 
         {/* ── EXERCISES STEP ── */}
         {step === 'exercises' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, minHeight: 0 }}>
-            {/* Selected exercises */}
-            {exercises.length > 0 && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '120px', overflowY: 'auto', flexShrink: 0 }}>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right' }}>
-                  תרגילים שנבחרו
-                </span>
-                {exercises.map((ex) => (
-                  <div
-                    key={ex.exercise_id}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '10px',
-                      background: '#1a1a1a',
-                      borderRadius: '10px',
-                      border: '1px solid #2a2a2a',
-                    }}
-                  >
-                    {ex.gif_url ? (
-                      <img
-                        src={ex.gif_url}
-                        alt={ex.exercise_name}
-                        loading="lazy"
-                        style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: '#111' }}
-                      />
-                    ) : (
-                      <div style={{ width: 40, height: 40, borderRadius: 6, background: '#111', flexShrink: 0 }} />
-                    )}
-                    <span style={{ flex: 1, fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#f0f0f0', textAlign: 'right' }}>
-                      {ex.exercise_name}
-                    </span>
-                    <button
-                      onClick={() => removeExercise(ex.exercise_id)}
-                      style={{
-                        width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'none', border: 'none', cursor: 'pointer', color: '#333',
-                        WebkitTapHighlightColor: 'transparent', flexShrink: 0,
-                      }}
-                    >
-                      <X size={14} strokeWidth={2} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Search */}
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="חפש תרגיל..."
-                style={{ ...inputStyle, paddingLeft: '36px' }}
-              />
-              <Search size={16} color="#444" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
-            </div>
-
-            {/* Body part filter */}
-            <div className="hide-scrollbar" style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '2px', flexShrink: 0, scrollbarWidth: 'none', msOverflowStyle: 'none' } as React.CSSProperties}>
-              {BODY_PARTS_FILTER.map((bp) => (
-                <button
-                  key={bp}
-                  onClick={() => setBodyPartFilter(bp)}
-                  style={{
-                    padding: '6px 12px',
-                    flexShrink: 0,
-                    background: bodyPartFilter === bp ? 'rgba(215,255,0,0.1)' : '#1a1a1a',
-                    border: bodyPartFilter === bp ? '1px solid rgba(215,255,0,0.3)' : '1px solid #222',
-                    borderRadius: '20px',
-                    color: bodyPartFilter === bp ? '#D7FF00' : '#555',
-                    fontFamily: '"Rubik", sans-serif',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    WebkitTapHighlightColor: 'transparent',
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  {bp}
-                </button>
-              ))}
-            </div>
-
-            {/* Exercise list with infinite scroll */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1 }}>
+            {/* Summary card */}
             <div
-              ref={listRef}
-              style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1, minHeight: 0, overflowY: 'auto' }}
+              style={{
+                padding: '16px',
+                background: exercises.length > 0 ? 'rgba(215,255,0,0.05)' : '#1a1a1a',
+                border: exercises.length > 0 ? '1px solid rgba(215,255,0,0.15)' : '1px solid #222',
+                borderRadius: '12px',
+                textAlign: 'center',
+              }}
             >
-              {loadingEx && (
-                <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#444', textAlign: 'center', margin: '12px 0' }}>
-                  טוען תרגילים...
-                </p>
-              )}
-              {!loadingEx && allExercises.length === 0 && (
-                <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#444', textAlign: 'center', margin: '12px 0' }}>
-                  לא נמצאו תרגילים
-                </p>
-              )}
-
-              {allExercises.map((ex) => {
-                const selected = exercises.some((e) => e.exercise_id === ex.exerciseId)
-                return (
-                  <div
-                    key={ex.exerciseId}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      padding: '8px 10px',
-                      background: selected ? 'rgba(215,255,0,0.05)' : '#1a1a1a',
-                      border: selected ? '1px solid rgba(215,255,0,0.18)' : '1px solid #222',
-                      borderRadius: '10px',
-                    }}
-                  >
-                    {/* GIF thumbnail */}
-                    {ex.gifUrl ? (
-                      <img
-                        src={ex.gifUrl}
-                        alt={ex.name_he}
-                        loading="lazy"
-                        style={{ width: 52, height: 52, borderRadius: 7, objectFit: 'cover', flexShrink: 0, background: '#111' }}
-                      />
-                    ) : (
-                      <div style={{ width: 52, height: 52, borderRadius: 7, background: '#111', flexShrink: 0 }} />
-                    )}
-
-                    {/* Text */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-end', minWidth: 0 }}>
-                      <span style={{
-                        fontFamily: '"Rubik", sans-serif',
-                        fontSize: '13px',
-                        color: selected ? '#D7FF00' : '#f0f0f0',
-                        textAlign: 'right',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        maxWidth: '100%',
-                      }}>
-                        {ex.name_he}
-                      </span>
-                      <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>
-                        {ex.bodyParts_he.join(' · ')}
-                      </span>
-                    </div>
-
-                    {/* Info button */}
-                    <button
-                      onClick={() => setDetailEx(ex)}
-                      style={{
-                        width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: '#222', border: '1px solid #2a2a2a', borderRadius: '8px',
-                        cursor: 'pointer', color: '#666', flexShrink: 0,
-                        WebkitTapHighlightColor: 'transparent',
-                      }}
-                    >
-                      <Info size={15} strokeWidth={2} />
-                    </button>
-
-                    {/* Add button */}
-                    <button
-                      onClick={() => addExercise(ex)}
-                      disabled={selected}
-                      style={{
-                        width: '34px', height: '34px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: selected ? 'rgba(215,255,0,0.1)' : '#D7FF00',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: selected ? 'default' : 'pointer',
-                        color: selected ? '#D7FF00' : '#0a0a0a',
-                        flexShrink: 0,
-                        WebkitTapHighlightColor: 'transparent',
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      {selected
-                        ? <span style={{ fontSize: '14px', lineHeight: 1 }}>✓</span>
-                        : <Plus size={16} strokeWidth={2.5} />
-                      }
-                    </button>
-                  </div>
-                )
-              })}
-
-              {/* Infinite scroll sentinel */}
-              <div ref={sentinelRef} style={{ height: 8 }} />
-
-              {/* Loading next page */}
-              {isFetchingNextPage && (
-                <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#444', textAlign: 'center', margin: '8px 0' }}>
-                  טוען עוד...
-                </p>
-              )}
+              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '32px', fontWeight: 700, color: exercises.length > 0 ? '#D7FF00' : '#333' }}>
+                {exercises.length}
+              </span>
+              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#555', display: 'block', marginTop: '2px' }}>
+                תרגילים נבחרו
+              </span>
             </div>
 
-            {/* Save — sticky so it's always reachable */}
-            <div style={{ position: 'sticky', bottom: 0, background: '#111', paddingTop: '10px' }}>
-              <button
-                onClick={handleSave}
-                disabled={isPending || !canSave}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  background: canSave ? '#D7FF00' : '#1a1a1a',
-                  border: 'none',
-                  borderRadius: '12px',
-                  color: canSave ? '#0a0a0a' : '#333',
-                  fontFamily: '"Barlow Condensed", sans-serif',
-                  fontSize: '17px',
-                  fontWeight: 700,
-                  cursor: canSave && !isPending ? 'pointer' : 'not-allowed',
-                  WebkitTapHighlightColor: 'transparent',
-                  transition: 'all 0.15s',
-                }}
-              >
-                {isPending ? 'שומר...' : 'שמור תכנית'}
-              </button>
-            </div>
+            <button
+              onClick={() => setPickerOpen(true)}
+              style={{
+                width: '100%',
+                padding: '14px',
+                background: '#1a1a1a',
+                border: '1px solid #2a2a2a',
+                borderRadius: '12px',
+                color: '#D7FF00',
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontSize: '16px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+              }}
+            >
+              <Plus size={17} strokeWidth={2.5} />
+              {exercises.length > 0 ? 'ערוך תרגילים' : 'בחר תרגילים'}
+            </button>
+
+            <button
+              onClick={() => setStep('details')}
+              style={{
+                width: '100%',
+                padding: '10px',
+                background: 'none',
+                border: 'none',
+                color: '#555',
+                fontFamily: '"Rubik", sans-serif',
+                fontSize: '13px',
+                cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+              }}
+            >
+              <ChevronLeft size={14} strokeWidth={2} />
+              חזור לפרטים
+            </button>
+
+            <div style={{ flex: 1 }} />
+
+            <button
+              onClick={handleSave}
+              disabled={isPending || !canSave}
+              style={{
+                width: '100%',
+                padding: '14px',
+                background: canSave ? '#D7FF00' : '#1a1a1a',
+                border: 'none',
+                borderRadius: '12px',
+                color: canSave ? '#0a0a0a' : '#333',
+                fontFamily: '"Barlow Condensed", sans-serif',
+                fontSize: '17px',
+                fontWeight: 700,
+                cursor: canSave && !isPending ? 'pointer' : 'not-allowed',
+                WebkitTapHighlightColor: 'transparent',
+                transition: 'all 0.15s',
+              }}
+            >
+              {isPending ? 'שומר...' : 'שמור תכנית'}
+            </button>
           </div>
         )}
       </Modal>
 
-      {/* Exercise detail modal — rendered outside the plan modal */}
-      <ExerciseDetailModal
-        exercise={detailEx}
-        isSelected={detailEx ? exercises.some((e) => e.exercise_id === detailEx.exerciseId) : false}
-        onClose={() => setDetailEx(null)}
+      <ExercisePickerSheet
+        isOpen={pickerOpen}
+        selectedExercises={exercises}
         onAdd={addExercise}
+        onRemove={removeExercise}
+        onDone={() => setPickerOpen(false)}
       />
     </>
   )

@@ -7,9 +7,10 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: React.ReactNode
+  zIndexOverride?: number
 }
 
-export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, zIndexOverride }: ModalProps) {
   useEffect(() => {
     if (!isOpen) return
     const handler = (e: KeyboardEvent) => {
@@ -26,7 +27,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 100,
+        zIndex: zIndexOverride ?? 100,
         display: 'flex',
         alignItems: 'flex-end',
       }}

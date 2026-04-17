@@ -7,6 +7,7 @@ interface Props {
   isSelected: boolean
   onClose: () => void
   onAdd: (ex: Exercise) => void
+  zIndexOverride?: number
 }
 
 function TagList({ items, color = '#888' }: { items: string[]; color?: string }) {
@@ -53,14 +54,14 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   )
 }
 
-export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd }: Props) {
+export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zIndexOverride }: Props) {
   if (!exercise) return null
 
   const hasSecondary = (exercise.secondaryMuscles_he ?? []).length > 0
   const hasInstructions = (exercise.instructions_he ?? []).length > 0
 
   return (
-    <Modal isOpen={exercise != null} onClose={onClose} title={exercise.name_he}>
+    <Modal isOpen={exercise != null} onClose={onClose} title={exercise.name_he} zIndexOverride={zIndexOverride}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         {/* GIF */}

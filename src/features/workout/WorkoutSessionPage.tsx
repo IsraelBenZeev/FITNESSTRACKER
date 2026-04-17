@@ -143,11 +143,17 @@ function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
     >
       {/* GIF */}
       {ex.gif_url && (
-        <div style={{ borderRadius: '14px', overflow: 'hidden', background: '#0a0a0a', lineHeight: 0 }}>
+        <div style={{
+          borderRadius: '16px',
+          overflow: 'hidden',
+          background: '#0d0d0d',
+          lineHeight: 0,
+          border: '1px solid #1a1a1a',
+        }}>
           <img
             src={ex.gif_url}
             alt={ex.exercise_name}
-            style={{ width: '100%', maxHeight: '180px', objectFit: 'contain', display: 'block' }}
+            style={{ width: '100%', maxHeight: '240px', objectFit: 'contain', display: 'block' }}
           />
         </div>
       )}
@@ -156,10 +162,11 @@ function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
       <div style={{ textAlign: 'center' }}>
         <div style={{
           fontFamily: '"Barlow Condensed", sans-serif',
-          fontSize: '24px',
+          fontSize: '26px',
           fontWeight: 700,
           color: '#f0f0f0',
           lineHeight: 1.1,
+          letterSpacing: '-0.01em',
         }}>
           {ex.exercise_name}
         </div>
@@ -354,7 +361,6 @@ export function WorkoutSessionPage() {
   }, [formValues, currentIndex, session])
 
   // ── Carousel navigation ──
-  // dir="ltr" on the carousel container fixes RTL scrollLeft issues on mobile browsers
   const goTo = useCallback((idx: number) => {
     setCurrentIndex(idx)
     const container = carouselRef.current
@@ -486,141 +492,158 @@ export function WorkoutSessionPage() {
         </button>
       </div>
 
-      {/* ── Dots navigation ── */}
+      {/* ── Dots + counter ── */}
       {totalEx > 0 && (
         <div style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '6px',
+          gap: '8px',
           padding: '10px 16px 0',
           flexShrink: 0,
         }}>
-          {exercises.map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              style={{
-                width: i === currentIndex ? 20 : 8,
-                height: 8,
-                borderRadius: 4,
-                background: i === currentIndex ? '#D7FF00' : '#2a2a2a',
-                border: 'none',
-                cursor: 'pointer',
-                padding: 0,
-                transition: 'all 0.2s',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            />
-          ))}
+          <span style={{
+            fontFamily: '"Barlow Condensed", sans-serif',
+            fontSize: '14px',
+            color: '#444',
+            minWidth: '32px',
+            textAlign: 'right',
+          }}>
+            {currentIndex + 1}/{totalEx}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            {exercises.map((_, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                style={{
+                  width: i === currentIndex ? 20 : 7,
+                  height: 7,
+                  borderRadius: 4,
+                  background: i === currentIndex ? '#D7FF00' : '#252525',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 0,
+                  transition: 'all 0.25s',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              />
+            ))}
+          </div>
         </div>
       )}
 
-      {/* ── Carousel (dir=ltr fixes RTL scrollLeft bug on mobile) ── */}
-      <div
-        ref={carouselRef}
-        dir="ltr"
-        style={{
-          flex: 1,
-          display: 'flex',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
-          msOverflowStyle: 'none',
-          scrollbarWidth: 'none',
-          touchAction: 'pan-x',
-        } as React.CSSProperties}
-        onScroll={(e) => {
-          const container = e.currentTarget
-          const idx = Math.round(container.scrollLeft / container.clientWidth)
-          if (idx !== currentIndex) setCurrentIndex(idx)
-        }}
-      >
-        {exercises.map((_, exIdx) => (
-          <div
-            key={exIdx}
-            dir="rtl"
-            style={{
-              flexShrink: 0,
-              width: '100%',
-              scrollSnapAlign: 'start',
-              overflowY: 'auto',
-              padding: '16px',
-              boxSizing: 'border-box',
-              touchAction: 'pan-y',
-            }}
-          >
-            <ExerciseSlide
-              exerciseIndex={exIdx}
-              session={session}
-              control={control}
-            />
-          </div>
-        ))}
-      </div>
+      {/* ── Carousel wrapper with floating side buttons ── */}
+      <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
 
-      {/* ── Prev / Next navigation ── */}
-      {totalEx > 1 && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '10px 16px',
-          borderTop: '1px solid #1a1a1a',
-          flexShrink: 0,
-        }}>
+        {/* כפתור הקודם — צד ימין (RTL) */}
+        {totalEx > 1 && (
           <button
             type="button"
             onClick={() => goTo(currentIndex - 1)}
             disabled={currentIndex === 0}
             style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '10px 16px',
-              background: currentIndex === 0 ? 'none' : '#1a1a1a',
-              border: currentIndex === 0 ? '1px solid transparent' : '1px solid #222',
-              borderRadius: '10px',
-              color: currentIndex === 0 ? '#333' : '#888',
-              fontFamily: '"Rubik", sans-serif', fontSize: '13px',
+              position: 'absolute',
+              right: 8,
+              top: 120,
+              zIndex: 10,
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: currentIndex === 0 ? 'rgba(20,20,20,0.3)' : 'rgba(20,20,20,0.88)',
+              border: `1px solid ${currentIndex === 0 ? '#1a1a1a' : '#2a2a2a'}`,
+              color: currentIndex === 0 ? '#2a2a2a' : '#aaa',
               cursor: currentIndex === 0 ? 'default' : 'pointer',
+              backdropFilter: 'blur(4px)',
               WebkitTapHighlightColor: 'transparent',
+              transition: 'opacity 0.2s',
             }}
           >
-            <ChevronLeft size={16} strokeWidth={2} />
-            הקודם
+            <ChevronRight size={18} strokeWidth={2} />
           </button>
+        )}
 
-          <span style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: '16px', color: '#555',
-          }}>
-            {currentIndex + 1} / {totalEx}
-          </span>
-
+        {/* כפתור הבא / סיים — צד שמאל (RTL) */}
+        {totalEx > 1 && (
           <button
             type="button"
             onClick={() => currentIndex < totalEx - 1 ? goTo(currentIndex + 1) : onFinish()}
             style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '10px 16px',
-              background: currentIndex === totalEx - 1 ? '#D7FF00' : '#1a1a1a',
-              border: 'none',
-              borderRadius: '10px',
-              color: currentIndex === totalEx - 1 ? '#0a0a0a' : '#888',
-              fontFamily: currentIndex === totalEx - 1 ? '"Barlow Condensed", sans-serif' : '"Rubik", sans-serif',
-              fontSize: currentIndex === totalEx - 1 ? '15px' : '13px',
-              fontWeight: currentIndex === totalEx - 1 ? 700 : 400,
+              position: 'absolute',
+              left: 8,
+              top: 120,
+              zIndex: 10,
+              width: 40,
+              height: 40,
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: currentIndex === totalEx - 1 ? '#D7FF00' : 'rgba(20,20,20,0.88)',
+              border: currentIndex === totalEx - 1 ? 'none' : '1px solid #2a2a2a',
+              color: currentIndex === totalEx - 1 ? '#0a0a0a' : '#aaa',
               cursor: 'pointer',
+              backdropFilter: 'blur(4px)',
               WebkitTapHighlightColor: 'transparent',
+              transition: 'background 0.2s, color 0.2s',
             }}
           >
-            {currentIndex === totalEx - 1 ? 'סיים אימון' : 'הבא'}
-            {currentIndex < totalEx - 1 && <ChevronRight size={16} strokeWidth={2} />}
-            {currentIndex === totalEx - 1 && <Check size={15} strokeWidth={2.5} />}
+            {currentIndex === totalEx - 1
+              ? <Check size={17} strokeWidth={2.5} />
+              : <ChevronLeft size={18} strokeWidth={2} />
+            }
           </button>
+        )}
+
+        {/* ── Carousel (dir=ltr prevents RTL scrollLeft bugs) ── */}
+        <div
+          ref={carouselRef}
+          dir="ltr"
+          style={{
+            height: '100%',
+            display: 'flex',
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none',
+            touchAction: 'pan-x',
+          } as React.CSSProperties}
+          onScroll={(e) => {
+            const container = e.currentTarget
+            const idx = Math.round(container.scrollLeft / container.clientWidth)
+            if (idx !== currentIndex) setCurrentIndex(idx)
+          }}
+        >
+          {exercises.map((_, exIdx) => (
+            <div
+              key={exIdx}
+              dir="rtl"
+              style={{
+                flexShrink: 0,
+                width: '100%',
+                scrollSnapAlign: 'start',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                padding: '16px',
+                boxSizing: 'border-box',
+                touchAction: 'pan-y',
+              }}
+            >
+              <ExerciseSlide
+                exerciseIndex={exIdx}
+                session={session}
+                control={control}
+              />
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* Notes - below last exercise */}
       {currentIndex === totalEx - 1 && (
