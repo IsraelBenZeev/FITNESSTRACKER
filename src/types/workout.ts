@@ -32,9 +32,6 @@ export interface WorkoutPlanExercise {
   exercise_id: string
   exercise_name: string
   gif_url?: string
-  target_sets: number
-  target_reps: number | null
-  target_weight_kg: number | null
   order_index: number
   created_at: string
 }

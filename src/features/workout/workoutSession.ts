@@ -11,9 +11,6 @@ export interface SessionExercise {
   exercise_id: string
   exercise_name: string
   gif_url?: string
-  target_sets: number
-  target_reps: number | null
-  target_weight_kg: number | null
   sets: SessionSet[]
 }
 
@@ -47,6 +44,49 @@ export function hasActiveSession(): boolean {
   return localStorage.getItem(SESSION_KEY) !== null
 }
 
+export function getSessionAgeMinutes(): number {
+  const session = getSession()
+  if (!session) return 0
+  return Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 60000)
+}
+
+export function isSessionExpired(): boolean {
+  const session = getSession()
+  if (!session) return false
+  const sessionDate = new Date(session.startedAt).toDateString()
+  const today = new Date().toDateString()
+  if (sessionDate !== today) return true
+  return getSessionAgeMinutes() > 24 * 60
+}
+
+export function formatSessionAge(): string {
+  const minutes = getSessionAgeMinutes()
+  if (minutes < 1) return 'עכשיו'
+  if (minutes < 60) return `לפני ${minutes} דקות`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `לפני ${hours} שעות`
+  const session = getSession()
+  if (!session) return 'ישן'
+  const sessionDate = new Date(session.startedAt)
+  const today = new Date()
+  const diffDays = Math.floor((today.getTime() - sessionDate.getTime()) / 86400000)
+  if (diffDays === 1) return 'מאתמול'
+  return `לפני ${diffDays} ימים`
+}
+
+export function formatElapsedFromSession(): string {
+  const session = getSession()
+  if (!session) return '00:00'
+  const totalSec = Math.floor((Date.now() - new Date(session.startedAt).getTime()) / 1000)
+  const h = Math.floor(totalSec / 3600)
+  const m = Math.floor((totalSec % 3600) / 60)
+  const s = totalSec % 60
+  if (h > 0) {
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+  }
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
 export function initSession(plan: WorkoutPlan): WorkoutSessionData {
   const data: WorkoutSessionData = {
     planId: plan.id,
@@ -58,9 +98,6 @@ export function initSession(plan: WorkoutPlan): WorkoutSessionData {
       exercise_id: ex.exercise_id,
       exercise_name: ex.exercise_name,
       gif_url: ex.gif_url,
-      target_sets: ex.target_sets,
-      target_reps: ex.target_reps,
-      target_weight_kg: ex.target_weight_kg,
       sets: [{ reps: '', weight: '' }],
     })),
   }

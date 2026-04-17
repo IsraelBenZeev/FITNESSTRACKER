@@ -4,7 +4,6 @@ import { Play, Dumbbell, ChevronLeft, X, Check } from 'lucide-react'
 import { Card } from '../../shared/components/Card'
 import { useWorkoutPlans } from './useWorkoutPlans'
 import { useTodayWorkoutLog } from './useWorkoutLog'
-import { hasActiveSession } from './workoutSession'
 import type { WorkoutPlan, WorkoutLog, WorkoutSetLog } from '../../types/workout'
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
@@ -247,7 +246,6 @@ export function TodayWorkout() {
   const navigate = useNavigate()
   const { data: plans = [], isLoading: plansLoading } = useWorkoutPlans()
   const { data: todayLogs = [], isLoading: logLoading } = useTodayWorkoutLog()
-  const hasSession = hasActiveSession()
   const [selectedLog, setSelectedLog] = useState<import('../../types/workout').WorkoutLog | null>(null)
 
   const todayDay = new Date().getDay()
@@ -283,28 +281,6 @@ export function TodayWorkout() {
   return (
     <>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-
-        {/* Active session banner */}
-        {hasSession && (
-          <button
-            onClick={() => navigate('/workout/session')}
-            style={{
-              width: '100%',
-              padding: '12px 14px',
-              background: 'rgba(215,255,0,0.1)',
-              border: '1px solid rgba(215,255,0,0.25)',
-              borderRadius: '10px',
-              color: '#D7FF00',
-              fontFamily: '"Rubik", sans-serif',
-              fontSize: '13px',
-              textAlign: 'right',
-              cursor: 'pointer',
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
-            יש אימון פעיל. לחץ כדי להמשיך
-          </button>
-        )}
 
         {/* Completed workouts today */}
         {hasCompletedToday && (

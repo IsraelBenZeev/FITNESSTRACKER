@@ -4,6 +4,7 @@ import { useForm, useFieldArray, useWatch, Control, Controller } from 'react-hoo
 import { ChevronRight, ChevronLeft, Plus, Trash2, Check, X } from 'lucide-react'
 import { getSession, saveSession, clearSession, WorkoutSessionData } from './workoutSession'
 import { useLogWorkout } from './useWorkoutLog'
+import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -258,8 +259,8 @@ function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
           onClick={() => {
             const last = currentSets?.[currentSets.length - 1]
             append({
-              reps: last?.reps ?? String(ex.target_reps ?? 10),
-              weight: last?.weight ?? String(ex.target_weight_kg ?? 0),
+              reps: last?.reps ?? '',
+              weight: last?.weight ?? '',
             })
           }}
           style={{
@@ -296,6 +297,7 @@ export function WorkoutSessionPage() {
   const [currentIndex, setCurrentIndex] = useState(() => getSession()?.currentExerciseIndex ?? 0)
   const [elapsed, setElapsed] = useState(0)
   const [showCancel, setShowCancel] = useState(false)
+  const [showLeave, setShowLeave] = useState(false)
 
   const carouselRef = useRef<HTMLDivElement>(null)
 
@@ -311,6 +313,17 @@ export function WorkoutSessionPage() {
     const id = setInterval(tick, 1000)
     return () => clearInterval(id)
   }, [session])
+
+  // Intercept browser back button
+  useEffect(() => {
+    window.history.pushState(null, '', window.location.href)
+    const handler = () => {
+      window.history.pushState(null, '', window.location.href)
+      setShowLeave(true)
+    }
+    window.addEventListener('popstate', handler)
+    return () => window.removeEventListener('popstate', handler)
+  }, [])
 
   const { control, watch, handleSubmit } = useForm<FormValues>({
     defaultValues: session ? buildDefaultValues(session) : { exercises: [], notes: '' },
@@ -694,6 +707,15 @@ export function WorkoutSessionPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={showLeave}
+        message="האם לעזוב את האימון? ההתקדמות שלך שמורה — תוכל לחזור בכל עת."
+        confirmLabel="עזוב"
+        cancelLabel="המשך אימון"
+        onConfirm={() => { setShowLeave(false); navigate('/workout', { replace: true }) }}
+        onCancel={() => setShowLeave(false)}
+      />
     </div>
   )
 }

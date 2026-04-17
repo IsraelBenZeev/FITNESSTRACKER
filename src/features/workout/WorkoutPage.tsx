@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { TodayWorkout } from './TodayWorkout'
 import { PlanList } from './PlanList'
 import { WorkoutHistory } from './WorkoutHistory'
+import { ActiveWorkoutBanner } from './ActiveWorkoutBanner'
 
 type SubTab = 'today' | 'plans' | 'history'
 
@@ -60,6 +61,7 @@ export function WorkoutPage() {
 
       {/* Content */}
       <div style={{ padding: '16px', flex: 1 }}>
+        <ActiveWorkoutBanner />
         {tab === 'today' && <TodayWorkout />}
         {tab === 'plans' && <PlanList />}
         {tab === 'history' && <WorkoutHistory />}

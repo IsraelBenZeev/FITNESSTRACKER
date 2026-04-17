@@ -34,10 +34,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
       exercise_id: ex.exercise_id,
       exercise_name: ex.exercise_name,
       gif_url: ex.gif_url,
-      sets: Array.from({ length: ex.target_sets }, () => ({
-        reps: ex.target_reps != null ? String(ex.target_reps) : '',
-        weight: ex.target_weight_kg != null ? String(ex.target_weight_kg) : '',
-      })),
+      sets: [{ reps: '', weight: '' }],
     }))
   )
   const [notes, setNotes] = useState('')
@@ -54,10 +51,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
         exercise_id: ex.exercise_id,
         exercise_name: ex.exercise_name,
         gif_url: ex.gif_url,
-        sets: Array.from({ length: ex.target_sets }, () => ({
-          reps: ex.target_reps != null ? String(ex.target_reps) : '',
-          weight: ex.target_weight_kg != null ? String(ex.target_weight_kg) : '',
-        })),
+        sets: [{ reps: '', weight: '' }],
       }))
     )
     setNotes('')

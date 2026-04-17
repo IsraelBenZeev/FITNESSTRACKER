@@ -12,9 +12,6 @@ interface PlanExerciseRow {
   exercise_name: string
   gif_url?: string
   order_index: number
-  target_sets: number
-  target_reps: number | null
-  target_weight_kg: number | null
 }
 
 interface Props {
@@ -114,9 +111,6 @@ export function CreatePlanModal({ isOpen, onClose, initialPlan }: Props) {
           exercise_name: ex.exercise_name,
           gif_url: ex.gif_url,
           order_index: ex.order_index,
-          target_sets: 1,
-          target_reps: null,
-          target_weight_kg: null,
         }))
       )
       setStep('details')
@@ -162,9 +156,6 @@ export function CreatePlanModal({ isOpen, onClose, initialPlan }: Props) {
           exercise_name: ex.name_he,
           gif_url: ex.gifUrl,
           order_index: prev.length,
-          target_sets: 3,
-          target_reps: 12,
-          target_weight_kg: null,
         },
       ]
     })
@@ -179,8 +170,8 @@ export function CreatePlanModal({ isOpen, onClose, initialPlan }: Props) {
   }
 
 const exercisesPayload = exercises.map(
-    ({ exercise_id, exercise_name, gif_url, order_index, target_sets, target_reps, target_weight_kg }) => ({
-      exercise_id, exercise_name, gif_url, order_index, target_sets, target_reps, target_weight_kg,
+    ({ exercise_id, exercise_name, gif_url, order_index }) => ({
+      exercise_id, exercise_name, gif_url, order_index,
     })
   )
 

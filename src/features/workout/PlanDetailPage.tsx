@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ArrowRight, Play, Dumbbell, Calendar, Pencil } from 'lucide-react'
 import { usePlanDetail } from './usePlanDetail'
-import { initSession, hasActiveSession } from './workoutSession'
+import { initSession, hasActiveSession, clearSession, getSession, formatSessionAge } from './workoutSession'
 import { CreatePlanModal } from './CreatePlanModal'
+import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
 
 const DAY_NAMES = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -17,18 +18,23 @@ export function PlanDetailPage() {
   const navigate = useNavigate()
   const { data: plan, isLoading, error } = usePlanDetail(planId)
   const [editOpen, setEditOpen] = useState(false)
+  const [confirmNewOpen, setConfirmNewOpen] = useState(false)
 
   function handleStart() {
     if (!plan) return
-    // Warn if session already active
     if (hasActiveSession()) {
-      const ok = window.confirm('יש אימון פעיל. האם להתחיל אימון חדש?')
-      if (!ok) {
-        navigate('/workout/session')
-        return
-      }
+      setConfirmNewOpen(true)
+      return
     }
     initSession(plan)
+    navigate('/workout/session')
+  }
+
+  function handleConfirmNew() {
+    if (!plan) return
+    clearSession()
+    initSession(plan)
+    setConfirmNewOpen(false)
     navigate('/workout/session')
   }
 
@@ -253,6 +259,18 @@ export function PlanDetailPage() {
         isOpen={editOpen}
         onClose={() => setEditOpen(false)}
         initialPlan={plan}
+      />
+
+      <ConfirmDialog
+        isOpen={confirmNewOpen}
+        message={`יש אימון פעיל: "${getSession()?.planName ?? ''}" (${formatSessionAge()}). האם להתחיל אימון חדש ולבטל את הקיים?`}
+        confirmLabel="התחל חדש"
+        cancelLabel="המשך קיים"
+        onConfirm={handleConfirmNew}
+        onCancel={() => {
+          setConfirmNewOpen(false)
+          navigate('/workout/session')
+        }}
       />
     </div>
   )

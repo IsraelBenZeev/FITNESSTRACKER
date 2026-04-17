@@ -1,6 +1,8 @@
 import { Zap, BarChart2, Activity, Dumbbell } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import type { Tab } from '../../types/common'
+import { hasActiveSession } from '../../features/workout/workoutSession'
 
 const tabs: { id: Tab; label: string; path: string; Icon: React.FC<{ size: number; color: string; strokeWidth: number }> }[] = [
   { id: 'today', label: 'היום', path: '/today', Icon: Zap },
@@ -12,6 +14,17 @@ const tabs: { id: Tab; label: string; path: string; Icon: React.FC<{ size: numbe
 export function TabBar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const [hasSession, setHasSession] = useState(hasActiveSession)
+
+  useEffect(() => {
+    const check = () => setHasSession(hasActiveSession())
+    const id = setInterval(check, 2000)
+    window.addEventListener('storage', check)
+    return () => {
+      clearInterval(id)
+      window.removeEventListener('storage', check)
+    }
+  }, [])
 
   const active: Tab = pathname.startsWith('/history')
     ? 'history'
@@ -61,7 +74,24 @@ export function TabBar() {
               WebkitTapHighlightColor: 'transparent',
             }}
           >
+            <div style={{ position: 'relative', display: 'inline-flex' }}>
             <Icon size={20} color={color} strokeWidth={isActive ? 2 : 1.5} />
+            {id === 'workout' && hasSession && (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: -3,
+                  insetInlineEnd: -3,
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: '#D7FF00',
+                  border: '1.5px solid #0a0a0a',
+                  animation: 'workoutPulse 1.6s ease-in-out infinite',
+                }}
+              />
+            )}
+          </div>
             <span
               style={{
                 fontFamily: '"Rubik", sans-serif',
