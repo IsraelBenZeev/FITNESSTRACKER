@@ -12,6 +12,7 @@ export interface SessionExercise {
   exercise_name: string
   gif_url?: string
   sets: SessionSet[]
+  notes: string
 }
 
 export interface WorkoutSessionData {
@@ -99,6 +100,7 @@ export function initSession(plan: WorkoutPlan): WorkoutSessionData {
       exercise_name: ex.exercise_name,
       gif_url: ex.gif_url,
       sets: [{ reps: '', weight: '' }],
+      notes: '',
     })),
   }
   saveSession(data)

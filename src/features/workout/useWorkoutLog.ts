@@ -45,6 +45,7 @@ interface SetPayload {
   set_number: number
   reps: number | null
   weight_kg: number | null
+  notes: string | null
 }
 
 interface LogWorkoutPayload {

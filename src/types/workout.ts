@@ -54,5 +54,6 @@ export interface WorkoutSetLog {
   set_number: number
   reps: number | null
   weight_kg: number | null
+  notes: string | null
   created_at: string
 }

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { Check, Plus, Trash2 } from 'lucide-react'
+import { Check, Plus, Trash2, X } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
 import { useLogWorkout } from './useWorkoutLog'
 import type { WorkoutPlan } from '../../types/workout'
@@ -14,6 +14,7 @@ interface ExerciseEntry {
   exercise_name: string
   gif_url?: string
   sets: SetEntry[]
+  notes: string
 }
 
 interface Props {
@@ -35,9 +36,11 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
       exercise_name: ex.exercise_name,
       gif_url: ex.gif_url,
       sets: [{ reps: '', weight: '' }],
+      notes: '',
     }))
   )
   const [notes, setNotes] = useState('')
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const resetAndClose = useCallback(() => {
     setNotes('')
@@ -52,9 +55,11 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
         exercise_name: ex.exercise_name,
         gif_url: ex.gif_url,
         sets: [{ reps: '', weight: '' }],
+        notes: '',
       }))
     )
     setNotes('')
+    setShowConfirm(false)
   }, [plan])
 
   // Call handleOpen only when modal opens
@@ -99,6 +104,12 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
     )
   }
 
+  function updateExerciseNotes(exIdx: number, val: string) {
+    setEntries((prev) =>
+      prev.map((e, i) => i !== exIdx ? e : { ...e, notes: val })
+    )
+  }
+
   function handleFinish() {
     const sets: {
       exercise_id: string
@@ -106,9 +117,11 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
       set_number: number
       reps: number | null
       weight_kg: number | null
+      notes: string | null
     }[] = []
 
     for (const ex of entries) {
+      const exNotes = ex.notes || null
       ex.sets.forEach((s, idx) => {
         sets.push({
           exercise_id: ex.exercise_id,
@@ -116,6 +129,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
           set_number: idx + 1,
           reps: s.reps ? Number(s.reps) : null,
           weight_kg: s.weight ? Number(s.weight) : null,
+          notes: exNotes,
         })
       })
     }
@@ -257,6 +271,29 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
               <Plus size={14} strokeWidth={2} />
               הוסף סט
             </button>
+
+            {/* Exercise notes */}
+            <textarea
+              value={ex.notes}
+              onChange={(e) => updateExerciseNotes(exIdx, e.target.value)}
+              placeholder="הערות לתרגיל..."
+              rows={2}
+              style={{
+                width: '100%',
+                padding: '10px 12px',
+                background: '#1a1a1a',
+                border: '1px solid #2a2a2a',
+                borderRadius: '8px',
+                color: '#888',
+                fontFamily: '"Rubik", sans-serif',
+                fontSize: '13px',
+                resize: 'none',
+                outline: 'none',
+                boxSizing: 'border-box',
+                textAlign: 'right',
+                direction: 'rtl',
+              }}
+            />
           </div>
         ))}
 
@@ -289,7 +326,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
         </div>
 
         <button
-          onClick={handleFinish}
+          onClick={() => setShowConfirm(true)}
           disabled={isPending}
           style={{
             width: '100%',
@@ -315,6 +352,90 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
           {isPending ? 'שומר...' : 'סיים אימון'}
         </button>
       </div>
+
+      {/* Finish confirmation overlay */}
+      {showConfirm && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 300,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px',
+        }}>
+          <div style={{
+            background: '#111',
+            borderRadius: '16px',
+            borderTop: '2px solid #D7FF00',
+            padding: '24px',
+            width: '100%',
+            maxWidth: '320px',
+            display: 'flex', flexDirection: 'column', gap: '16px',
+            textAlign: 'right',
+            position: 'relative',
+          }}>
+            <button
+              onClick={() => setShowConfirm(false)}
+              style={{
+                position: 'absolute', top: 12, left: 12,
+                width: 30, height: 30,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'none', border: 'none',
+                color: '#444', cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <X size={18} strokeWidth={2} />
+            </button>
+
+            <span style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontSize: '21px', fontWeight: 600, color: '#f0f0f0',
+            }}>
+              האם לסיים את האימון?
+            </span>
+            <p style={{
+              fontFamily: '"Rubik", sans-serif', fontSize: '13px',
+              color: '#555', margin: 0, lineHeight: 1.5,
+            }}>
+              האימון יישמר בהיסטוריה שלך
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                onClick={() => { setShowConfirm(false); handleFinish() }}
+                disabled={isPending}
+                style={{
+                  padding: '14px',
+                  background: '#D7FF00', border: 'none', borderRadius: '12px',
+                  color: '#0a0a0a',
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontSize: '17px', fontWeight: 700,
+                  cursor: isPending ? 'not-allowed' : 'pointer',
+                  opacity: isPending ? 0.7 : 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                <Check size={16} strokeWidth={2.5} />
+                {isPending ? 'שומר...' : 'כן, שמור'}
+              </button>
+
+              <button
+                onClick={() => setShowConfirm(false)}
+                style={{
+                  padding: '12px',
+                  background: 'none', border: '1px solid #222', borderRadius: '12px',
+                  color: '#555',
+                  fontFamily: '"Rubik", sans-serif', fontSize: '14px',
+                  cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                בטל
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Modal>
   )
 }

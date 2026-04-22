@@ -15,6 +15,7 @@ interface SetValues {
 
 interface ExerciseValues {
   sets: SetValues[]
+  notes: string
 }
 
 interface FormValues {
@@ -32,7 +33,7 @@ function formatElapsed(seconds: number): string {
 
 function buildDefaultValues(session: WorkoutSessionData): FormValues {
   return {
-    exercises: session.exercises.map((ex) => ({ sets: ex.sets })),
+    exercises: session.exercises.map((ex) => ({ sets: ex.sets, notes: ex.notes ?? '' })),
     notes: session.notes,
   }
 }
@@ -290,6 +291,34 @@ function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
           הוסף סט
         </button>
       </div>
+
+      {/* Exercise notes */}
+      <Controller
+        control={control}
+        name={`exercises.${exerciseIndex}.notes`}
+        render={({ field }) => (
+          <textarea
+            {...field}
+            placeholder="הערות לתרגיל..."
+            rows={2}
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              background: '#111',
+              border: '1px solid #1a1a1a',
+              borderRadius: '10px',
+              color: '#888',
+              fontFamily: '"Rubik", sans-serif',
+              fontSize: '13px',
+              resize: 'none',
+              outline: 'none',
+              boxSizing: 'border-box',
+              textAlign: 'right',
+              direction: 'rtl',
+            }}
+          />
+        )}
+      />
     </div>
   )
 }
@@ -305,6 +334,7 @@ export function WorkoutSessionPage() {
   const [elapsed, setElapsed] = useState(0)
   const [showCancel, setShowCancel] = useState(false)
   const [showLeave, setShowLeave] = useState(false)
+  const [showFinishModal, setShowFinishModal] = useState(false)
 
   const carouselRef = useRef<HTMLDivElement>(null)
 
@@ -353,6 +383,7 @@ export function WorkoutSessionPage() {
             reps: s.reps ?? '',
             weight: s.weight ?? '',
           })),
+          notes: formValues.exercises[i]?.notes ?? '',
         })),
       }
       saveSession(updated)
@@ -379,10 +410,13 @@ export function WorkoutSessionPage() {
       set_number: number
       reps: number | null
       weight_kg: number | null
+      notes: string | null
     }[] = []
 
     session.exercises.forEach((ex, i) => {
-      const exSets = values.exercises[i]?.sets ?? []
+      const exForm = values.exercises[i]
+      const exNotes = exForm?.notes || null
+      const exSets = exForm?.sets ?? []
       exSets.forEach((s, j) => {
         const reps = s.reps ? Number(s.reps) : null
         const weight = s.weight ? Number(s.weight) : null
@@ -393,6 +427,7 @@ export function WorkoutSessionPage() {
             set_number: j + 1,
             reps,
             weight_kg: weight,
+            notes: exNotes,
           })
         }
       })
@@ -471,7 +506,7 @@ export function WorkoutSessionPage() {
 
         <button
           type="button"
-          onClick={onFinish}
+          onClick={() => setShowFinishModal(true)}
           disabled={isSaving}
           style={{
             padding: '8px 14px',
@@ -571,7 +606,7 @@ export function WorkoutSessionPage() {
         {totalEx > 1 && (
           <button
             type="button"
-            onClick={() => currentIndex < totalEx - 1 ? goTo(currentIndex + 1) : onFinish()}
+            onClick={() => currentIndex < totalEx - 1 ? goTo(currentIndex + 1) : setShowFinishModal(true)}
             style={{
               position: 'absolute',
               left: 8,
@@ -742,6 +777,117 @@ export function WorkoutSessionPage() {
         onConfirm={() => { setShowLeave(false); navigate('/workout', { replace: true }) }}
         onCancel={() => setShowLeave(false)}
       />
+
+      {/* ── Finish confirmation modal ── */}
+      {showFinishModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 200,
+          background: 'rgba(0,0,0,0.85)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px',
+        }}>
+          <div style={{
+            background: '#111',
+            borderRadius: '16px',
+            borderTop: '2px solid #D7FF00',
+            padding: '24px',
+            width: '100%',
+            maxWidth: '320px',
+            display: 'flex', flexDirection: 'column', gap: '16px',
+            textAlign: 'right',
+            position: 'relative',
+          }}>
+            {/* X button */}
+            <button
+              type="button"
+              onClick={() => setShowFinishModal(false)}
+              style={{
+                position: 'absolute', top: 12, left: 12,
+                width: 30, height: 30,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'none', border: 'none',
+                color: '#444', cursor: 'pointer',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <X size={18} strokeWidth={2} />
+            </button>
+
+            <span style={{
+              fontFamily: '"Barlow Condensed", sans-serif',
+              fontSize: '21px', fontWeight: 600, color: '#f0f0f0',
+            }}>
+              האם לסיים את האימון?
+            </span>
+            <p style={{
+              fontFamily: '"Rubik", sans-serif', fontSize: '13px',
+              color: '#555', margin: 0, lineHeight: 1.5,
+            }}>
+              האימון יישמר בהיסטוריה שלך
+            </p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button
+                type="button"
+                onClick={() => { setShowFinishModal(false); onFinish() }}
+                disabled={isSaving}
+                style={{
+                  padding: '14px',
+                  background: '#D7FF00',
+                  border: 'none',
+                  borderRadius: '12px',
+                  color: '#0a0a0a',
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontSize: '17px', fontWeight: 700,
+                  cursor: isSaving ? 'not-allowed' : 'pointer',
+                  opacity: isSaving ? 0.7 : 1,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                <Check size={16} strokeWidth={2.5} />
+                {isSaving ? 'שומר...' : 'כן, שמור'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { clearSession(); navigate('/workout', { replace: true }) }}
+                style={{
+                  padding: '14px',
+                  background: 'rgba(255,71,87,0.08)',
+                  border: '1px solid rgba(255,71,87,0.25)',
+                  borderRadius: '12px',
+                  color: '#ff4757',
+                  fontFamily: '"Barlow Condensed", sans-serif',
+                  fontSize: '17px', fontWeight: 700,
+                  cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                צא ללא שמירה
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowFinishModal(false)}
+                style={{
+                  padding: '12px',
+                  background: 'none',
+                  border: '1px solid #222',
+                  borderRadius: '12px',
+                  color: '#555',
+                  fontFamily: '"Rubik", sans-serif',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  WebkitTapHighlightColor: 'transparent',
+                }}
+              >
+                בטל
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

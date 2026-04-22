@@ -112,6 +112,11 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
                   </div>
                 ))}
               </div>
+              {sets![0]?.notes && (
+                <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#555', textAlign: 'right', margin: '4px 0 0', lineHeight: 1.5 }}>
+                  {sets![0].notes}
+                </p>
+              )}
             </div>
           ))}
           {log.notes && (

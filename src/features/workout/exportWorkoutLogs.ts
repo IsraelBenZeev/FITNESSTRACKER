@@ -12,10 +12,15 @@ import {
 
 export async function copyWorkoutLogsAsJson(logs: WorkoutLog[]): Promise<void> {
   const payload = logs.map((log) => {
-    const exerciseMap = new Map<string, { set_number: number; reps: number | null; weight_kg: number | null }[]>()
+    const exerciseMap = new Map<string, {
+      notes: string | null
+      sets: { set_number: number; reps: number | null; weight_kg: number | null }[]
+    }>()
     for (const s of log.set_logs ?? []) {
-      if (!exerciseMap.has(s.exercise_name)) exerciseMap.set(s.exercise_name, [])
-      exerciseMap.get(s.exercise_name)!.push({
+      if (!exerciseMap.has(s.exercise_name)) {
+        exerciseMap.set(s.exercise_name, { notes: s.notes ?? null, sets: [] })
+      }
+      exerciseMap.get(s.exercise_name)!.sets.push({
         set_number: s.set_number,
         reps: s.reps,
         weight_kg: s.weight_kg,
@@ -24,7 +29,11 @@ export async function copyWorkoutLogsAsJson(logs: WorkoutLog[]): Promise<void> {
     return {
       date: log.date,
       notes: log.notes ?? undefined,
-      exercises: [...exerciseMap.entries()].map(([name, sets]) => ({ name, sets })),
+      exercises: [...exerciseMap.entries()].map(([name, data]) => ({
+        name,
+        ...(data.notes ? { notes: data.notes } : {}),
+        sets: data.sets,
+      })),
     }
   })
   await navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
@@ -146,6 +155,21 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
         doc.setLineWidth(0.1)
         doc.line(M, y + 6, RIGHT, y + 6)
         y += 7
+      }
+
+      // Exercise notes
+      const exNotes = sets?.[0]?.notes
+      if (exNotes) {
+        if (y + 6 > PAGE_BOTTOM) {
+          doc.addPage()
+          drawPage(false)
+          y = 30
+        }
+        doc.setFont('NotoSansHebrew', 'normal')
+        doc.setFontSize(7)
+        setTextColor(doc, '#444444')
+        doc.text(rtl(exNotes), RIGHT - 4, y + 4, { align: 'right' })
+        y += 6
       }
     }
 
