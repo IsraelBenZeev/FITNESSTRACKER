@@ -13,6 +13,7 @@ interface ExerciseEntry {
   exercise_id: string
   exercise_name: string
   gif_url?: string
+  is_bodyweight: boolean
   sets: SetEntry[]
   notes: string
 }
@@ -35,6 +36,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
       exercise_id: ex.exercise_id,
       exercise_name: ex.exercise_name,
       gif_url: ex.gif_url,
+      is_bodyweight: ex.is_bodyweight,
       sets: [{ reps: '', weight: '' }],
       notes: '',
     }))
@@ -54,6 +56,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
         exercise_id: ex.exercise_id,
         exercise_name: ex.exercise_name,
         gif_url: ex.gif_url,
+        is_bodyweight: ex.is_bodyweight,
         sets: [{ reps: '', weight: '' }],
         notes: '',
       }))
@@ -117,6 +120,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
       set_number: number
       reps: number | null
       weight_kg: number | null
+      is_bodyweight: boolean
       notes: string | null
     }[] = []
 
@@ -129,6 +133,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
           set_number: idx + 1,
           reps: s.reps ? Number(s.reps) : null,
           weight_kg: s.weight ? Number(s.weight) : null,
+          is_bodyweight: ex.is_bodyweight,
           notes: exNotes,
         })
       })
