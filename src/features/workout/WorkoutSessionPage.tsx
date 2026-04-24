@@ -221,21 +221,30 @@ function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
               )}
             />
 
-            {/* Weight stepper */}
-            <Controller
-              control={control}
-              name={`exercises.${exerciseIndex}.sets.${setIdx}.weight`}
-              render={({ field: f }) => (
-                <StepperInput
-                  value={f.value}
-                  onChange={f.onChange}
-                  step={1}
-                  min={0}
-                  decimals={true}
-                  label='ק"ג'
-                />
-              )}
-            />
+            {/* Weight stepper / bodyweight badge */}
+            {ex.is_bodyweight ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '10px', color: '#444' }}>משקל</span>
+                <span className="text-xs font-body px-3 py-1.5 rounded-full bg-lime-dim text-lime border border-lime/20 whitespace-nowrap">
+                  משקל גוף
+                </span>
+              </div>
+            ) : (
+              <Controller
+                control={control}
+                name={`exercises.${exerciseIndex}.sets.${setIdx}.weight`}
+                render={({ field: f }) => (
+                  <StepperInput
+                    value={f.value}
+                    onChange={f.onChange}
+                    step={1}
+                    min={0}
+                    decimals={true}
+                    label='ק"ג'
+                  />
+                )}
+              />
+            )}
 
             {/* Delete */}
             <button
@@ -410,6 +419,7 @@ export function WorkoutSessionPage() {
       set_number: number
       reps: number | null
       weight_kg: number | null
+      is_bodyweight: boolean
       notes: string | null
     }[] = []
 
@@ -419,14 +429,15 @@ export function WorkoutSessionPage() {
       const exSets = exForm?.sets ?? []
       exSets.forEach((s, j) => {
         const reps = s.reps ? Number(s.reps) : null
-        const weight = s.weight ? Number(s.weight) : null
-        if (reps !== null || weight !== null) {
+        const weight = ex.is_bodyweight ? null : (s.weight ? Number(s.weight) : null)
+        if (reps !== null || weight !== null || ex.is_bodyweight) {
           sets.push({
             exercise_id: ex.exercise_id,
             exercise_name: ex.exercise_name,
             set_number: j + 1,
             reps,
             weight_kg: weight,
+            is_bodyweight: ex.is_bodyweight ?? false,
             notes: exNotes,
           })
         }

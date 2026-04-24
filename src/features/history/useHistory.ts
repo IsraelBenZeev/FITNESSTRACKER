@@ -102,16 +102,18 @@ interface UseDayMealsResult {
   loading: boolean
 }
 
-export async function fetchNutritionForExport(sinceDate: string | null): Promise<NutritionLog[]> {
+export async function fetchNutritionForExport(
+  sinceDate: string | null,
+  untilDate?: string | null,
+): Promise<NutritionLog[]> {
   let query = supabase
     .from('nutrition_log')
     .select('*')
     .order('date', { ascending: true })
     .order('time', { ascending: true })
 
-  if (sinceDate != null) {
-    query = query.gte('date', sinceDate)
-  }
+  if (sinceDate != null) query = query.gte('date', sinceDate)
+  if (untilDate != null) query = query.lte('date', untilDate)
 
   const { data, error: err } = await query
   if (err) throw new Error(err.message)

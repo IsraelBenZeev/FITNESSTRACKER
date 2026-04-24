@@ -59,12 +59,12 @@ export function HistoryPage() {
       if (exportTarget === 'json') {
         // Start clipboard write synchronously (within the gesture) and pass the
         // fetch as a Promise — iOS Safari keeps gesture trust alive this way.
-        await copyNutritionAsJsonFromPromise(fetchNutritionForExport(range.sinceDate))
+        await copyNutritionAsJsonFromPromise(fetchNutritionForExport(range.sinceDate, range.untilDate))
         setCopied(true)
         showToast('הועתק בהצלחה')
         setTimeout(() => setCopied(false), 2800)
       } else if (exportTarget === 'pdf') {
-        const logs = await fetchNutritionForExport(range.sinceDate)
+        const logs = await fetchNutritionForExport(range.sinceDate, range.untilDate)
         if (logs.length === 0) { showToast('אין נתונים בטווח זה'); return }
         await downloadNutritionPdf(logs, range.label)
         showToast('PDF הורד בהצלחה')

@@ -271,9 +271,16 @@ export function PlanDetailPage() {
               )}
 
               {/* Info */}
-              <span style={{ flex: 1, fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#f0f0f0', textAlign: 'right' }}>
-                {ex.exercise_name}
-              </span>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#f0f0f0', textAlign: 'right' }}>
+                  {ex.exercise_name}
+                </span>
+                {ex.is_bodyweight && (
+                  <span className="text-xs font-body px-2 py-0.5 rounded-full bg-lime-dim text-lime border border-lime/20">
+                    משקל גוף
+                  </span>
+                )}
+              </div>
             </div>
           ))}
         </div>
