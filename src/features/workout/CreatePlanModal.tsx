@@ -1,5 +1,21 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, ChevronLeft } from 'lucide-react'
+import { Plus, ChevronLeft, GripVertical } from 'lucide-react'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { Modal } from '../../shared/components/Modal'
 import { ExercisePickerSheet } from './ExercisePickerSheet'
 import { useAddPlan } from './useAddPlan'
@@ -18,6 +34,62 @@ interface Props {
   isOpen: boolean
   onClose: () => void
   initialPlan?: WorkoutPlan
+}
+
+interface SortableRowProps {
+  ex: PlanExerciseRow
+  onToggleBodyweight: (id: string) => void
+}
+
+function SortableExerciseRow({ ex, onToggleBodyweight }: SortableRowProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: ex.exercise_id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2 bg-surface2 rounded-xl px-3 py-3 border border-[#222]"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="w-6 h-7 flex items-center justify-center text-muted touch-none flex-shrink-0 cursor-grab active:cursor-grabbing"
+        tabIndex={-1}
+        type="button"
+      >
+        <GripVertical size={16} strokeWidth={2} />
+      </button>
+      <span className="text-sm font-body text-white flex-1 text-right">{ex.exercise_name}</span>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <span className={`text-xs font-body ${ex.is_bodyweight ? 'text-lime' : 'text-muted'}`}>
+          משקל גוף
+        </span>
+        <button
+          dir="ltr"
+          type="button"
+          onClick={() => onToggleBodyweight(ex.exercise_id)}
+          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${ex.is_bodyweight ? 'bg-lime' : 'bg-[#333]'}`}
+        >
+          <span
+            className={`inline-block h-3.5 w-3.5 rounded-full bg-bg transition-transform ${ex.is_bodyweight ? 'translate-x-[18px]' : 'translate-x-[2px]'}`}
+          />
+        </button>
+      </div>
+    </div>
+  )
 }
 
 const DAYS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
@@ -141,6 +213,21 @@ export function CreatePlanModal({ isOpen, onClose, initialPlan }: Props) {
         .filter((e) => e.exercise_id !== id)
         .map((e, i) => ({ ...e, order_index: i }))
     )
+  }
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+  )
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    setExercises((prev) => {
+      const oldIdx = prev.findIndex((e) => e.exercise_id === active.id)
+      const newIdx = prev.findIndex((e) => e.exercise_id === over.id)
+      return arrayMove(prev, oldIdx, newIdx).map((e, i) => ({ ...e, order_index: i }))
+    })
   }
 
 const exercisesPayload = exercises.map(
@@ -380,30 +467,22 @@ const exercisesPayload = exercises.map(
 
             {/* Exercise list with bodyweight toggles */}
             {exercises.length > 0 && (
-              <div className="flex flex-col gap-2 overflow-y-auto max-h-[280px]">
-                {exercises.map((ex) => (
-                  <div
-                    key={ex.exercise_id}
-                    className="flex items-center justify-between bg-surface2 rounded-xl px-4 py-3 border border-[#222]"
-                  >
-                    <span className="text-sm font-body text-white flex-1 text-right">{ex.exercise_name}</span>
-                    <div className="flex items-center gap-2 mr-3 flex-shrink-0">
-                      <span className={`text-xs font-body ${ex.is_bodyweight ? 'text-lime' : 'text-muted'}`}>
-                        משקל גוף
-                      </span>
-                      <button
-                        dir="ltr"
-                        onClick={() => toggleBodyweight(ex.exercise_id)}
-                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${ex.is_bodyweight ? 'bg-lime' : 'bg-[#333]'}`}
-                      >
-                        <span
-                          className={`inline-block h-3.5 w-3.5 rounded-full bg-bg transition-transform ${ex.is_bodyweight ? 'translate-x-[18px]' : 'translate-x-[2px]'}`}
-                        />
-                      </button>
-                    </div>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext
+                  items={exercises.map((e) => e.exercise_id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="flex flex-col gap-2 overflow-y-auto max-h-[280px]">
+                    {exercises.map((ex) => (
+                      <SortableExerciseRow
+                        key={ex.exercise_id}
+                        ex={ex}
+                        onToggleBodyweight={toggleBodyweight}
+                      />
+                    ))}
                   </div>
-                ))}
-              </div>
+                </SortableContext>
+              </DndContext>
             )}
 
             <button

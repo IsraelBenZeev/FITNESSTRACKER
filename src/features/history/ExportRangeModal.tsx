@@ -18,10 +18,16 @@ function daysAgo(n: number): string {
   return d.toISOString().slice(0, 10)
 }
 
+function thisWeekSunday(): string {
+  const d = new Date()
+  d.setDate(d.getDate() - d.getDay()) // d.getDay(): 0=ראשון … 6=שבת
+  return d.toISOString().slice(0, 10)
+}
+
 const RANGES: ExportRange[] = [
   { label: 'היום',             sinceDate: getTodayStr(), untilDate: getTodayStr() },
   { label: 'אתמול',            sinceDate: daysAgo(1),   untilDate: daysAgo(1) },
-  { label: 'שבוע אחרון',       sinceDate: daysAgo(7) },
+  { label: 'שבוע הנוכחי',      sinceDate: thisWeekSunday() },
   { label: 'חודש אחרון',       sinceDate: daysAgo(30) },
   { label: '3 חודשים אחרונים', sinceDate: daysAgo(90) },
   { label: '6 חודשים אחרונים', sinceDate: daysAgo(180) },

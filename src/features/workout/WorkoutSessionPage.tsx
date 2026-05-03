@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, useFieldArray, useWatch, Control, Controller } from 'react-hook-form'
-import { ChevronRight, ChevronLeft, Plus, Trash2, Check, X } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Plus, Trash2, Check, X, Minimize2 } from 'lucide-react'
 import { getSession, saveSession, clearSession, WorkoutSessionData } from './workoutSession'
 import { useLogWorkout } from './useWorkoutLog'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
@@ -341,7 +341,6 @@ export function WorkoutSessionPage() {
   const [session] = useState<WorkoutSessionData | null>(() => getSession())
   const [currentIndex, setCurrentIndex] = useState(() => getSession()?.currentExerciseIndex ?? 0)
   const [elapsed, setElapsed] = useState(0)
-  const [showCancel, setShowCancel] = useState(false)
   const [showLeave, setShowLeave] = useState(false)
   const [showFinishModal, setShowFinishModal] = useState(false)
 
@@ -488,7 +487,7 @@ export function WorkoutSessionPage() {
       }}>
         <button
           type="button"
-          onClick={() => setShowCancel(true)}
+          onClick={() => navigate('/workout', { replace: true })}
           style={{
             width: 36, height: 36,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -497,7 +496,7 @@ export function WorkoutSessionPage() {
             WebkitTapHighlightColor: 'transparent',
           }}
         >
-          <X size={16} strokeWidth={2} />
+          <Minimize2 size={16} strokeWidth={2} />
         </button>
 
         <div style={{ textAlign: 'center' }}>
@@ -717,66 +716,6 @@ export function WorkoutSessionPage() {
               />
             )}
           />
-        </div>
-      )}
-
-      {/* ── Cancel dialog ── */}
-      {showCancel && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 200,
-          background: 'rgba(0,0,0,0.8)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '20px',
-        }}>
-          <div style={{
-            background: '#111',
-            borderRadius: '16px',
-            borderTop: '2px solid #ff4757',
-            padding: '24px',
-            width: '100%',
-            maxWidth: '320px',
-            display: 'flex', flexDirection: 'column', gap: '16px',
-            textAlign: 'right',
-          }}>
-            <span style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '20px', fontWeight: 600, color: '#f0f0f0',
-            }}>
-              לבטל את האימון?
-            </span>
-            <p style={{
-              fontFamily: '"Rubik", sans-serif', fontSize: '13px',
-              color: '#666', margin: 0, lineHeight: 1.5,
-            }}>
-              ההתקדמות לא תישמר. האם אתה בטוח?
-            </p>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={() => setShowCancel(false)}
-                style={{
-                  flex: 1, padding: '12px',
-                  background: '#1a1a1a', border: '1px solid #222', borderRadius: '10px',
-                  color: '#888', fontFamily: '"Rubik", sans-serif', fontSize: '14px',
-                  cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
-                }}
-              >
-                המשך
-              </button>
-              <button
-                onClick={() => { clearSession(); navigate('/workout', { replace: true }) }}
-                style={{
-                  flex: 1, padding: '12px',
-                  background: 'rgba(255,71,87,0.1)', border: '1px solid rgba(255,71,87,0.3)',
-                  borderRadius: '10px',
-                  color: '#ff4757', fontFamily: '"Barlow Condensed", sans-serif',
-                  fontSize: '16px', fontWeight: 700,
-                  cursor: 'pointer', WebkitTapHighlightColor: 'transparent',
-                }}
-              >
-                בטל אימון
-              </button>
-            </div>
-          </div>
         </div>
       )}
 
