@@ -11,6 +11,7 @@ export interface SessionExercise {
   exercise_id: string
   exercise_name: string
   gif_url?: string
+  is_bodyweight: boolean
   sets: SessionSet[]
   notes: string
 }
@@ -99,6 +100,7 @@ export function initSession(plan: WorkoutPlan): WorkoutSessionData {
       exercise_id: ex.exercise_id,
       exercise_name: ex.exercise_name,
       gif_url: ex.gif_url,
+      is_bodyweight: ex.is_bodyweight ?? false,
       sets: [{ reps: '', weight: '' }],
       notes: '',
     })),

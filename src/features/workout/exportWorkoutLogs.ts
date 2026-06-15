@@ -10,7 +10,7 @@ import {
 
 // ─── JSON copy ────────────────────────────────────────────────────────────────
 
-export async function copyWorkoutLogsAsJson(logs: WorkoutLog[]): Promise<void> {
+function buildWorkoutJsonText(logs: WorkoutLog[]): string {
   const payload = logs.map((log) => {
     const exerciseMap = new Map<string, {
       notes: string | null
@@ -36,7 +36,29 @@ export async function copyWorkoutLogsAsJson(logs: WorkoutLog[]): Promise<void> {
       })),
     }
   })
-  await navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+  return JSON.stringify(payload, null, 2)
+}
+
+export async function copyWorkoutLogsAsJson(logs: WorkoutLog[]): Promise<void> {
+  await navigator.clipboard.writeText(buildWorkoutJsonText(logs))
+}
+
+// iOS Safari loses gesture trust after any network await — pass a Promise<Blob>
+// to ClipboardItem so iOS waits for the data while keeping the gesture alive.
+export async function copyWorkoutLogsAsJsonFromPromise(
+  logsPromise: Promise<WorkoutLog[]>,
+): Promise<void> {
+  if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
+    const blobPromise = logsPromise.then((logs) => {
+      if (logs.length === 0) throw new Error('empty')
+      return new Blob([buildWorkoutJsonText(logs)], { type: 'text/plain' })
+    })
+    await navigator.clipboard.write([new ClipboardItem({ 'text/plain': blobPromise })])
+  } else {
+    const logs = await logsPromise
+    if (logs.length === 0) throw new Error('empty')
+    await navigator.clipboard.writeText(buildWorkoutJsonText(logs))
+  }
 }
 
 // ─── PDF export ───────────────────────────────────────────────────────────────

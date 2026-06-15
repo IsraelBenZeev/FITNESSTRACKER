@@ -33,6 +33,7 @@ export interface WorkoutPlanExercise {
   exercise_name: string
   gif_url?: string
   order_index: number
+  is_bodyweight: boolean
   created_at: string
 }
 
@@ -54,6 +55,7 @@ export interface WorkoutSetLog {
   set_number: number
   reps: number | null
   weight_kg: number | null
+  is_bodyweight: boolean
   notes: string | null
   created_at: string
 }

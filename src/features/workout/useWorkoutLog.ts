@@ -45,6 +45,7 @@ interface SetPayload {
   set_number: number
   reps: number | null
   weight_kg: number | null
+  is_bodyweight: boolean
   notes: string | null
 }
 
@@ -65,7 +66,7 @@ export function useWorkoutHistory() {
     queryFn: async (): Promise<WorkoutLog[]> => {
       const { data: logs, error } = await supabase
         .from('workout_logs')
-        .select('*')
+        .select('*, workout_plans(id, name)')
         .order('date', { ascending: false })
         .limit(30)
       if (error) throw new Error(error.message)
@@ -80,14 +81,53 @@ export function useWorkoutHistory() {
         .order('set_number', { ascending: true })
       if (setErr) throw new Error(setErr.message)
 
-      return (logs ?? []).map((log) => ({
-        ...log,
-        set_logs: (setLogs ?? []).filter(
-          (s: WorkoutSetLog) => s.workout_log_id === log.id
-        ),
-      })) as WorkoutLog[]
+      return (logs ?? []).map((log) => {
+        const { workout_plans, ...rest } = log as typeof log & { workout_plans?: { id: string; name: string } | null }
+        return {
+          ...rest,
+          plan: workout_plans ?? undefined,
+          set_logs: (setLogs ?? []).filter(
+            (s: WorkoutSetLog) => s.workout_log_id === log.id
+          ),
+        }
+      }) as WorkoutLog[]
     },
   })
+}
+
+export async function fetchWorkoutLogsForExport(
+  sinceDate: string | null,
+  untilDate?: string | null,
+): Promise<WorkoutLog[]> {
+  let query = supabase
+    .from('workout_logs')
+    .select('*, workout_plans(id, name)')
+    .order('date', { ascending: false })
+
+  if (sinceDate != null) query = query.gte('date', sinceDate)
+  if (untilDate != null) query = query.lte('date', untilDate)
+
+  const { data: logs, error } = await query
+  if (error) throw new Error(error.message)
+
+  const logIds = (logs ?? []).map((l) => l.id)
+  if (logIds.length === 0) return []
+
+  const { data: setLogs, error: setErr } = await supabase
+    .from('workout_set_logs')
+    .select('*')
+    .in('workout_log_id', logIds)
+    .order('set_number', { ascending: true })
+  if (setErr) throw new Error(setErr.message)
+
+  return (logs ?? []).map((log) => {
+    const { workout_plans, ...rest } = log as typeof log & { workout_plans?: { id: string; name: string } | null }
+    return {
+      ...rest,
+      plan: workout_plans ?? undefined,
+      set_logs: (setLogs ?? []).filter((s: WorkoutSetLog) => s.workout_log_id === log.id),
+    }
+  }) as WorkoutLog[]
 }
 
 export function useDeleteWorkoutLog() {

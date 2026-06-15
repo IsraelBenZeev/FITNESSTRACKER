@@ -1,10 +1,12 @@
 import { ChevronDown, ChevronUp, Dumbbell, Copy, FileDown, Check, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { Card } from '../../shared/components/Card'
-import { useWorkoutHistory, useDeleteWorkoutLog } from './useWorkoutLog'
+import { useWorkoutHistory, useDeleteWorkoutLog, fetchWorkoutLogsForExport } from './useWorkoutLog'
 import { useToast } from '../../shared/context/ToastContext'
-import { copyWorkoutLogsAsJson, downloadWorkoutLogsPdf } from './exportWorkoutLogs'
+import { copyWorkoutLogsAsJsonFromPromise, downloadWorkoutLogsPdf } from './exportWorkoutLogs'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { ExportRangeModal } from '../history/ExportRangeModal'
+import type { ExportRange } from '../history/ExportRangeModal'
 import type { WorkoutLog } from '../../types/workout'
 
 function formatDate(dateStr: string): string {
@@ -56,6 +58,11 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
               : <ChevronDown size={16} color="#555" />}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
+            {log.plan?.name && (
+              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '15px', fontWeight: 600, color: '#f0f0f0' }}>
+                {log.plan.name}
+              </span>
+            )}
             <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '17px', fontWeight: 600, color: '#D7FF00' }}>
               {formatDate(log.date)}
             </span>
@@ -107,7 +114,10 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
                       סט {s.set_number}
                     </span>
                     <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '15px', color: '#f0f0f0' }}>
-                      {s.reps ?? '—'} × {s.weight_kg != null ? `${s.weight_kg}ק"ג` : '—'}
+                      {s.reps ?? '—'} ×{' '}
+                      {s.is_bodyweight
+                        ? <span className="text-xs font-body px-2 py-0.5 rounded-full bg-lime-dim text-lime">משקל גוף</span>
+                        : s.weight_kg != null ? `${s.weight_kg}ק"ג` : '—'}
                     </span>
                   </div>
                 ))}
@@ -142,23 +152,26 @@ export function WorkoutHistory() {
   const { mutate: deleteLog } = useDeleteWorkoutLog()
   const { showSuccess } = useToast()
   const [copied, setCopied] = useState(false)
+  const [exportTarget, setExportTarget] = useState<'json' | 'pdf' | null>(null)
 
-  async function handleCopyJson() {
-    if (logs.length === 0) return
-    await copyWorkoutLogsAsJson(logs)
-    setCopied(true)
-    showSuccess('הועתק בהצלחה')
-    setTimeout(() => setCopied(false), 2800)
-  }
-
-  async function handleDownloadPdf() {
-    if (logs.length === 0) return
+  async function handleExportSelect(range: ExportRange) {
     try {
-      await downloadWorkoutLogsPdf(logs)
-      showSuccess('PDF הורד בהצלחה')
-    } catch (err) {
-      console.error('[PDF export]', err)
-      alert(`שגיאה בייצוא PDF:\n${err instanceof Error ? err.message : String(err)}`)
+      if (exportTarget === 'json') {
+        await copyWorkoutLogsAsJsonFromPromise(
+          fetchWorkoutLogsForExport(range.sinceDate, range.untilDate)
+        )
+        setCopied(true)
+        showSuccess('הועתק בהצלחה')
+        setTimeout(() => setCopied(false), 2800)
+      } else if (exportTarget === 'pdf') {
+        const filtered = await fetchWorkoutLogsForExport(range.sinceDate, range.untilDate)
+        if (filtered.length === 0) { showSuccess('אין נתונים בטווח זה'); return }
+        await downloadWorkoutLogsPdf(filtered)
+        showSuccess('PDF הורד בהצלחה')
+      }
+    } catch (e) {
+      if (e instanceof Error && e.message === 'empty') showSuccess('אין נתונים בטווח זה')
+      else showSuccess('שגיאה בייצוא הנתונים')
     }
   }
 
@@ -182,58 +195,67 @@ export function WorkoutHistory() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        <button
-          onClick={handleCopyJson}
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            padding: '10px',
-            background: copied ? 'rgba(74,222,128,0.08)' : '#1a1a1a',
-            border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid #222',
-            borderRadius: '10px',
-            color: copied ? '#4ade80' : '#666',
-            fontFamily: '"Rubik", sans-serif',
-            fontSize: '12px',
-            cursor: 'pointer',
-            transition: 'all 0.2s',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
-          {copied ? <Check size={14} strokeWidth={2.5} /> : <Copy size={14} strokeWidth={2} />}
-          {copied ? 'הועתק!' : 'העתק JSON'}
-        </button>
-        <button
-          onClick={handleDownloadPdf}
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            padding: '10px',
-            background: '#1a1a1a',
-            border: '1px solid #222',
-            borderRadius: '10px',
-            color: '#666',
-            fontFamily: '"Rubik", sans-serif',
-            fontSize: '12px',
-            cursor: 'pointer',
-            WebkitTapHighlightColor: 'transparent',
-          }}
-        >
-          <FileDown size={14} strokeWidth={2} />
-          הורד PDF
-        </button>
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button
+            onClick={() => setExportTarget('json')}
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '10px',
+              background: copied ? 'rgba(74,222,128,0.08)' : '#1a1a1a',
+              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid #222',
+              borderRadius: '10px',
+              color: copied ? '#4ade80' : '#666',
+              fontFamily: '"Rubik", sans-serif',
+              fontSize: '12px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            {copied ? <Check size={14} strokeWidth={2.5} /> : <Copy size={14} strokeWidth={2} />}
+            {copied ? 'הועתק!' : 'העתק JSON'}
+          </button>
+          <button
+            onClick={() => setExportTarget('pdf')}
+            style={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              padding: '10px',
+              background: '#1a1a1a',
+              border: '1px solid #222',
+              borderRadius: '10px',
+              color: '#666',
+              fontFamily: '"Rubik", sans-serif',
+              fontSize: '12px',
+              cursor: 'pointer',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            <FileDown size={14} strokeWidth={2} />
+            הורד PDF
+          </button>
+        </div>
+
+        {logs.map((log) => (
+          <LogCard key={log.id} log={log} onDelete={deleteLog} />
+        ))}
       </div>
 
-      {logs.map((log) => (
-        <LogCard key={log.id} log={log} onDelete={deleteLog} />
-      ))}
-    </div>
+      <ExportRangeModal
+        isOpen={exportTarget !== null}
+        onClose={() => setExportTarget(null)}
+        title={exportTarget === 'json' ? 'העתק JSON — בחר טווח' : 'הורד PDF — בחר טווח'}
+        onSelect={handleExportSelect}
+      />
+    </>
   )
 }
