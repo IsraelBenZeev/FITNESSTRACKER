@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, useFieldArray, useWatch, Control, Controller } from 'react-hook-form'
 import { ChevronRight, ChevronLeft, Plus, Trash2, Check, X } from 'lucide-react'
 import { getSession, saveSession, clearSession, WorkoutSessionData } from './workoutSession'
-import { useLogWorkout } from './useWorkoutLog'
+import { useLogWorkout, usePreviousExerciseSets } from './useWorkoutLog'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import type { WorkoutSetLog } from '../../types/workout'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -118,9 +119,10 @@ interface SlideProps {
   exerciseIndex: number
   session: WorkoutSessionData
   control: Control<FormValues>
+  previousSets?: WorkoutSetLog[]
 }
 
-function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
+function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideProps) {
   const ex = session.exercises[exerciseIndex]!
 
   const { fields, append, remove } = useFieldArray<FormValues>({
@@ -172,6 +174,66 @@ function ExerciseSlide({ exerciseIndex, session, control }: SlideProps) {
           {ex.exercise_name}
         </div>
       </div>
+
+      {/* Previous workout reference */}
+      {previousSets && previousSets.length > 0 && (
+        <div style={{
+          background: '#0d0d0d',
+          border: '1px solid #1a1a1a',
+          borderRadius: '10px',
+          padding: '9px 12px',
+          direction: 'rtl',
+        }}>
+          <div style={{
+            fontFamily: '"Rubik", sans-serif',
+            fontSize: '10px',
+            color: '#3a3a3a',
+            letterSpacing: '0.05em',
+            marginBottom: '7px',
+          }}>
+            ביצועים אחרונים
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {previousSets.map((s) => {
+              const w = s.weight_kg != null && s.weight_kg > 0
+                ? (s.weight_kg % 1 === 0 ? `${s.weight_kg}` : s.weight_kg.toFixed(1))
+                : null
+              const label = s.reps != null && w != null
+                ? `${s.reps} × ${w} ק"ג`
+                : s.reps != null
+                ? `${s.reps} חז'`
+                : w != null
+                ? `${w} ק"ג`
+                : '—'
+              return (
+                <div key={s.id} style={{
+                  background: '#181818',
+                  borderRadius: '6px',
+                  padding: '4px 8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                }}>
+                  <span style={{
+                    fontFamily: '"Rubik", sans-serif',
+                    fontSize: '10px',
+                    color: '#3a3a3a',
+                  }}>
+                    {s.set_number}.
+                  </span>
+                  <span style={{
+                    fontFamily: '"Rubik", sans-serif',
+                    fontSize: '13px',
+                    color: '#555',
+                  }}>
+                    {label}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Sets */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -361,6 +423,12 @@ export function WorkoutSessionPage() {
     window.addEventListener('popstate', handler)
     return () => window.removeEventListener('popstate', handler)
   }, [])
+
+  const exerciseIds = useMemo(
+    () => (session?.exercises ?? []).map((ex) => ex.exercise_id),
+    [session]
+  )
+  const { data: prevSetsMap } = usePreviousExerciseSets(exerciseIds)
 
   const { control, watch, handleSubmit } = useForm<FormValues>({
     defaultValues: session ? buildDefaultValues(session) : { exercises: [], notes: '' },
@@ -674,6 +742,7 @@ export function WorkoutSessionPage() {
                 exerciseIndex={exIdx}
                 session={session}
                 control={control}
+                previousSets={prevSetsMap?.[session.exercises[exIdx]?.exercise_id ?? '']}
               />
             </div>
           ))}

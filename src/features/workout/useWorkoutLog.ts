@@ -117,6 +117,40 @@ export function useDeleteWorkoutLog() {
   })
 }
 
+export function usePreviousExerciseSets(exerciseIds: string[]) {
+  const { user } = useAuth()
+  const userId = user?.id
+  const idKey = [...exerciseIds].sort().join(',')
+
+  return useQuery({
+    queryKey: ['workout', 'previous-sets', userId, idKey],
+    enabled: !!userId && exerciseIds.length > 0,
+    staleTime: 5 * 60 * 1000,
+    queryFn: async (): Promise<Record<string, WorkoutSetLog[]>> => {
+      const { data: setLogs, error } = await supabase
+        .from('workout_set_logs')
+        .select('*')
+        .in('exercise_id', exerciseIds)
+        .order('created_at', { ascending: false })
+      if (error) throw new Error(error.message)
+      if (!setLogs?.length) return {}
+
+      const result: Record<string, WorkoutSetLog[]> = {}
+      for (const exerciseId of exerciseIds) {
+        const forExercise = (setLogs as WorkoutSetLog[]).filter(
+          (s) => s.exercise_id === exerciseId
+        )
+        if (!forExercise.length) continue
+        const mostRecentLogId = forExercise[0]!.workout_log_id
+        result[exerciseId] = forExercise
+          .filter((s) => s.workout_log_id === mostRecentLogId)
+          .sort((a, b) => a.set_number - b.set_number)
+      }
+      return result
+    },
+  })
+}
+
 export function useLogWorkout() {
   const queryClient = useQueryClient()
   const { showSuccess, showError } = useToast()
