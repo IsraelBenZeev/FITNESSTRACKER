@@ -438,9 +438,33 @@ export function WorkoutSessionPage() {
   )
   const { data: prevSetsMap } = usePreviousExerciseSets(exerciseIds)
 
-  const { control, watch, handleSubmit } = useForm<FormValues>({
+  const { control, watch, handleSubmit, setValue, getValues } = useForm<FormValues>({
     defaultValues: session ? buildDefaultValues(session) : { exercises: [], notes: '' },
   })
+
+  // Pre-fill sets from previous workout when data loads
+  const prevFilledRef = useRef(false)
+  useEffect(() => {
+    if (!prevSetsMap || prevFilledRef.current || !session) return
+    prevFilledRef.current = true
+
+    const current = getValues()
+    session.exercises.forEach((ex, exIdx) => {
+      const prevSets = prevSetsMap[ex.exercise_id]
+      if (!prevSets?.length) return
+
+      const currentSets = current.exercises[exIdx]?.sets
+      const isInitial = currentSets?.length === 1 &&
+        !currentSets[0]?.reps && !currentSets[0]?.weight
+
+      if (!isInitial) return
+
+      setValue(`exercises.${exIdx}.sets`, prevSets.map((s) => ({
+        reps: s.reps != null ? String(s.reps) : '',
+        weight: s.weight_kg != null ? String(s.weight_kg) : '',
+      })))
+    })
+  }, [prevSetsMap, session, setValue, getValues])
 
   // Sync form → localStorage (debounced 500ms)
   const formValues = watch()
