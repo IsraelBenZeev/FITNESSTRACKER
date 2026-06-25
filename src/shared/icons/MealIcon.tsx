@@ -1,5 +1,6 @@
 import {
   Sunrise, Sun, Moon, Apple, Dumbbell, Flame, UtensilsCrossed, Coffee,
+  Beef, Salad, Cherry, Wheat, Droplets,
 } from 'lucide-react'
 import type { LucideProps } from 'lucide-react'
 
@@ -16,6 +17,12 @@ const MEAL_ICON_MAP: Record<string, React.FC<LucideProps>> = {
   שייקר: Coffee,
   ספורט: Flame,
   'אחרי ספורט': Dumbbell,
+  'פוסט וורקאות': Dumbbell,
+  חלבון: Beef,
+  ירקות: Salad,
+  פירות: Cherry,
+  פחמימות: Wheat,
+  שומנים: Droplets,
 }
 
 interface MealIconProps {
