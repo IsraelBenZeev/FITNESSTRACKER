@@ -17,6 +17,9 @@ const TARGET_ANON_KEY =
 export const source = createClient(SOURCE_URL, SOURCE_ANON_KEY)
 export const target = createClient(TARGET_URL, TARGET_ANON_KEY)
 
-// user_id mapping
-export const SOURCE_USER_ID = 'abed08d4-1cf1-492d-b22b-9be21e0a6bb6' // FitnessTracker
-export const TARGET_USER_ID = 'f2290863-2572-4006-8fb7-4e15d612eb17' // BodyBuddy
+// user_id mapping (FitnessTracker → BodyBuddy)
+export const TARGET_USER_ID = 'f2290863-2572-4006-8fb7-4e15d612eb17'
+export const SOURCE_USER_IDS = [
+	'abed08d4-1cf1-492d-b22b-9be21e0a6bb6',
+	'9a24d9b0-097c-441d-afb4-58577346f02c',
+]
