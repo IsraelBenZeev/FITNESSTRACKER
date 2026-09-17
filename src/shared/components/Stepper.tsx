@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 
 interface StepperProps {
   value: number
@@ -6,19 +6,21 @@ interface StepperProps {
   min: number
   max: number
   step: number
+  stepOptions?: number[]
   label?: string
   unit?: string
   decimals?: number
 }
 
-export function Stepper({ value, onChange, min, max, step, label, unit, decimals = 0 }: StepperProps) {
+export function Stepper({ value, onChange, min, max, step, stepOptions = [step], label, unit, decimals = 0 }: StepperProps) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [activeStep, setActiveStep] = useState(step)
 
   const clamp = (v: number) => Math.min(max, Math.max(min, parseFloat(v.toFixed(decimals))))
 
-  const increment = () => onChange(clamp(value + step))
-  const decrement = () => onChange(clamp(value - step))
+  const increment = () => onChange(clamp(value + activeStep))
+  const decrement = () => onChange(clamp(value - activeStep))
 
   const startLongPress = (fn: () => void) => {
     fn()
@@ -129,6 +131,33 @@ export function Stepper({ value, onChange, min, max, step, label, unit, decimals
           +
         </button>
       </div>
+
+      {stepOptions.length > 1 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          {stepOptions.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setActiveStep(option)}
+              aria-pressed={activeStep === option}
+              style={{
+                minWidth: '34px',
+                height: '28px',
+                padding: '0 8px',
+                background: activeStep === option ? '#D7FF00' : '#1a1a1a',
+                color: activeStep === option ? '#0a0a0a' : '#777',
+                border: `1px solid ${activeStep === option ? '#D7FF00' : '#2a2a2a'}`,
+                borderRadius: '7px',
+                fontFamily: '"Rubik", sans-serif',
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

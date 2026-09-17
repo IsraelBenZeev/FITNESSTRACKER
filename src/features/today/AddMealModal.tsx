@@ -21,6 +21,18 @@ const MEAL_OPTIONS = [
   'אחר',
 ]
 
+const ADD_MEAL_DRAFT_KEY = 'fitnesstracker:add-meal-draft'
+
+interface MealDraft {
+  mealName: string
+  foodItems: string
+  calories: number
+  proteinG: number
+  carbsG: number
+  fatG: number
+  eatTime: string
+}
+
 interface AddMealModalProps {
   isOpen: boolean
   onClose: () => void
@@ -37,6 +49,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
   const [carbsG, setCarbsG] = useState(0)
   const [fatG, setFatG] = useState(0)
   const [eatTime, setEatTime] = useState(() => new Date().toTimeString().slice(0, 5))
+  const [draftReady, setDraftReady] = useState(false)
 
   const { mutate: addMeal, isPending: isAdding } = useAddMeal()
   const { mutate: editMeal, isPending: isEditing_ } = useEditMeal()
@@ -52,17 +65,39 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
         setCarbsG(initialMeal.carbs_g ?? 0)
         setFatG(initialMeal.fat_g ?? 0)
         setEatTime(initialMeal.time ?? new Date().toTimeString().slice(0, 5))
+        setDraftReady(false)
       } else {
-        setMealName(MEAL_OPTIONS[0]!)
-        setFoodItems('')
-        setCalories(0)
-        setProteinG(0)
-        setCarbsG(0)
-        setFatG(0)
-        setEatTime(new Date().toTimeString().slice(0, 5))
+        let draft: MealDraft | null = null
+        try {
+          const savedDraft = localStorage.getItem(ADD_MEAL_DRAFT_KEY)
+          draft = savedDraft ? JSON.parse(savedDraft) as MealDraft : null
+        } catch {
+          draft = null
+        }
+
+        setMealName(draft?.mealName ?? MEAL_OPTIONS[0]!)
+        setFoodItems(draft?.foodItems ?? '')
+        setCalories(draft?.calories ?? 0)
+        setProteinG(draft?.proteinG ?? 0)
+        setCarbsG(draft?.carbsG ?? 0)
+        setFatG(draft?.fatG ?? 0)
+        setEatTime(draft?.eatTime ?? new Date().toTimeString().slice(0, 5))
+        setDraftReady(true)
       }
     }
   }, [isOpen, initialMeal])
+
+  useEffect(() => {
+    if (!isOpen || isEditing || !draftReady) return
+
+    const draft: MealDraft = { mealName, foodItems, calories, proteinG, carbsG, fatG, eatTime }
+    localStorage.setItem(ADD_MEAL_DRAFT_KEY, JSON.stringify(draft))
+  }, [isOpen, isEditing, draftReady, mealName, foodItems, calories, proteinG, carbsG, fatG, eatTime])
+
+  const clearDraft = () => {
+    localStorage.removeItem(ADD_MEAL_DRAFT_KEY)
+    onClose()
+  }
 
   const handleSubmit = () => {
     const payload = {
@@ -78,7 +113,12 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
     if (isEditing && initialMeal) {
       editMeal({ id: initialMeal.id, ...payload }, { onSuccess: onClose })
     } else {
-      addMeal(payload, { onSuccess: onClose })
+      addMeal(payload, {
+        onSuccess: () => {
+          localStorage.removeItem(ADD_MEAL_DRAFT_KEY)
+          onClose()
+        },
+      })
     }
   }
 
@@ -148,10 +188,28 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
         <div style={{ height: '1px', background: '#1a1a1a' }} />
 
         {/* Steppers */}
-        <Stepper label="קלוריות" value={calories} onChange={setCalories} min={0} max={3000} step={25} unit="קל'" />
-        <Stepper label="חלבון" value={proteinG} onChange={setProteinG} min={0} max={200} step={1} unit="g" />
-        <Stepper label="פחמימות" value={carbsG} onChange={setCarbsG} min={0} max={300} step={1} unit="g" />
-        <Stepper label="שומן" value={fatG} onChange={setFatG} min={0} max={100} step={1} unit="g" />
+        <Stepper label="קלוריות" value={calories} onChange={setCalories} min={0} max={3000} step={1} stepOptions={[1, 5, 10]} unit="קל'" />
+        <Stepper label="חלבון" value={proteinG} onChange={setProteinG} min={0} max={200} step={1} stepOptions={[1, 5, 10]} unit="g" />
+        <Stepper label="פחמימות" value={carbsG} onChange={setCarbsG} min={0} max={300} step={1} stepOptions={[1, 5, 10]} unit="g" />
+        <Stepper label="שומן" value={fatG} onChange={setFatG} min={0} max={100} step={1} stepOptions={[1, 5, 10]} unit="g" />
+
+        <button
+          onClick={clearDraft}
+          disabled={isPending}
+          style={{
+            width: '100%',
+            padding: '12px',
+            background: 'transparent',
+            color: '#777',
+            border: '1px solid #2a2a2a',
+            borderRadius: '12px',
+            fontFamily: '"Rubik", sans-serif',
+            fontSize: '14px',
+            cursor: isPending ? 'not-allowed' : 'pointer',
+          }}
+        >
+          ביטול
+        </button>
 
         {/* Submit */}
         <button

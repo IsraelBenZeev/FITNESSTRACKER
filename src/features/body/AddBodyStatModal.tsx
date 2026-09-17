@@ -58,7 +58,8 @@ export function AddBodyStatModal({ isOpen, onClose, editStat }: AddBodyStatModal
           onChange={setWeightKg}
           min={30}
           max={200}
-          step={0.1}
+          step={1}
+          stepOptions={[1, 5, 10, 0.5]}
           unit='ק"ג'
           decimals={1}
         />
@@ -68,7 +69,8 @@ export function AddBodyStatModal({ isOpen, onClose, editStat }: AddBodyStatModal
           onChange={setWaistCm}
           min={40}
           max={200}
-          step={0.5}
+          step={1}
+          stepOptions={[1, 5, 10, 0.5]}
           unit='ס"מ'
           decimals={1}
         />
