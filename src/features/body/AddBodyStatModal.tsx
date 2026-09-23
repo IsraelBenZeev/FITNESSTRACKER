@@ -59,7 +59,7 @@ export function AddBodyStatModal({ isOpen, onClose, editStat }: AddBodyStatModal
           min={30}
           max={200}
           step={1}
-          stepOptions={[1, 5, 10, 0.5]}
+          stepOptions={[1, 5, 10, 0.5, 0.1]}
           unit='ק"ג'
           decimals={1}
         />
