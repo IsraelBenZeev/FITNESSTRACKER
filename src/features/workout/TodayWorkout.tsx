@@ -137,6 +137,11 @@ function CompletedWorkoutModal({
                             {s.weight_kg} <span style={{ fontSize: '11px', color: '#555', fontFamily: '"Rubik", sans-serif' }}>ק"ג</span>
                           </span>
                         )}
+                        {s.is_bodyweight && s.added_weight_kg != null && s.added_weight_kg > 0 && (
+                          <span className="font-['Bebas_Neue'] text-base text-[#f0f0f0]">
+                            +{s.added_weight_kg} <span className="font-body text-[11px] text-[#555]">ק"ג</span>
+                          </span>
+                        )}
                         {s.reps != null && (
                           <span style={{
                             fontFamily: '"Bebas Neue", sans-serif',

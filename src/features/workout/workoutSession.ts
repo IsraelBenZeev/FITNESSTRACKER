@@ -5,6 +5,8 @@ const SESSION_KEY = 'ft_workout_session'
 export interface SessionSet {
   reps: string
   weight: string
+  /** Extra load for bodyweight exercises. '' = not enabled */
+  addedWeight?: string
 }
 
 export interface SessionExercise {
@@ -101,7 +103,7 @@ export function initSession(plan: WorkoutPlan): WorkoutSessionData {
       exercise_name: ex.exercise_name,
       gif_url: ex.gif_url,
       is_bodyweight: ex.is_bodyweight ?? false,
-      sets: [{ reps: '', weight: '' }],
+      sets: [{ reps: '', weight: '', addedWeight: '' }],
       notes: '',
     })),
   }

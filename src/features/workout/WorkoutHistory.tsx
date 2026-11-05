@@ -116,7 +116,9 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
                     <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '15px', color: '#f0f0f0' }}>
                       {s.reps ?? '—'} ×{' '}
                       {s.is_bodyweight
-                        ? <span className="text-xs font-body px-2 py-0.5 rounded-full bg-lime-dim text-lime">משקל גוף</span>
+                        ? <span className="text-xs font-body px-2 py-0.5 rounded-full bg-lime-dim text-lime">
+                            משקל גוף{s.added_weight_kg != null && s.added_weight_kg > 0 ? ` + ${s.added_weight_kg} ק"ג` : ''}
+                          </span>
                         : s.weight_kg != null ? `${s.weight_kg}ק"ג` : '—'}
                     </span>
                   </div>

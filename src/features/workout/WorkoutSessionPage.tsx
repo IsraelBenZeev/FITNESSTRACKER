@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useForm, useFieldArray, useWatch, Control, Controller } from 'react-hook-form'
-import { ChevronRight, ChevronLeft, Plus, Trash2, Check, X, Minimize2 } from 'lucide-react'
+import { ChevronRight, ChevronLeft, Plus, Trash2, Check, X, Minimize2, Dumbbell } from 'lucide-react'
 import { getSession, saveSession, clearSession, WorkoutSessionData } from './workoutSession'
 import { useLogWorkout, usePreviousExerciseSets } from './useWorkoutLog'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
@@ -12,6 +12,8 @@ import type { WorkoutSetLog } from '../../types/workout'
 interface SetValues {
   reps: string
   weight: string
+  /** Extra load for bodyweight exercises. '' = not enabled */
+  addedWeight: string
 }
 
 interface ExerciseValues {
@@ -34,7 +36,10 @@ function formatElapsed(seconds: number): string {
 
 function buildDefaultValues(session: WorkoutSessionData): FormValues {
   return {
-    exercises: session.exercises.map((ex) => ({ sets: ex.sets, notes: ex.notes ?? '' })),
+    exercises: session.exercises.map((ex) => ({
+      sets: ex.sets.map((s) => ({ reps: s.reps, weight: s.weight, addedWeight: s.addedWeight ?? '' })),
+      notes: ex.notes ?? '',
+    })),
     notes: session.notes,
   }
 }
@@ -109,6 +114,61 @@ function StepperInput({ value, onChange, step, min, decimals, label }: StepperPr
           +
         </button>
       </div>
+    </div>
+  )
+}
+
+// ─── BodyweightLoad ───────────────────────────────────────────────────────────
+// Bodyweight badge + optional extra load. Enabled when value !== ''.
+
+interface BodyweightLoadProps {
+  value: string
+  onChange: (v: string) => void
+}
+
+function BodyweightLoad({ value, onChange }: BodyweightLoadProps) {
+  const enabled = value !== ''
+
+  if (!enabled) {
+    return (
+      <div className="flex flex-col items-center gap-1">
+        <span className="font-body text-[10px] text-[#444]">משקל</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-xs font-body px-3 py-1.5 rounded-full bg-lime-dim text-lime border border-lime/20 whitespace-nowrap">
+            משקל גוף
+          </span>
+          <button
+            type="button"
+            onClick={() => onChange('0')}
+            aria-label="הוסף משקל נוסף"
+            className="flex h-9 items-center gap-1 rounded-[10px] border border-dashed border-[#2a2a2a] bg-surface2 px-2 font-body text-[11px] text-muted transition-colors duration-200 hover:border-lime hover:text-lime [-webkit-tap-highlight-color:transparent]"
+          >
+            <Plus size={12} strokeWidth={2} />
+            <Dumbbell size={13} strokeWidth={2} />
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-end gap-1">
+      <StepperInput
+        value={value}
+        onChange={onChange}
+        step={1}
+        min={0}
+        decimals={true}
+        label='גוף + ק"ג'
+      />
+      <button
+        type="button"
+        onClick={() => onChange('')}
+        aria-label="הסר משקל נוסף"
+        className="flex h-9 w-6 items-center justify-center text-muted transition-colors duration-200 hover:text-danger [-webkit-tap-highlight-color:transparent]"
+      >
+        <X size={14} strokeWidth={2} />
+      </button>
     </div>
   )
 }
@@ -198,7 +258,12 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
               const w = s.weight_kg != null && s.weight_kg > 0
                 ? (s.weight_kg % 1 === 0 ? `${s.weight_kg}` : s.weight_kg.toFixed(1))
                 : null
-              const label = s.reps != null && w != null
+              const added = s.is_bodyweight && s.added_weight_kg != null && s.added_weight_kg > 0
+                ? `+${s.added_weight_kg % 1 === 0 ? s.added_weight_kg : s.added_weight_kg.toFixed(1)} ק"ג`
+                : null
+              const label = s.reps != null && added != null
+                ? `${s.reps} × ${added}`
+                : s.reps != null && w != null
                 ? `${s.reps} × ${w} ק"ג`
                 : s.reps != null
                 ? `${s.reps} חז'`
@@ -285,12 +350,13 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
 
             {/* Weight stepper / bodyweight badge */}
             {ex.is_bodyweight ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '10px', color: '#444' }}>משקל</span>
-                <span className="text-xs font-body px-3 py-1.5 rounded-full bg-lime-dim text-lime border border-lime/20 whitespace-nowrap">
-                  משקל גוף
-                </span>
-              </div>
+              <Controller
+                control={control}
+                name={`exercises.${exerciseIndex}.sets.${setIdx}.addedWeight`}
+                render={({ field: f }) => (
+                  <BodyweightLoad value={f.value ?? ''} onChange={f.onChange} />
+                )}
+              />
             ) : (
               <Controller
                 control={control}
@@ -340,6 +406,7 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
             append({
               reps: last?.reps ?? '',
               weight: last?.weight ?? '',
+              addedWeight: last?.addedWeight ?? '',
             })
           }}
           style={{
@@ -455,13 +522,14 @@ export function WorkoutSessionPage() {
 
       const currentSets = current.exercises[exIdx]?.sets
       const isInitial = currentSets?.length === 1 &&
-        !currentSets[0]?.reps && !currentSets[0]?.weight
+        !currentSets[0]?.reps && !currentSets[0]?.weight && !currentSets[0]?.addedWeight
 
       if (!isInitial) return
 
       setValue(`exercises.${exIdx}.sets`, prevSets.map((s) => ({
         reps: s.reps != null ? String(s.reps) : '',
         weight: s.weight_kg != null ? String(s.weight_kg) : '',
+        addedWeight: s.added_weight_kg != null && s.added_weight_kg > 0 ? String(s.added_weight_kg) : '',
       })))
     })
   }, [prevSetsMap, session, setValue, getValues])
@@ -482,6 +550,7 @@ export function WorkoutSessionPage() {
           sets: (formValues.exercises[i]?.sets ?? []).map((s) => ({
             reps: s.reps ?? '',
             weight: s.weight ?? '',
+            addedWeight: s.addedWeight ?? '',
           })),
           notes: formValues.exercises[i]?.notes ?? '',
         })),
@@ -511,6 +580,7 @@ export function WorkoutSessionPage() {
       reps: number | null
       weight_kg: number | null
       is_bodyweight: boolean
+      added_weight_kg: number | null
       notes: string | null
     }[] = []
 
@@ -521,6 +591,8 @@ export function WorkoutSessionPage() {
       exSets.forEach((s, j) => {
         const reps = s.reps ? Number(s.reps) : null
         const weight = ex.is_bodyweight ? null : (s.weight ? Number(s.weight) : null)
+        const addedNum = ex.is_bodyweight && s.addedWeight ? Number(s.addedWeight) : 0
+        const addedWeight = addedNum > 0 ? addedNum : null
         if (reps !== null || weight !== null || ex.is_bodyweight) {
           sets.push({
             exercise_id: ex.exercise_id,
@@ -529,6 +601,7 @@ export function WorkoutSessionPage() {
             reps,
             weight_kg: weight,
             is_bodyweight: ex.is_bodyweight ?? false,
+            added_weight_kg: addedWeight,
             notes: exNotes,
           })
         }

@@ -121,6 +121,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
       reps: number | null
       weight_kg: number | null
       is_bodyweight: boolean
+      added_weight_kg: number | null
       notes: string | null
     }[] = []
 
@@ -134,6 +135,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
           reps: s.reps ? Number(s.reps) : null,
           weight_kg: s.weight ? Number(s.weight) : null,
           is_bodyweight: ex.is_bodyweight,
+          added_weight_kg: null,
           notes: exNotes,
         })
       })

@@ -14,7 +14,7 @@ function buildWorkoutJsonText(logs: WorkoutLog[]): string {
   const payload = logs.map((log) => {
     const exerciseMap = new Map<string, {
       notes: string | null
-      sets: { set_number: number; reps: number | null; weight_kg: number | null }[]
+      sets: { set_number: number; reps: number | null; weight_kg: number | null; added_weight_kg?: number }[]
     }>()
     for (const s of log.set_logs ?? []) {
       if (!exerciseMap.has(s.exercise_name)) {
@@ -24,6 +24,7 @@ function buildWorkoutJsonText(logs: WorkoutLog[]): string {
         set_number: s.set_number,
         reps: s.reps,
         weight_kg: s.weight_kg,
+        ...(s.added_weight_kg != null && s.added_weight_kg > 0 ? { added_weight_kg: s.added_weight_kg } : {}),
       })
     }
     return {
@@ -170,7 +171,9 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
         doc.setFontSize(8)
         setTextColor(doc, PDF_C.white)
         const reps   = s.reps      != null ? String(s.reps)      : '-'
-        const weight = s.weight_kg != null ? `${s.weight_kg} kg` : '-'
+        const weight = s.is_bodyweight
+          ? (s.added_weight_kg != null && s.added_weight_kg > 0 ? `BW + ${s.added_weight_kg} kg` : 'BW')
+          : s.weight_kg != null ? `${s.weight_kg} kg` : '-'
         doc.text(`${reps}  x  ${weight}`, M + 4, y + 4.5)
 
         setDraw(doc, PDF_C.border)
