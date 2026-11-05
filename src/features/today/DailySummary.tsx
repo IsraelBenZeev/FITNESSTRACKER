@@ -78,7 +78,7 @@ export function DailySummary({ totals, goalCalories, goalProtein, isTrainingDay,
             type="button"
             onClick={onEditGoals}
             aria-label="עריכת יעדים"
-            className="-me-2.5 flex h-11 w-11 items-center justify-center rounded-xl text-muted transition-colors duration-200 hover:bg-surface2 hover:text-text-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [-webkit-tap-highlight-color:transparent]"
+            className="-me-2.5 flex h-11 w-11 items-center justify-center rounded-xl text-muted transition-colors duration-200 hover:bg-surface2 hover:text-text-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [-webkit-tap-highlight-color:transparent]"
           >
             <SlidersHorizontal size={19} strokeWidth={1.75} />
           </button>
@@ -95,14 +95,14 @@ export function DailySummary({ totals, goalCalories, goalProtein, isTrainingDay,
           ) : (
             <>
               נשארו{' '}
-              <span className="font-display text-[44px] font-bold leading-none tabular-nums text-lime">{fmt(calLeft)}</span>
+              <span className="font-display text-[44px] font-bold leading-none tabular-nums text-accent">{fmt(calLeft)}</span>
               {' '}קלוריות
             </>
           )}
           <br />
           {proteinDone ? (
             <span className="inline-flex items-center gap-1.5 text-base text-muted">
-              <Check size={16} strokeWidth={2.5} className="text-lime" />
+              <Check size={16} strokeWidth={2.5} className="text-accent" />
               יעד החלבון הושג
             </span>
           ) : (
@@ -130,7 +130,7 @@ export function DailySummary({ totals, goalCalories, goalProtein, isTrainingDay,
 function StripStat({ value, label, danger, done }: { value: string; label: string; danger?: boolean; done?: boolean }) {
   return (
     <span className="flex items-baseline gap-1.5">
-      <span className={`font-display text-xl font-bold leading-none tabular-nums ${danger ? 'text-danger' : done ? 'text-text-col' : 'text-lime'}`}>
+      <span className={`font-display text-xl font-bold leading-none tabular-nums ${danger ? 'text-danger' : done ? 'text-text-col' : 'text-accent'}`}>
         {value}
       </span>
       <span className="font-body text-xs text-muted">{label}</span>

@@ -42,8 +42,8 @@ export function ActiveWorkoutBanner() {
         style={{
           margin: '0 0 2px',
           padding: '12px 14px',
-          background: 'rgba(102,102,102,0.08)',
-          border: '1px solid rgba(102,102,102,0.2)',
+          background: 'rgba(81,96,112,0.08)',
+          border: '1px solid rgba(81,96,112,0.2)',
           borderRadius: '12px',
           animation: 'bannerEnter 0.25s ease forwards',
         }}
@@ -55,12 +55,12 @@ export function ActiveWorkoutBanner() {
           gap: '10px',
           marginBottom: '10px',
         }}>
-          <Clock size={15} color="#555" strokeWidth={1.5} />
+          <Clock size={15} color="#8C9AAB" strokeWidth={1.5} />
           <div style={{ flex: 1, textAlign: 'right' }}>
             <span style={{
               fontFamily: '"Rubik", sans-serif',
               fontSize: '12px',
-              color: '#555',
+              color: '#8C9AAB',
               display: 'block',
             }}>
               אימון ישן נמצא · {formatSessionAge()}
@@ -69,7 +69,7 @@ export function ActiveWorkoutBanner() {
               fontFamily: '"Barlow Condensed", sans-serif',
               fontSize: '15px',
               fontWeight: 600,
-              color: '#888',
+              color: '#8C9AAB',
               letterSpacing: '0.02em',
             }}>
               {session.planName}
@@ -83,9 +83,9 @@ export function ActiveWorkoutBanner() {
               flex: 1,
               padding: '9px',
               background: 'transparent',
-              border: '1px solid #2a2a2a',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '9px',
-              color: '#555',
+              color: '#8C9AAB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '13px',
               cursor: 'pointer',
@@ -99,10 +99,10 @@ export function ActiveWorkoutBanner() {
             style={{
               flex: 2,
               padding: '9px',
-              background: 'rgba(102,102,102,0.12)',
-              border: '1px solid rgba(102,102,102,0.25)',
+              background: 'rgba(81,96,112,0.12)',
+              border: '1px solid rgba(81,96,112,0.25)',
               borderRadius: '9px',
-              color: '#aaa',
+              color: '#8C9AAB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '13px',
               fontWeight: 500,
@@ -165,9 +165,9 @@ export function ActiveWorkoutBanner() {
               flex: 1,
               padding: '9px',
               background: 'transparent',
-              border: '1px solid #2a2a2a',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '9px',
-              color: '#555',
+              color: '#8C9AAB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '13px',
               cursor: 'pointer',
@@ -206,8 +206,8 @@ export function ActiveWorkoutBanner() {
       style={{
         width: '100%',
         padding: '12px 14px',
-        background: 'rgba(215,255,0,0.07)',
-        border: '1px solid rgba(215,255,0,0.2)',
+        background: 'rgba(150,200,40,0.07)',
+        border: '1px solid rgba(150,200,40,0.2)',
         borderRadius: '12px',
         cursor: 'pointer',
         WebkitTapHighlightColor: 'transparent',
@@ -224,7 +224,7 @@ export function ActiveWorkoutBanner() {
       <span style={{
         fontFamily: '"Bebas Neue", sans-serif',
         fontSize: '18px',
-        color: '#D7FF00',
+        color: '#96C828',
         letterSpacing: '0.06em',
         flexShrink: 0,
       }}>
@@ -237,7 +237,7 @@ export function ActiveWorkoutBanner() {
         fontFamily: '"Barlow Condensed", sans-serif',
         fontSize: '15px',
         fontWeight: 600,
-        color: '#e0f060',
+        color: '#B4DC5A',
         letterSpacing: '0.02em',
         textAlign: 'right',
       }}>
@@ -249,12 +249,12 @@ export function ActiveWorkoutBanner() {
         <span style={{
           fontFamily: '"Rubik", sans-serif',
           fontSize: '12px',
-          color: '#D7FF00',
+          color: '#96C828',
           opacity: 0.8,
         }}>
           פעיל
         </span>
-        <Timer size={14} color="#D7FF00" strokeWidth={1.5} />
+        <Timer size={14} color="#96C828" strokeWidth={1.5} />
       </div>
     </button>
   )

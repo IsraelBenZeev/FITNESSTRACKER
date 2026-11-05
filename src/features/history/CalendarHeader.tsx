@@ -26,7 +26,7 @@ export function CalendarHeader({ year, month, onPrev, onNext, disableNext }: Cal
         style={{
           background: 'none',
           border: 'none',
-          color: '#888',
+          color: '#8C9AAB',
           cursor: 'pointer',
           padding: '8px',
           display: 'flex',
@@ -41,7 +41,7 @@ export function CalendarHeader({ year, month, onPrev, onNext, disableNext }: Cal
         style={{
           fontFamily: '"Bebas Neue", cursive',
           fontSize: '22px',
-          color: '#f0f0f0',
+          color: '#C8D0DB',
           letterSpacing: '0.05em',
         }}
       >
@@ -55,7 +55,7 @@ export function CalendarHeader({ year, month, onPrev, onNext, disableNext }: Cal
         style={{
           background: 'none',
           border: 'none',
-          color: disableNext ? '#333' : '#888',
+          color: disableNext ? '#516070' : '#8C9AAB',
           cursor: disableNext ? 'default' : 'pointer',
           padding: '8px',
           display: 'flex',

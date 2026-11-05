@@ -135,11 +135,11 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
+    background: '#2C3545',
+    border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: '10px',
     padding: '12px 14px',
-    color: '#f0f0f0',
+    color: '#C8D0DB',
     fontFamily: '"Rubik", sans-serif',
     fontSize: '14px',
     outline: 'none',
@@ -154,7 +154,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
 
         {/* Meal type */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             סוג ארוחה
           </span>
           <select
@@ -170,7 +170,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
 
         {/* Eating time */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             שעת אכילה
           </span>
           <input
@@ -183,7 +183,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
 
         {/* Food items */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             מה אכלת? (אופציונלי)
           </span>
           <input
@@ -196,7 +196,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
         </div>
 
         {/* Divider */}
-        <div style={{ height: '1px', background: '#1a1a1a' }} />
+        <div style={{ height: '1px', background: '#2C3545' }} />
 
         {/* Steppers */}
         <Stepper label="קלוריות" value={calories} onChange={setCalories} min={0} max={3000} step={1} stepOptions={[1, 5, 10]} unit="קל'" />
@@ -211,8 +211,8 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
             width: '100%',
             padding: '12px',
             background: 'transparent',
-            color: '#777',
-            border: '1px solid #2a2a2a',
+            color: '#8C9AAB',
+            border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: '12px',
             fontFamily: '"Rubik", sans-serif',
             fontSize: '14px',
@@ -230,8 +230,8 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
             marginTop: '4px',
             width: '100%',
             padding: '14px',
-            background: !canSubmit ? '#1a1a1a' : '#D7FF00',
-            color: !canSubmit ? '#333' : '#0a0a0a',
+            background: !canSubmit ? '#2C3545' : '#96C828',
+            color: !canSubmit ? '#516070' : '#1A2030',
             border: 'none',
             borderRadius: '12px',
             fontFamily: '"Barlow Condensed", sans-serif',

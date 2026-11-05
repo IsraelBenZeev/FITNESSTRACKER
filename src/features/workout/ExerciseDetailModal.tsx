@@ -10,7 +10,7 @@ interface Props {
   zIndexOverride?: number
 }
 
-function TagList({ items, color = '#888' }: { items: string[]; color?: string }) {
+function TagList({ items, color = '#8C9AAB' }: { items: string[]; color?: string }) {
   if (!items.length) return null
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'flex-start' }}>
@@ -43,7 +43,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
           fontSize: '13px',
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
-          color: '#555',
+          color: '#8C9AAB',
           textAlign: 'right',
         }}
       >
@@ -66,7 +66,7 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zInd
 
         {/* GIF */}
         {exercise.gifUrl && (
-          <div style={{ borderRadius: '12px', overflow: 'hidden', background: '#0a0a0a', lineHeight: 0 }}>
+          <div style={{ borderRadius: '12px', overflow: 'hidden', background: '#1A2030', lineHeight: 0 }}>
             <img
               src={exercise.gifUrl}
               alt={exercise.name_he}
@@ -77,7 +77,7 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zInd
 
         {/* Body parts */}
         <Section title="אזור גוף">
-          <TagList items={exercise.bodyParts_he} color="#D7FF00" />
+          <TagList items={exercise.bodyParts_he} color="#96C828" />
         </Section>
 
         {/* Target muscles */}
@@ -90,7 +90,7 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zInd
         {/* Secondary muscles */}
         {hasSecondary && (
           <Section title="שרירים משניים">
-            <TagList items={exercise.secondaryMuscles_he} color="#888" />
+            <TagList items={exercise.secondaryMuscles_he} color="#8C9AAB" />
           </Section>
         )}
 
@@ -129,14 +129,14 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zInd
                       width: '22px',
                       height: '22px',
                       borderRadius: '50%',
-                      background: 'rgba(215,255,0,0.12)',
-                      border: '1px solid rgba(215,255,0,0.25)',
+                      background: 'rgba(150,200,40,0.12)',
+                      border: '1px solid rgba(150,200,40,0.25)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontFamily: '"Barlow Condensed", sans-serif',
                       fontSize: '12px',
-                      color: '#D7FF00',
+                      color: '#96C828',
                     }}
                   >
                     {i + 1}
@@ -145,7 +145,7 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zInd
                     style={{
                       fontFamily: '"Rubik", sans-serif',
                       fontSize: '13px',
-                      color: '#ccc',
+                      color: '#C8D0DB',
                       lineHeight: 1.55,
                       textAlign: 'right',
                       flex: 1,
@@ -166,10 +166,10 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zInd
           style={{
             width: '100%',
             padding: '14px',
-            background: isSelected ? '#1a1a1a' : '#D7FF00',
-            border: isSelected ? '1px solid #2a2a2a' : 'none',
+            background: isSelected ? '#2C3545' : '#96C828',
+            border: isSelected ? '1px solid rgba(255,255,255,0.08)' : 'none',
             borderRadius: '12px',
-            color: isSelected ? '#555' : '#0a0a0a',
+            color: isSelected ? '#8C9AAB' : '#1A2030',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '17px',
             fontWeight: 700,

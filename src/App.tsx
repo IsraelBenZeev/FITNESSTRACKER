@@ -60,7 +60,7 @@ function AppContent() {
       <div
         style={{
           minHeight: '100dvh',
-          background: '#0a0a0a',
+          background: '#1A2030',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -70,7 +70,7 @@ function AppContent() {
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '28px',
-            color: '#D7FF00',
+            color: '#96C828',
             letterSpacing: '0.05em',
           }}
         >
@@ -88,7 +88,7 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <div style={{ minHeight: '100dvh', background: '#0a0a0a', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ minHeight: '100dvh', background: '#1A2030', display: 'flex', flexDirection: 'column' }}>
         <ToastProvider>
           <AppContent />
         </ToastProvider>

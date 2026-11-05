@@ -78,9 +78,9 @@ export async function downloadPlanPdf(plan: WorkoutPlan): Promise<void> {
     doc.text('ימי אימון:', RIGHT, y, { align: 'right' })
     let dx = RIGHT - 22
     for (const d of sorted) {
-      setFill(doc, '#1a1a1a')
+      setFill(doc, '#2C3545')
       doc.roundedRect(dx - 8, y - 4, 14, 6, 1.5, 1.5, 'F')
-      setTextColor(doc, PDF_C.lime)
+      setTextColor(doc, PDF_C.accent)
       doc.setFont('NotoSansHebrew', 'normal')
       doc.setFontSize(7)
       doc.text(rtl(DAY_NAMES[d]), dx + 3, y, { align: 'right' })
@@ -112,15 +112,15 @@ export async function downloadPlanPdf(plan: WorkoutPlan): Promise<void> {
     }
 
     if (i % 2 === 0) {
-      setFill(doc, '#0f0f0f')
+      setFill(doc, '#1A2030')
       doc.rect(M, y - 1, W - M * 2, 8, 'F')
     }
 
     // Index badge
-    setFill(doc, 'rgba(215,255,0,0.08)' as string)
+    setFill(doc, '#2E3938') // accent tint over surface (jsPDF needs hex)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(7)
-    setTextColor(doc, PDF_C.lime)
+    setTextColor(doc, PDF_C.accent)
     doc.text(String(i + 1), M + 4, y + 4.5)
 
     // Exercise name

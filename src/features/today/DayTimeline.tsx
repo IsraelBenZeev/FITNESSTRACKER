@@ -33,7 +33,7 @@ export function DayTimeline({ meals, onSelect }: DayTimelineProps) {
               type="button"
               onClick={() => onSelect(meal)}
               aria-label={`עריכת ${meal.meal_name}${meal.time ? ` משעה ${meal.time.slice(0, 5)}` : ''}`}
-              className="group flex w-full items-start gap-3 rounded-xl py-3 pe-2 text-right transition-colors duration-150 hover:bg-surface active:bg-surface2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-lime [-webkit-tap-highlight-color:transparent]"
+              className="group flex w-full items-start gap-3 rounded-xl py-3 pe-2 text-right transition-colors duration-150 hover:bg-surface active:bg-surface2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent [-webkit-tap-highlight-color:transparent]"
             >
               {/* Time */}
               <span className="w-11 flex-shrink-0 pt-2 text-left font-body text-xs tabular-nums text-muted">
@@ -41,7 +41,7 @@ export function DayTimeline({ meals, onSelect }: DayTimelineProps) {
               </span>
 
               {/* Node on the rail */}
-              <span className="relative z-10 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-border-col bg-bg text-muted transition-colors duration-150 group-hover:border-lime/50 group-hover:text-lime">
+              <span className="relative z-10 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-border-col bg-bg text-muted transition-colors duration-150 group-hover:border-accent/50 group-hover:text-accent">
                 <MealIcon mealName={meal.meal_name} size={17} color="currentColor" />
               </span>
 
@@ -62,7 +62,7 @@ export function DayTimeline({ meals, onSelect }: DayTimelineProps) {
                 <span className="flex flex-wrap gap-x-3 font-body text-xs tabular-nums text-muted">
                   {meal.protein_g != null && (
                     <span>
-                      חלבון <span className="font-medium text-lime">{Math.round(meal.protein_g)}g</span>
+                      חלבון <span className="font-medium text-accent">{Math.round(meal.protein_g)}g</span>
                     </span>
                   )}
                   {meal.carbs_g != null && <span>פחמ' {Math.round(meal.carbs_g)}g</span>}
@@ -81,13 +81,13 @@ export function DayTimeline({ meals, onSelect }: DayTimelineProps) {
 function NowMarker({ time }: { time: string }) {
   return (
     <li aria-label={`עכשיו ${time}`} className="flex items-center gap-3 py-2">
-      <span className="w-11 flex-shrink-0 text-left font-body text-xs font-medium tabular-nums text-lime">{time}</span>
+      <span className="w-11 flex-shrink-0 text-left font-body text-xs font-medium tabular-nums text-accent">{time}</span>
       <span className="relative z-10 flex w-9 flex-shrink-0 justify-center">
-        <span className="h-2.5 w-2.5 rounded-full bg-lime shadow-[0_0_0_4px_rgba(215,255,0,0.15)]" />
+        <span className="h-2.5 w-2.5 rounded-full bg-accent shadow-[0_0_0_4px_rgba(150,200,40,0.15)]" />
       </span>
       <span className="flex flex-1 items-center gap-2">
-        <span className="font-body text-xs font-medium text-lime">עכשיו</span>
-        <span className="h-px flex-1 bg-gradient-to-l from-lime/50 to-transparent" />
+        <span className="font-body text-xs font-medium text-accent">עכשיו</span>
+        <span className="h-px flex-1 bg-gradient-to-l from-accent/50 to-transparent" />
       </span>
     </li>
   )

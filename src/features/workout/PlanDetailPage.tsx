@@ -11,7 +11,7 @@ const DAY_NAMES = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 const DIFFICULTY_COLOR: Record<string, string> = {
   קל: '#4ade80',
   בינוני: '#fb923c',
-  קשה: '#ff4757',
+  קשה: '#F87171',
 }
 
 export function PlanDetailPage() {
@@ -56,7 +56,7 @@ export function PlanDetailPage() {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '48px 20px', textAlign: 'center', color: '#555', fontFamily: '"Rubik", sans-serif' }}>
+      <div style={{ padding: '48px 20px', textAlign: 'center', color: '#8C9AAB', fontFamily: '"Rubik", sans-serif' }}>
         טוען...
       </div>
     )
@@ -64,7 +64,7 @@ export function PlanDetailPage() {
 
   if (error || !plan) {
     return (
-      <div style={{ padding: '48px 20px', textAlign: 'center', color: '#ff4757', fontFamily: '"Rubik", sans-serif' }}>
+      <div style={{ padding: '48px 20px', textAlign: 'center', color: '#F87171', fontFamily: '"Rubik", sans-serif' }}>
         שגיאה בטעינת התכנית
       </div>
     )
@@ -80,15 +80,15 @@ export function PlanDetailPage() {
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '14px 16px',
-        borderBottom: '1px solid #1a1a1a',
+        borderBottom: '1px solid #2C3545',
       }}>
         <button
           onClick={() => navigate(-1)}
           style={{
             width: 36, height: 36,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#1a1a1a', border: '1px solid #222', borderRadius: '10px',
-            cursor: 'pointer', color: '#888',
+            background: '#2C3545', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px',
+            cursor: 'pointer', color: '#8C9AAB',
             WebkitTapHighlightColor: 'transparent',
           }}
         >
@@ -98,7 +98,7 @@ export function PlanDetailPage() {
           fontFamily: '"Barlow Condensed", sans-serif',
           fontSize: '20px',
           fontWeight: 600,
-          color: '#f0f0f0',
+          color: '#C8D0DB',
           letterSpacing: '0.03em',
         }}>
           {plan.name}
@@ -110,11 +110,11 @@ export function PlanDetailPage() {
             style={{
               width: 36, height: 36,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: copied ? 'rgba(74,222,128,0.12)' : '#1a1a1a',
-              border: `1px solid ${copied ? 'rgba(74,222,128,0.3)' : '#222'}`,
+              background: copied ? 'rgba(74,222,128,0.12)' : '#2C3545',
+              border: `1px solid ${copied ? 'rgba(74,222,128,0.3)' : 'rgba(255,255,255,0.08)'}`,
               borderRadius: '10px',
               cursor: 'pointer',
-              color: copied ? '#4ade80' : '#888',
+              color: copied ? '#4ade80' : '#8C9AAB',
               WebkitTapHighlightColor: 'transparent',
               transition: 'all 0.2s',
             }}
@@ -127,11 +127,11 @@ export function PlanDetailPage() {
             style={{
               width: 36, height: 36,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: downloading ? 'rgba(215,255,0,0.08)' : '#1a1a1a',
-              border: `1px solid ${downloading ? 'rgba(215,255,0,0.2)' : '#222'}`,
+              background: downloading ? 'rgba(150,200,40,0.08)' : '#2C3545',
+              border: `1px solid ${downloading ? 'rgba(150,200,40,0.2)' : 'rgba(255,255,255,0.08)'}`,
               borderRadius: '10px',
               cursor: downloading ? 'default' : 'pointer',
-              color: downloading ? '#D7FF00' : '#888',
+              color: downloading ? '#96C828' : '#8C9AAB',
               WebkitTapHighlightColor: 'transparent',
               transition: 'all 0.2s',
             }}
@@ -143,8 +143,8 @@ export function PlanDetailPage() {
             style={{
               width: 36, height: 36,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: '#1a1a1a', border: '1px solid #222', borderRadius: '10px',
-              cursor: 'pointer', color: '#888',
+              background: '#2C3545', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px',
+              cursor: 'pointer', color: '#8C9AAB',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -156,17 +156,17 @@ export function PlanDetailPage() {
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 120px', display: 'flex', flexDirection: 'column', gap: '20px', minHeight: 0 }}>
         {/* Plan meta */}
         <div style={{
-          background: '#111',
+          background: '#252D3A',
           borderRadius: '14px',
-          border: '1px solid #1a1a1a',
-          borderTop: '2px solid #D7FF00',
+          border: '1px solid #2C3545',
+          borderTop: '2px solid #96C828',
           padding: '16px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
         }}>
           {plan.description && (
-            <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#888', margin: 0, textAlign: 'right' }}>
+            <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#8C9AAB', margin: 0, textAlign: 'right' }}>
               {plan.description}
             </p>
           )}
@@ -186,8 +186,8 @@ export function PlanDetailPage() {
               </span>
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Dumbbell size={14} color="#555" />
-              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#555' }}>
+              <Dumbbell size={14} color="#8C9AAB" />
+              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#8C9AAB' }}>
                 {exercises.length} תרגילים
               </span>
             </div>
@@ -201,19 +201,19 @@ export function PlanDetailPage() {
                     key={d}
                     style={{
                       padding: '3px 8px',
-                      background: 'rgba(215,255,0,0.08)',
-                      border: '1px solid rgba(215,255,0,0.15)',
+                      background: 'rgba(150,200,40,0.08)',
+                      border: '1px solid rgba(150,200,40,0.15)',
                       borderRadius: '6px',
                       fontFamily: '"Rubik", sans-serif',
                       fontSize: '12px',
-                      color: '#D7FF00',
+                      color: '#96C828',
                     }}
                   >
                     {DAY_NAMES[d]}
                   </span>
                 ))}
               </div>
-              <Calendar size={14} color="#555" />
+              <Calendar size={14} color="#8C9AAB" />
             </div>
           )}
         </div>
@@ -225,7 +225,7 @@ export function PlanDetailPage() {
             fontSize: '13px',
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            color: '#555',
+            color: '#8C9AAB',
             textAlign: 'right',
           }}>
             תרגילים
@@ -239,9 +239,9 @@ export function PlanDetailPage() {
                 alignItems: 'center',
                 gap: '12px',
                 padding: '12px',
-                background: '#111',
+                background: '#252D3A',
                 borderRadius: '12px',
-                border: '1px solid #1a1a1a',
+                border: '1px solid #2C3545',
               }}
             >
               {/* Number */}
@@ -249,12 +249,12 @@ export function PlanDetailPage() {
                 flexShrink: 0,
                 width: 28, height: 28,
                 borderRadius: '50%',
-                background: 'rgba(215,255,0,0.08)',
-                border: '1px solid rgba(215,255,0,0.15)',
+                background: 'rgba(150,200,40,0.08)',
+                border: '1px solid rgba(150,200,40,0.15)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: '13px',
-                color: '#D7FF00',
+                color: '#96C828',
               }}>
                 {i + 1}
               </span>
@@ -264,19 +264,19 @@ export function PlanDetailPage() {
                 <img
                   src={ex.gif_url}
                   alt={ex.exercise_name}
-                  style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: '#0a0a0a' }}
+                  style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: '#1A2030' }}
                 />
               ) : (
-                <div style={{ width: 60, height: 60, borderRadius: 8, background: '#1a1a1a', flexShrink: 0 }} />
+                <div style={{ width: 60, height: 60, borderRadius: 8, background: '#2C3545', flexShrink: 0 }} />
               )}
 
               {/* Info */}
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#f0f0f0', textAlign: 'right' }}>
+                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#C8D0DB', textAlign: 'right' }}>
                   {ex.exercise_name}
                 </span>
                 {ex.is_bodyweight && (
-                  <span className="text-xs font-body px-2 py-0.5 rounded-full bg-lime-dim text-lime border border-lime/20">
+                  <span className="text-xs font-body px-2 py-0.5 rounded-full bg-accent-soft text-accent border border-accent/20">
                     משקל גוף
                   </span>
                 )}
@@ -293,10 +293,10 @@ export function PlanDetailPage() {
           style={{
             width: '100%',
             padding: '16px',
-            background: '#D7FF00',
+            background: '#96C828',
             border: 'none',
             borderRadius: '16px',
-            color: '#0a0a0a',
+            color: '#1A2030',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '20px',
             fontWeight: 700,
@@ -307,10 +307,10 @@ export function PlanDetailPage() {
             justifyContent: 'center',
             gap: '8px',
             WebkitTapHighlightColor: 'transparent',
-            boxShadow: '0 8px 32px rgba(215, 255, 0, 0.35), 0 2px 8px rgba(0,0,0,0.6)',
+            boxShadow: '0 8px 32px rgba(150,200,40,0.35), 0 2px 8px rgba(0,0,0,0.6)',
           }}
         >
-          <Play size={18} strokeWidth={2.5} fill="#0a0a0a" />
+          <Play size={18} strokeWidth={2.5} fill="#1A2030" />
           התחל אימון
         </button>
       </div>

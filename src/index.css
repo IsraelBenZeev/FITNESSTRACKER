@@ -5,15 +5,18 @@
   @apply border-2 border-red-700;
 }
 :root {
-  --bg: #0a0a0a;
-  --surface: #111111;
-  --surface2: #1a1a1a;
-  --border: #222222;
-  --lime: #D7FF00;
-  --lime-dim: rgba(215, 255, 0, 0.12);
-  --text: #f0f0f0;
-  --muted: #8f8f8f;
-  --danger: #ff4757;
+  --bg: #1A2030;
+  --surface: #252D3A;
+  --surface2: #2C3545;
+  --border: rgba(255,255,255,0.08);
+  --accent: #96C828;
+  --accent-soft: rgba(150,200,40,0.14);
+  --accent-line: rgba(150,200,40,0.40);
+  --heading: #FFFFFF;
+  --subtle: #516070;
+  --text: #C8D0DB;
+  --muted: #8C9AAB;
+  --danger: #F87171;
 }
 
 
@@ -28,13 +31,13 @@ html, body, #root {
 }
 
 ::selection {
-  background: var(--lime);
+  background: var(--accent);
   color: var(--bg);
 }
 
 body {
-  caret-color: var(--lime);
-  accent-color: var(--lime);
+  caret-color: var(--accent);
+  accent-color: var(--accent);
   font-family: 'Rubik', sans-serif;
   background-color: var(--bg);
   color: var(--text);
@@ -48,8 +51,8 @@ body {
     font-family: 'Barlow Condensed', sans-serif;
   }
 
-  .card-lime-top {
-    border-top: 2px solid var(--lime);
+  .card-accent-top {
+    border-top: 2px solid var(--accent);
   }
 
   .page-enter {

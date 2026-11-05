@@ -38,10 +38,10 @@ const RANGES: ExportRange[] = [
 const btnBase: React.CSSProperties = {
   width: '100%',
   padding: '14px 16px',
-  background: '#1a1a1a',
-  border: '1px solid #222',
+  background: '#2C3545',
+  border: '1px solid rgba(255,255,255,0.08)',
   borderRadius: '10px',
-  color: '#f0f0f0',
+  color: '#C8D0DB',
   fontFamily: '"DM Sans", sans-serif',
   fontSize: '15px',
   textAlign: 'right',
@@ -57,12 +57,12 @@ function RangeButton({ label, onClick }: { label: string; onClick: () => void })
       onClick={onClick}
       style={btnBase}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = 'rgba(215,255,0,0.4)'
-        e.currentTarget.style.background = 'rgba(215,255,0,0.05)'
+        e.currentTarget.style.borderColor = 'rgba(150,200,40,0.4)'
+        e.currentTarget.style.background = 'rgba(150,200,40,0.05)'
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = '#222'
-        e.currentTarget.style.background = '#1a1a1a'
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'
+        e.currentTarget.style.background = '#2C3545'
       }}
     >
       {label}
@@ -106,7 +106,7 @@ export function ExportRangeModal({ isOpen, onClose, title, onSelect }: ExportRan
           ))}
 
           {/* Divider */}
-          <div style={{ height: '1px', background: '#222', margin: '4px 0' }} />
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '4px 0' }} />
 
           {/* בחר תאריך */}
           <button
@@ -117,19 +117,19 @@ export function ExportRangeModal({ isOpen, onClose, title, onSelect }: ExportRan
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '8px',
-              color: '#D7FF00',
-              borderColor: 'rgba(215,255,0,0.2)',
+              color: '#96C828',
+              borderColor: 'rgba(150,200,40,0.2)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(215,255,0,0.5)'
-              e.currentTarget.style.background = 'rgba(215,255,0,0.07)'
+              e.currentTarget.style.borderColor = 'rgba(150,200,40,0.5)'
+              e.currentTarget.style.background = 'rgba(150,200,40,0.07)'
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(215,255,0,0.2)'
-              e.currentTarget.style.background = '#1a1a1a'
+              e.currentTarget.style.borderColor = 'rgba(150,200,40,0.2)'
+              e.currentTarget.style.background = '#2C3545'
             }}
           >
-            <Calendar size={15} strokeWidth={2} color="#D7FF00" />
+            <Calendar size={15} strokeWidth={2} color="#96C828" />
             <span>בחר תאריך</span>
           </button>
         </div>
@@ -145,7 +145,7 @@ export function ExportRangeModal({ isOpen, onClose, title, onSelect }: ExportRan
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              color: '#666',
+              color: '#8C9AAB',
               fontFamily: '"DM Sans", sans-serif',
               fontSize: '13px',
               padding: 0,
@@ -162,7 +162,7 @@ export function ExportRangeModal({ isOpen, onClose, title, onSelect }: ExportRan
             <label style={{
               fontFamily: '"DM Sans", sans-serif',
               fontSize: '12px',
-              color: '#666',
+              color: '#8C9AAB',
               textAlign: 'right',
               direction: 'rtl',
             }}>
@@ -176,10 +176,10 @@ export function ExportRangeModal({ isOpen, onClose, title, onSelect }: ExportRan
               style={{
                 width: '100%',
                 padding: '14px 16px',
-                background: '#1a1a1a',
-                border: '1px solid #333',
+                background: '#2C3545',
+                border: '1px solid #516070',
                 borderRadius: '10px',
-                color: '#f0f0f0',
+                color: '#C8D0DB',
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: '16px',
                 colorScheme: 'dark',
@@ -197,10 +197,10 @@ export function ExportRangeModal({ isOpen, onClose, title, onSelect }: ExportRan
             style={{
               width: '100%',
               padding: '14px 16px',
-              background: pickedDate ? '#D7FF00' : '#222',
+              background: pickedDate ? '#96C828' : 'rgba(255,255,255,0.08)',
               border: 'none',
               borderRadius: '10px',
-              color: pickedDate ? '#0a0a0a' : '#444',
+              color: pickedDate ? '#1A2030' : '#8C9AAB',
               fontFamily: '"DM Sans", sans-serif',
               fontSize: '15px',
               fontWeight: 600,

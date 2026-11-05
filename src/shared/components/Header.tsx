@@ -27,10 +27,10 @@ export function Header() {
           position: 'sticky',
           top: 0,
           zIndex: 50,
-          background: 'rgba(10,10,10,0.85)',
+          background: 'rgba(26,32,48,0.85)',
           backdropFilter: 'blur(12px)',
           WebkitBackdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #222',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
           paddingTop: 'calc(env(safe-area-inset-top) + 12px)',
           paddingBottom: '12px',
           paddingLeft: '16px',
@@ -44,7 +44,7 @@ export function Header() {
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '24px',
-            color: '#D7FF00',
+            color: '#96C828',
             letterSpacing: '0.05em',
             lineHeight: 1,
           }}
@@ -84,7 +84,7 @@ export function Header() {
             style={{
               fontFamily: '"Rubik", sans-serif',
               fontSize: '13px',
-              color: '#666',
+              color: '#8C9AAB',
               fontWeight: 400,
             }}
           >
@@ -121,15 +121,15 @@ export function Header() {
                   width: '28px',
                   height: '28px',
                   borderRadius: '50%',
-                  background: '#1a1a1a',
-                  border: '1px solid #333',
+                  background: '#2C3545',
+                  border: '1px solid #516070',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontFamily: '"DM Sans", sans-serif',
                   fontSize: '11px',
                   fontWeight: 600,
-                  color: '#D7FF00',
+                  color: '#96C828',
                   letterSpacing: '0.02em',
                   userSelect: 'none',
                 }}
@@ -157,9 +157,9 @@ export function Header() {
           <div
             onClick={e => e.stopPropagation()}
             style={{
-              background: '#111',
-              border: '1px solid #222',
-              borderTop: '2px solid #D7FF00',
+              background: '#252D3A',
+              border: '1px solid rgba(255,255,255,0.08)',
+              borderTop: '2px solid #96C828',
               borderRadius: '16px',
               padding: '28px 24px 20px',
               width: '280px',
@@ -170,7 +170,7 @@ export function Header() {
               style={{
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: '15px',
-                color: '#ccc',
+                color: '#C8D0DB',
                 margin: '0 0 20px',
                 lineHeight: 1.5,
               }}
@@ -184,9 +184,9 @@ export function Header() {
                   flex: 1,
                   padding: '10px',
                   borderRadius: '10px',
-                  border: '1px solid #333',
+                  border: '1px solid #516070',
                   background: 'transparent',
-                  color: '#888',
+                  color: '#8C9AAB',
                   fontFamily: '"DM Sans", sans-serif',
                   fontSize: '14px',
                   cursor: 'pointer',
@@ -201,7 +201,7 @@ export function Header() {
                   padding: '10px',
                   borderRadius: '10px',
                   border: 'none',
-                  background: '#ff4757',
+                  background: '#F87171',
                   color: '#fff',
                   fontFamily: '"DM Sans", sans-serif',
                   fontSize: '14px',

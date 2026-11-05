@@ -65,10 +65,10 @@ function StepperInput({ value, onChange, step, min, decimals, label }: StepperPr
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
+    background: '#2C3545',
+    border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: '10px',
-    color: '#888',
+    color: '#8C9AAB',
     fontSize: '20px',
     lineHeight: 1,
     cursor: 'pointer',
@@ -82,7 +82,7 @@ function StepperInput({ value, onChange, step, min, decimals, label }: StepperPr
       <span style={{
         fontFamily: '"Rubik", sans-serif',
         fontSize: '10px',
-        color: '#444',
+        color: '#8C9AAB',
         letterSpacing: '0.03em',
       }}>
         {label}
@@ -98,7 +98,7 @@ function StepperInput({ value, onChange, step, min, decimals, label }: StepperPr
         <span style={{
           fontFamily: '"Bebas Neue", sans-serif',
           fontSize: '26px',
-          color: '#f0f0f0',
+          color: '#C8D0DB',
           width: '44px',
           textAlign: 'center',
           letterSpacing: '0.02em',
@@ -132,16 +132,16 @@ function BodyweightLoad({ value, onChange }: BodyweightLoadProps) {
   if (!enabled) {
     return (
       <div className="flex flex-col items-center gap-1">
-        <span className="font-body text-[10px] text-[#444]">משקל</span>
+        <span className="font-body text-[10px] text-[#8C9AAB]">משקל</span>
         <div className="flex items-center gap-1.5">
-          <span className="text-xs font-body px-3 py-1.5 rounded-full bg-lime-dim text-lime border border-lime/20 whitespace-nowrap">
+          <span className="text-xs font-body px-3 py-1.5 rounded-full bg-accent-soft text-accent border border-accent/20 whitespace-nowrap">
             משקל גוף
           </span>
           <button
             type="button"
             onClick={() => onChange('0')}
             aria-label="הוסף משקל נוסף"
-            className="flex h-9 items-center gap-1 rounded-[10px] border border-dashed border-[#2a2a2a] bg-surface2 px-2 font-body text-[11px] text-muted transition-colors duration-200 hover:border-lime hover:text-lime [-webkit-tap-highlight-color:transparent]"
+            className="flex h-9 items-center gap-1 rounded-[10px] border border-dashed border-[rgba(255,255,255,0.08)] bg-surface2 px-2 font-body text-[11px] text-muted transition-colors duration-200 hover:border-accent hover:text-accent [-webkit-tap-highlight-color:transparent]"
           >
             <Plus size={12} strokeWidth={2} />
             <Dumbbell size={13} strokeWidth={2} />
@@ -209,9 +209,9 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
         <div style={{
           borderRadius: '16px',
           overflow: 'hidden',
-          background: '#0d0d0d',
+          background: '#1A2030',
           lineHeight: 0,
-          border: '1px solid #1a1a1a',
+          border: '1px solid #2C3545',
         }}>
           <img
             src={ex.gif_url}
@@ -227,7 +227,7 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
           fontFamily: '"Barlow Condensed", sans-serif',
           fontSize: '26px',
           fontWeight: 700,
-          color: '#f0f0f0',
+          color: '#C8D0DB',
           lineHeight: 1.1,
           letterSpacing: '-0.01em',
         }}>
@@ -238,8 +238,8 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
       {/* Previous workout reference */}
       {previousSets && previousSets.length > 0 && (
         <div style={{
-          background: '#0d0d0d',
-          border: '1px solid #1a1a1a',
+          background: '#1A2030',
+          border: '1px solid #2C3545',
           borderRadius: '10px',
           padding: '9px 12px',
           direction: 'rtl',
@@ -247,7 +247,7 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
           <div style={{
             fontFamily: '"Rubik", sans-serif',
             fontSize: '10px',
-            color: '#3a3a3a',
+            color: '#516070',
             letterSpacing: '0.05em',
             marginBottom: '7px',
           }}>
@@ -272,7 +272,7 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
                 : '—'
               return (
                 <div key={s.id} style={{
-                  background: '#181818',
+                  background: '#2C3545',
                   borderRadius: '6px',
                   padding: '4px 8px',
                   display: 'flex',
@@ -282,14 +282,14 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
                   <span style={{
                     fontFamily: '"Rubik", sans-serif',
                     fontSize: '10px',
-                    color: '#3a3a3a',
+                    color: '#516070',
                   }}>
                     {s.set_number}.
                   </span>
                   <span style={{
                     fontFamily: '"Rubik", sans-serif',
                     fontSize: '13px',
-                    color: '#555',
+                    color: '#8C9AAB',
                   }}>
                     {label}
                   </span>
@@ -317,14 +317,14 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
               width: 28,
               height: 44,
               borderRadius: '50%',
-              background: 'rgba(215,255,0,0.08)',
-              border: '1px solid rgba(215,255,0,0.15)',
+              background: 'rgba(150,200,40,0.08)',
+              border: '1px solid rgba(150,200,40,0.15)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '12px',
-              color: '#D7FF00',
+              color: '#96C828',
               flexShrink: 0,
               alignSelf: 'flex-end',
               marginBottom: '2px',
@@ -387,7 +387,7 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
                 background: 'none',
                 border: 'none',
                 cursor: 'pointer',
-                color: '#ff4757',
+                color: '#F87171',
                 flexShrink: 0,
                 WebkitTapHighlightColor: 'transparent',
                 alignSelf: 'flex-end',
@@ -416,9 +416,9 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
             gap: '6px',
             padding: '12px',
             background: 'none',
-            border: '1px dashed #2a2a2a',
+            border: '1px dashed rgba(255,255,255,0.08)',
             borderRadius: '10px',
-            color: '#555',
+            color: '#8C9AAB',
             fontFamily: '"Rubik", sans-serif',
             fontSize: '13px',
             cursor: 'pointer',
@@ -442,10 +442,10 @@ function ExerciseSlide({ exerciseIndex, session, control, previousSets }: SlideP
             style={{
               width: '100%',
               padding: '10px 12px',
-              background: '#111',
-              border: '1px solid #1a1a1a',
+              background: '#252D3A',
+              border: '1px solid #2C3545',
               borderRadius: '10px',
-              color: '#888',
+              color: '#8C9AAB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '13px',
               resize: 'none',
@@ -635,7 +635,7 @@ export function WorkoutSessionPage() {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        background: '#0a0a0a',
+        background: '#1A2030',
       }}
     >
       {/* ── Top bar ── */}
@@ -647,7 +647,7 @@ export function WorkoutSessionPage() {
         paddingBottom: '12px',
         paddingLeft: '16px',
         paddingRight: '16px',
-        borderBottom: '1px solid #1a1a1a',
+        borderBottom: '1px solid #2C3545',
         flexShrink: 0,
       }}>
         <button
@@ -656,8 +656,8 @@ export function WorkoutSessionPage() {
           style={{
             width: 36, height: 36,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: '#1a1a1a', border: '1px solid #222', borderRadius: '10px',
-            cursor: 'pointer', color: '#666',
+            background: '#2C3545', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px',
+            cursor: 'pointer', color: '#8C9AAB',
             WebkitTapHighlightColor: 'transparent',
           }}
         >
@@ -667,13 +667,13 @@ export function WorkoutSessionPage() {
         <div style={{ textAlign: 'center' }}>
           <div style={{
             fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: '17px', fontWeight: 600, color: '#f0f0f0',
+            fontSize: '17px', fontWeight: 600, color: '#C8D0DB',
           }}>
             {session.planName}
           </div>
           <div style={{
             fontFamily: '"Bebas Neue", sans-serif',
-            fontSize: '15px', color: '#D7FF00', letterSpacing: '0.06em',
+            fontSize: '15px', color: '#96C828', letterSpacing: '0.06em',
           }}>
             {formatElapsed(elapsed)}
           </div>
@@ -685,10 +685,10 @@ export function WorkoutSessionPage() {
           disabled={isSaving}
           style={{
             padding: '8px 14px',
-            background: '#D7FF00',
+            background: '#96C828',
             border: 'none',
             borderRadius: '10px',
-            color: '#0a0a0a',
+            color: '#1A2030',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '15px', fontWeight: 700,
             cursor: isSaving ? 'not-allowed' : 'pointer',
@@ -715,7 +715,7 @@ export function WorkoutSessionPage() {
           <span style={{
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '14px',
-            color: '#444',
+            color: '#8C9AAB',
             minWidth: '32px',
             textAlign: 'right',
           }}>
@@ -731,7 +731,7 @@ export function WorkoutSessionPage() {
                   width: i === currentIndex ? 20 : 7,
                   height: 7,
                   borderRadius: 4,
-                  background: i === currentIndex ? '#D7FF00' : '#252525',
+                  background: i === currentIndex ? '#96C828' : '#2C3545',
                   border: 'none',
                   cursor: 'pointer',
                   padding: 0,
@@ -764,9 +764,9 @@ export function WorkoutSessionPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: currentIndex === 0 ? 'rgba(20,20,20,0.3)' : 'rgba(20,20,20,0.88)',
-              border: `1px solid ${currentIndex === 0 ? '#1a1a1a' : '#2a2a2a'}`,
-              color: currentIndex === 0 ? '#2a2a2a' : '#aaa',
+              background: currentIndex === 0 ? 'rgba(37,45,58,0.3)' : 'rgba(37,45,58,0.88)',
+              border: `1px solid ${currentIndex === 0 ? '#2C3545' : 'rgba(255,255,255,0.08)'}`,
+              color: currentIndex === 0 ? 'rgba(255,255,255,0.08)' : '#8C9AAB',
               cursor: currentIndex === 0 ? 'default' : 'pointer',
               backdropFilter: 'blur(4px)',
               WebkitTapHighlightColor: 'transparent',
@@ -793,9 +793,9 @@ export function WorkoutSessionPage() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: currentIndex === totalEx - 1 ? '#D7FF00' : 'rgba(20,20,20,0.88)',
-              border: currentIndex === totalEx - 1 ? 'none' : '1px solid #2a2a2a',
-              color: currentIndex === totalEx - 1 ? '#0a0a0a' : '#aaa',
+              background: currentIndex === totalEx - 1 ? '#96C828' : 'rgba(37,45,58,0.88)',
+              border: currentIndex === totalEx - 1 ? 'none' : '1px solid rgba(255,255,255,0.08)',
+              color: currentIndex === totalEx - 1 ? '#1A2030' : '#8C9AAB',
               cursor: 'pointer',
               backdropFilter: 'blur(4px)',
               WebkitTapHighlightColor: 'transparent',
@@ -870,10 +870,10 @@ export function WorkoutSessionPage() {
                 style={{
                   width: '100%',
                   padding: '10px 12px',
-                  background: '#111',
-                  border: '1px solid #1a1a1a',
+                  background: '#252D3A',
+                  border: '1px solid #2C3545',
                   borderRadius: '10px',
-                  color: '#888',
+                  color: '#8C9AAB',
                   fontFamily: '"Rubik", sans-serif', fontSize: '13px',
                   resize: 'none', outline: 'none',
                   boxSizing: 'border-box',
@@ -903,9 +903,9 @@ export function WorkoutSessionPage() {
           padding: '20px',
         }}>
           <div style={{
-            background: '#111',
+            background: '#252D3A',
             borderRadius: '16px',
-            borderTop: '2px solid #D7FF00',
+            borderTop: '2px solid #96C828',
             padding: '24px',
             width: '100%',
             maxWidth: '320px',
@@ -922,7 +922,7 @@ export function WorkoutSessionPage() {
                 width: 30, height: 30,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: 'none', border: 'none',
-                color: '#444', cursor: 'pointer',
+                color: '#8C9AAB', cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
@@ -931,13 +931,13 @@ export function WorkoutSessionPage() {
 
             <span style={{
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '21px', fontWeight: 600, color: '#f0f0f0',
+              fontSize: '21px', fontWeight: 600, color: '#C8D0DB',
             }}>
               האם לסיים את האימון?
             </span>
             <p style={{
               fontFamily: '"Rubik", sans-serif', fontSize: '13px',
-              color: '#555', margin: 0, lineHeight: 1.5,
+              color: '#8C9AAB', margin: 0, lineHeight: 1.5,
             }}>
               האימון יישמר בהיסטוריה שלך
             </p>
@@ -949,10 +949,10 @@ export function WorkoutSessionPage() {
                 disabled={isSaving}
                 style={{
                   padding: '14px',
-                  background: '#D7FF00',
+                  background: '#96C828',
                   border: 'none',
                   borderRadius: '12px',
-                  color: '#0a0a0a',
+                  color: '#1A2030',
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontSize: '17px', fontWeight: 700,
                   cursor: isSaving ? 'not-allowed' : 'pointer',
@@ -970,10 +970,10 @@ export function WorkoutSessionPage() {
                 onClick={() => { clearSession(); navigate('/workout', { replace: true }) }}
                 style={{
                   padding: '14px',
-                  background: 'rgba(255,71,87,0.08)',
-                  border: '1px solid rgba(255,71,87,0.25)',
+                  background: 'rgba(248,113,113,0.08)',
+                  border: '1px solid rgba(248,113,113,0.25)',
                   borderRadius: '12px',
-                  color: '#ff4757',
+                  color: '#F87171',
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontSize: '17px', fontWeight: 700,
                   cursor: 'pointer',
@@ -989,9 +989,9 @@ export function WorkoutSessionPage() {
                 style={{
                   padding: '12px',
                   background: 'none',
-                  border: '1px solid #222',
+                  border: '1px solid rgba(255,255,255,0.08)',
                   borderRadius: '12px',
-                  color: '#555',
+                  color: '#8C9AAB',
                   fontFamily: '"Rubik", sans-serif',
                   fontSize: '14px',
                   cursor: 'pointer',

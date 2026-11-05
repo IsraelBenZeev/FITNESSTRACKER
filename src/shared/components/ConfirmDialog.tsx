@@ -45,9 +45,9 @@ export function ConfirmDialog({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: '#111',
-          border: '1px solid #222',
-          borderTop: '2px solid #D7FF00',
+          background: '#252D3A',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderTop: '2px solid #96C828',
           borderRadius: '16px',
           padding: '28px 24px 20px',
           width: '280px',
@@ -58,7 +58,7 @@ export function ConfirmDialog({
           style={{
             fontFamily: '"DM Sans", sans-serif',
             fontSize: '15px',
-            color: '#ccc',
+            color: '#C8D0DB',
             margin: '0 0 20px',
             lineHeight: 1.5,
           }}
@@ -72,9 +72,9 @@ export function ConfirmDialog({
               flex: 1,
               padding: '10px',
               borderRadius: '10px',
-              border: '1px solid #333',
+              border: '1px solid #516070',
               background: 'transparent',
-              color: '#888',
+              color: '#8C9AAB',
               fontFamily: '"DM Sans", sans-serif',
               fontSize: '14px',
               cursor: 'pointer',
@@ -89,7 +89,7 @@ export function ConfirmDialog({
               padding: '10px',
               borderRadius: '10px',
               border: 'none',
-              background: '#ff4757',
+              background: '#F87171',
               color: '#fff',
               fontFamily: '"DM Sans", sans-serif',
               fontSize: '14px',

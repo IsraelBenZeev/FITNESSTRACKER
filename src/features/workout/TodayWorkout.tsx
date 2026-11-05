@@ -10,7 +10,7 @@ const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמיש
 const DIFFICULTY_COLOR: Record<string, string> = {
   קל: '#4ade80',
   בינוני: '#fb923c',
-  קשה: '#ff4757',
+  קשה: '#F87171',
 }
 
 // ─── CompletedWorkoutModal ────────────────────────────────────────────────────
@@ -50,9 +50,9 @@ function CompletedWorkoutModal({
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: '#111',
+          background: '#252D3A',
           borderRadius: '20px 20px 0 0',
-          borderTop: '2px solid #D7FF00',
+          borderTop: '2px solid #96C828',
           width: '100%',
           maxWidth: '480px',
           maxHeight: '80vh',
@@ -67,7 +67,7 @@ function CompletedWorkoutModal({
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: '16px 16px 12px',
-          borderBottom: '1px solid #1a1a1a',
+          borderBottom: '1px solid #2C3545',
           flexShrink: 0,
         }}>
           <button
@@ -75,8 +75,8 @@ function CompletedWorkoutModal({
             style={{
               width: 32, height: 32,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: '#1a1a1a', border: '1px solid #222', borderRadius: '8px',
-              cursor: 'pointer', color: '#666',
+              background: '#2C3545', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px',
+              cursor: 'pointer', color: '#8C9AAB',
               WebkitTapHighlightColor: 'transparent',
             }}
           >
@@ -85,13 +85,13 @@ function CompletedWorkoutModal({
           <div style={{ textAlign: 'center' }}>
             <div style={{
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '18px', fontWeight: 700, color: '#f0f0f0',
+              fontSize: '18px', fontWeight: 700, color: '#C8D0DB',
             }}>
               {planName}
             </div>
             <div style={{
               fontFamily: '"Rubik", sans-serif',
-              fontSize: '11px', color: '#444',
+              fontSize: '11px', color: '#8C9AAB',
             }}>
               {log.date}
             </div>
@@ -104,7 +104,7 @@ function CompletedWorkoutModal({
           {grouped.size === 0 ? (
             <p style={{
               fontFamily: '"Rubik", sans-serif', fontSize: '13px',
-              color: '#444', textAlign: 'center', margin: '24px 0',
+              color: '#8C9AAB', textAlign: 'center', margin: '24px 0',
             }}>
               לא נרשמו סטים לאימון זה
             </p>
@@ -113,7 +113,7 @@ function CompletedWorkoutModal({
               <div key={exName} style={{ marginBottom: '16px' }}>
                 <div style={{
                   fontFamily: '"Barlow Condensed", sans-serif',
-                  fontSize: '15px', fontWeight: 600, color: '#D7FF00',
+                  fontSize: '15px', fontWeight: 600, color: '#96C828',
                   marginBottom: '6px', textAlign: 'right',
                 }}>
                   {exName}
@@ -125,35 +125,35 @@ function CompletedWorkoutModal({
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       padding: '6px 10px',
-                      background: '#1a1a1a',
+                      background: '#2C3545',
                       borderRadius: '6px',
                     }}>
                       <div style={{ display: 'flex', gap: '12px' }}>
                         {s.weight_kg != null && (
                           <span style={{
                             fontFamily: '"Bebas Neue", sans-serif',
-                            fontSize: '16px', color: '#f0f0f0',
+                            fontSize: '16px', color: '#C8D0DB',
                           }}>
-                            {s.weight_kg} <span style={{ fontSize: '11px', color: '#555', fontFamily: '"Rubik", sans-serif' }}>ק"ג</span>
+                            {s.weight_kg} <span style={{ fontSize: '11px', color: '#8C9AAB', fontFamily: '"Rubik", sans-serif' }}>ק"ג</span>
                           </span>
                         )}
                         {s.is_bodyweight && s.added_weight_kg != null && s.added_weight_kg > 0 && (
-                          <span className="font-['Bebas_Neue'] text-base text-[#f0f0f0]">
-                            +{s.added_weight_kg} <span className="font-body text-[11px] text-[#555]">ק"ג</span>
+                          <span className="font-['Bebas_Neue'] text-base text-[#C8D0DB]">
+                            +{s.added_weight_kg} <span className="font-body text-[11px] text-[#8C9AAB]">ק"ג</span>
                           </span>
                         )}
                         {s.reps != null && (
                           <span style={{
                             fontFamily: '"Bebas Neue", sans-serif',
-                            fontSize: '16px', color: '#f0f0f0',
+                            fontSize: '16px', color: '#C8D0DB',
                           }}>
-                            {s.reps} <span style={{ fontSize: '11px', color: '#555', fontFamily: '"Rubik", sans-serif' }}>חזרות</span>
+                            {s.reps} <span style={{ fontSize: '11px', color: '#8C9AAB', fontFamily: '"Rubik", sans-serif' }}>חזרות</span>
                           </span>
                         )}
                       </div>
                       <span style={{
                         fontFamily: '"Rubik", sans-serif', fontSize: '11px',
-                        color: '#D7FF00', opacity: 0.6,
+                        color: '#96C828', opacity: 0.6,
                       }}>
                         סט {i + 1}
                       </span>
@@ -190,7 +190,7 @@ function CompactPlanCard({ plan, onStart }: { plan: WorkoutPlan; onStart: () => 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
             <span style={{
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '18px', fontWeight: 600, color: '#f0f0f0',
+              fontSize: '18px', fontWeight: 600, color: '#C8D0DB',
             }}>
               {plan.name}
             </span>
@@ -198,11 +198,11 @@ function CompactPlanCard({ plan, onStart }: { plan: WorkoutPlan; onStart: () => 
               <span style={{
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '10px',
-                color: DIFFICULTY_COLOR[plan.difficulty] ?? '#555',
+                color: DIFFICULTY_COLOR[plan.difficulty] ?? '#8C9AAB',
                 padding: '2px 7px',
-                background: `${DIFFICULTY_COLOR[plan.difficulty] ?? '#555'}15`,
+                background: `${DIFFICULTY_COLOR[plan.difficulty] ?? '#8C9AAB'}15`,
                 borderRadius: '20px',
-                border: `1px solid ${DIFFICULTY_COLOR[plan.difficulty] ?? '#555'}30`,
+                border: `1px solid ${DIFFICULTY_COLOR[plan.difficulty] ?? '#8C9AAB'}30`,
                 flexShrink: 0,
               }}>
                 {plan.difficulty}
@@ -210,7 +210,7 @@ function CompactPlanCard({ plan, onStart }: { plan: WorkoutPlan; onStart: () => 
             )}
           </div>
           {days && (
-            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>
+            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#8C9AAB' }}>
               {days}
             </span>
           )}
@@ -224,10 +224,10 @@ function CompactPlanCard({ plan, onStart }: { plan: WorkoutPlan; onStart: () => 
             alignItems: 'center',
             gap: '4px',
             padding: '8px 12px',
-            background: '#D7FF00',
+            background: '#96C828',
             border: 'none',
             borderRadius: '8px',
-            color: '#0a0a0a',
+            color: '#1A2030',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '14px',
             fontWeight: 700,
@@ -236,7 +236,7 @@ function CompactPlanCard({ plan, onStart }: { plan: WorkoutPlan; onStart: () => 
             WebkitTapHighlightColor: 'transparent',
           }}
         >
-          <Play size={12} strokeWidth={2.5} fill="#0a0a0a" />
+          <Play size={12} strokeWidth={2.5} fill="#1A2030" />
           פרטים
           <ChevronLeft size={12} strokeWidth={2.5} />
         </button>
@@ -265,7 +265,7 @@ export function TodayWorkout() {
 
   if (plansLoading || logLoading) {
     return (
-      <div style={{ padding: '32px', textAlign: 'center', color: '#555', fontFamily: '"Rubik", sans-serif' }}>
+      <div style={{ padding: '32px', textAlign: 'center', color: '#8C9AAB', fontFamily: '"Rubik", sans-serif' }}>
         טוען...
       </div>
     )
@@ -274,8 +274,8 @@ export function TodayWorkout() {
   if (plans.length === 0 && !hasCompletedToday) {
     return (
       <div style={{ padding: '48px 32px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-        <Dumbbell size={40} color="#222" strokeWidth={1.5} />
-        <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#444', margin: 0 }}>
+        <Dumbbell size={40} color="rgba(255,255,255,0.08)" strokeWidth={1.5} />
+        <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#8C9AAB', margin: 0 }}>
           עדיין אין תכניות אימון.<br />
           עבור ל"תכניות" כדי ליצור אחת.
         </p>
@@ -292,7 +292,7 @@ export function TodayWorkout() {
           <>
             <h3 style={{
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '13px', color: '#D7FF00',
+              fontSize: '13px', color: '#96C828',
               margin: 0, letterSpacing: '0.08em',
               textTransform: 'uppercase', textAlign: 'right',
             }}>
@@ -311,10 +311,10 @@ export function TodayWorkout() {
                     style={{
                       display: 'flex', alignItems: 'center', gap: '4px',
                       padding: '8px 12px',
-                      background: '#1a1a1a',
-                      border: '1px solid #222',
+                      background: '#2C3545',
+                      border: '1px solid rgba(255,255,255,0.08)',
                       borderRadius: '8px',
-                      color: '#888',
+                      color: '#8C9AAB',
                       fontFamily: '"Rubik", sans-serif', fontSize: '12px',
                       cursor: 'pointer', flexShrink: 0,
                       WebkitTapHighlightColor: 'transparent',
@@ -337,7 +337,7 @@ export function TodayWorkout() {
                     </span>
                     <span style={{
                       fontFamily: '"Barlow Condensed", sans-serif',
-                      fontSize: '18px', fontWeight: 600, color: '#f0f0f0',
+                      fontSize: '18px', fontWeight: 600, color: '#C8D0DB',
                     }}>
                       {getPlanName(log.workout_plan_id)}
                     </span>
@@ -353,7 +353,7 @@ export function TodayWorkout() {
           <>
             <h3 style={{
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '13px', color: hasCompletedToday ? '#555' : '#D7FF00',
+              fontSize: '13px', color: hasCompletedToday ? '#8C9AAB' : '#96C828',
               margin: 0, letterSpacing: '0.08em',
               textTransform: 'uppercase', textAlign: 'right',
             }}>
@@ -369,10 +369,10 @@ export function TodayWorkout() {
         {todayPlans.length === 0 && !hasCompletedToday && (
           <div style={{
             padding: '16px',
-            background: '#111', borderRadius: '10px',
-            border: '1px solid #1a1a1a', textAlign: 'center',
+            background: '#252D3A', borderRadius: '10px',
+            border: '1px solid #2C3545', textAlign: 'center',
           }}>
-            <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#444', margin: 0 }}>
+            <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#8C9AAB', margin: 0 }}>
               היום אין אימון מתוכנן
             </p>
           </div>
@@ -383,7 +383,7 @@ export function TodayWorkout() {
           <>
             <h3 style={{
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '13px', color: '#555',
+              fontSize: '13px', color: '#8C9AAB',
               margin: '6px 0 0', letterSpacing: '0.08em',
               textTransform: 'uppercase', textAlign: 'right',
             }}>

@@ -119,12 +119,12 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
     // ── Date header (RTL) ────────────────────────────────────────
     setFill(doc, PDF_C.surface2)
     doc.rect(M, y, W - M * 2, 9, 'F')
-    setFill(doc, PDF_C.lime)
-    doc.rect(RIGHT - 2, y, 2, 9, 'F')   // lime strip RIGHT
+    setFill(doc, PDF_C.accent)
+    doc.rect(RIGHT - 2, y, 2, 9, 'F')   // accent strip RIGHT
 
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(9)
-    setTextColor(doc, PDF_C.lime)
+    setTextColor(doc, PDF_C.accent)
     doc.text(fmtDateWeekday(log.date), RIGHT - 6, y + 6, { align: 'right' })
 
     doc.setFont('helvetica', 'normal')
@@ -156,14 +156,14 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
         }
 
         if ((s.set_number ?? 0) % 2 === 0) {
-          setFill(doc, '#0f0f0f')
+          setFill(doc, '#1A2030')
           doc.rect(M, y - 1, W - M * 2, 7, 'F')
         }
 
         // Set number RIGHT
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(7)
-        setTextColor(doc, '#555555')
+        setTextColor(doc, '#8C9AAB')
         doc.text(`Set ${s.set_number}`, RIGHT - 8, y + 4.5, { align: 'right' })
 
         // Weight × reps LEFT
@@ -192,7 +192,7 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
         }
         doc.setFont('NotoSansHebrew', 'normal')
         doc.setFontSize(7)
-        setTextColor(doc, '#444444')
+        setTextColor(doc, '#8C9AAB')
         doc.text(rtl(exNotes), RIGHT - 4, y + 4, { align: 'right' })
         y += 6
       }

@@ -40,24 +40,24 @@ function StatDetailModal({ stat, onClose, onEdit }: StatDetailModalProps) {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '14px 16px',
-              background: '#1a1a1a',
+              background: '#2C3545',
               borderRadius: '12px',
-              border: '1px solid #222',
+              border: '1px solid rgba(255,255,255,0.08)',
             }}
           >
-            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#888' }}>
+            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#8C9AAB' }}>
               משקל
             </span>
             <span
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: '28px',
-                color: '#D7FF00',
+                color: '#96C828',
                 lineHeight: 1,
               }}
             >
               {stat.weight_kg.toFixed(1)}{' '}
-              <span style={{ fontSize: '14px', color: '#555' }}>ק"ג</span>
+              <span style={{ fontSize: '14px', color: '#8C9AAB' }}>ק"ג</span>
             </span>
           </div>
         )}
@@ -69,24 +69,24 @@ function StatDetailModal({ stat, onClose, onEdit }: StatDetailModalProps) {
               alignItems: 'center',
               justifyContent: 'space-between',
               padding: '14px 16px',
-              background: '#1a1a1a',
+              background: '#2C3545',
               borderRadius: '12px',
-              border: '1px solid #222',
+              border: '1px solid rgba(255,255,255,0.08)',
             }}
           >
-            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#888' }}>
+            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#8C9AAB' }}>
               היקף בטן
             </span>
             <span
               style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: '28px',
-                color: '#D7FF00',
+                color: '#96C828',
                 lineHeight: 1,
               }}
             >
               {stat.waist_cm.toFixed(1)}{' '}
-              <span style={{ fontSize: '14px', color: '#555' }}>ס"מ</span>
+              <span style={{ fontSize: '14px', color: '#8C9AAB' }}>ס"מ</span>
             </span>
           </div>
         )}
@@ -95,9 +95,9 @@ function StatDetailModal({ stat, onClose, onEdit }: StatDetailModalProps) {
           <div
             style={{
               padding: '14px 16px',
-              background: '#1a1a1a',
+              background: '#2C3545',
               borderRadius: '12px',
-              border: '1px solid #222',
+              border: '1px solid rgba(255,255,255,0.08)',
             }}
           >
             <span
@@ -105,7 +105,7 @@ function StatDetailModal({ stat, onClose, onEdit }: StatDetailModalProps) {
                 display: 'block',
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '11px',
-                color: '#555',
+                color: '#8C9AAB',
                 marginBottom: '6px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.05em',
@@ -113,7 +113,7 @@ function StatDetailModal({ stat, onClose, onEdit }: StatDetailModalProps) {
             >
               הערות
             </span>
-            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#ccc', lineHeight: 1.5 }}>
+            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#C8D0DB', lineHeight: 1.5 }}>
               {stat.notes}
             </span>
           </div>
@@ -128,9 +128,9 @@ function StatDetailModal({ stat, onClose, onEdit }: StatDetailModalProps) {
             gap: '8px',
             padding: '13px',
             background: 'transparent',
-            border: '1px solid rgba(215,255,0,0.3)',
+            border: '1px solid rgba(150,200,40,0.3)',
             borderRadius: '12px',
-            color: '#D7FF00',
+            color: '#96C828',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '16px',
             fontWeight: 600,
@@ -192,10 +192,10 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
     <>
       <div
         style={{
-          background: '#111',
+          background: '#252D3A',
           borderRadius: '14px',
-          border: '1px solid #222',
-          borderTop: '2px solid #D7FF00',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderTop: '2px solid #96C828',
           overflow: 'hidden',
         }}
       >
@@ -206,15 +206,15 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '14px 16px',
-            borderBottom: '1px solid #1a1a1a',
+            borderBottom: '1px solid #2C3545',
           }}
         >
           <button
             onClick={nextMonth}
             style={{
               width: '32px', height: '32px', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', background: '#1a1a1a', border: '1px solid #222',
-              borderRadius: '8px', cursor: 'pointer', color: '#888',
+              justifyContent: 'center', background: '#2C3545', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '8px', cursor: 'pointer', color: '#8C9AAB',
             }}
           >
             <ChevronRight size={16} strokeWidth={2} />
@@ -224,7 +224,7 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
             style={{
               fontFamily: '"Barlow Condensed", sans-serif',
               fontSize: '18px',
-              color: '#e0e0e0',
+              color: '#C8D0DB',
               letterSpacing: '0.04em',
             }}
           >
@@ -236,8 +236,8 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
             disabled={false}
             style={{
               width: '32px', height: '32px', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', background: '#1a1a1a', border: '1px solid #222',
-              borderRadius: '8px', cursor: 'pointer', color: '#888',
+              justifyContent: 'center', background: '#2C3545', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '8px', cursor: 'pointer', color: '#8C9AAB',
             }}
           >
             <ChevronLeft size={16} strokeWidth={2} />
@@ -260,7 +260,7 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
                 textAlign: 'center',
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '10px',
-                color: '#444',
+                color: '#8C9AAB',
                 fontWeight: 500,
                 padding: '2px 0',
               }}
@@ -303,11 +303,11 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
                   gap: '2px',
                   borderRadius: '8px',
                   border: hasStat
-                    ? '1px solid rgba(215,255,0,0.35)'
+                    ? '1px solid rgba(150,200,40,0.35)'
                     : isToday
-                    ? '1px solid #333'
+                    ? '1px solid #516070'
                     : '1px solid transparent',
-                  background: hasStat ? 'rgba(215,255,0,0.06)' : 'transparent',
+                  background: hasStat ? 'rgba(150,200,40,0.06)' : 'transparent',
                   cursor: hasStat ? 'pointer' : 'default',
                   padding: '2px',
                   WebkitTapHighlightColor: 'transparent',
@@ -318,7 +318,7 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
                   style={{
                     fontFamily: '"Rubik", sans-serif',
                     fontSize: '11px',
-                    color: isToday ? '#D7FF00' : hasStat ? '#ccc' : '#444',
+                    color: isToday ? '#96C828' : hasStat ? '#C8D0DB' : '#8C9AAB',
                     fontWeight: isToday ? 700 : 400,
                     lineHeight: 1,
                   }}
@@ -332,7 +332,7 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
                         style={{
                           fontFamily: '"Barlow Condensed", sans-serif',
                           fontSize: '10px',
-                          color: '#D7FF00',
+                          color: '#96C828',
                           lineHeight: 1,
                         }}
                       >
@@ -344,7 +344,7 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
                         style={{
                           fontFamily: '"Barlow Condensed", sans-serif',
                           fontSize: '9px',
-                          color: '#888',
+                          color: '#8C9AAB',
                           lineHeight: 1,
                         }}
                       >
@@ -362,25 +362,25 @@ export function BodyHistoryCalendar({ stats, onEditStat }: BodyHistoryCalendarPr
         <div
           style={{
             padding: '8px 16px 12px',
-            borderTop: '1px solid #1a1a1a',
+            borderTop: '1px solid #2C3545',
             display: 'flex',
             gap: '16px',
             alignItems: 'center',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '11px', color: '#D7FF00' }}>
+            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '11px', color: '#96C828' }}>
               00.0
             </span>
-            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '10px', color: '#444' }}>
+            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '10px', color: '#8C9AAB' }}>
               = משקל (ק"ג)
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '11px', color: '#888' }}>
+            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '11px', color: '#8C9AAB' }}>
               00
             </span>
-            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '10px', color: '#444' }}>
+            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '10px', color: '#8C9AAB' }}>
               = היקף (ס"מ)
             </span>
           </div>

@@ -25,7 +25,7 @@ A personal nutrition, body, and workout log. Success means logging a meal in sec
 - Deploys to Vercel from `main`.
 
 ## Brand Commitments
-- Dark UI with lime (#D7FF00) as the accent. Confirmed by the owner as the part of the identity to keep; everything else (structure, type, components) is open.
+- Palette chosen by the owner (from another project of theirs): navy-slate dark ground #1A2030, surfaces #252D3A / #2C3545, green accent #96C828, text #C8D0DB / #8C9AAB, headings #FFFFFF, warning #F87171. Structure, type and components are open.
 
 ## Evidence on Hand
 Real personal data in Supabase. No marketing assets, testimonials, or illustrations exist; none should be invented.

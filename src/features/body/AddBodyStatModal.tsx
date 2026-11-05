@@ -77,7 +77,7 @@ export function AddBodyStatModal({ isOpen, onClose, editStat }: AddBodyStatModal
 
         {/* Notes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', fontWeight: 500, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
             הערות (אופציונלי)
           </span>
           <textarea
@@ -87,11 +87,11 @@ export function AddBodyStatModal({ isOpen, onClose, editStat }: AddBodyStatModal
             rows={2}
             style={{
               width: '100%',
-              background: '#1a1a1a',
-              border: '1px solid #2a2a2a',
+              background: '#2C3545',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '10px',
               padding: '12px 14px',
-              color: '#f0f0f0',
+              color: '#C8D0DB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '14px',
               outline: 'none',
@@ -108,8 +108,8 @@ export function AddBodyStatModal({ isOpen, onClose, editStat }: AddBodyStatModal
             marginTop: '4px',
             width: '100%',
             padding: '14px',
-            background: isPending ? '#1a1a1a' : '#D7FF00',
-            color: isPending ? '#333' : '#0a0a0a',
+            background: isPending ? '#2C3545' : '#96C828',
+            color: isPending ? '#516070' : '#1A2030',
             border: 'none',
             borderRadius: '12px',
             fontFamily: '"Barlow Condensed", sans-serif',

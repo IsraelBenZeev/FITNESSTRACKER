@@ -16,9 +16,9 @@ export function MealCard({ meal, onEdit }: MealCardProps) {
     <Root
       {...(interactive ? { type: 'button' as const, onClick: () => onEdit(meal) } : {})}
       aria-label={interactive ? `עריכת ${meal.meal_name}` : undefined}
-      className={`flex w-full items-start gap-3 rounded-xl border border-border-col border-t-2 border-t-lime bg-surface p-3.5 text-right
+      className={`flex w-full items-start gap-3 rounded-xl border border-border-col border-t-2 border-t-accent bg-surface p-3.5 text-right
         ${interactive
-          ? 'transition-colors duration-200 hover:border-lime active:bg-surface2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [-webkit-tap-highlight-color:transparent]'
+          ? 'transition-colors duration-200 hover:border-accent active:bg-surface2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [-webkit-tap-highlight-color:transparent]'
           : ''}`}
     >
       {/* Icon */}
@@ -36,7 +36,7 @@ export function MealCard({ meal, onEdit }: MealCardProps) {
             )}
           </span>
           <span className="flex flex-shrink-0 items-baseline gap-1">
-            <span className="font-display text-2xl font-semibold leading-none tabular-nums text-lime">
+            <span className="font-display text-2xl font-semibold leading-none tabular-nums text-accent">
               {Math.round(meal.calories).toLocaleString('he-IL')}
             </span>
             <span className="font-body text-xs text-muted">קל'</span>

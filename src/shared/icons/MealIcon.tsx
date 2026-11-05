@@ -31,7 +31,7 @@ interface MealIconProps {
   color?: string
 }
 
-export function MealIcon({ mealName, size = 20, color = '#D7FF00' }: MealIconProps) {
+export function MealIcon({ mealName, size = 20, color = '#96C828' }: MealIconProps) {
   // Try exact match first, then partial match
   const IconComponent =
     MEAL_ICON_MAP[mealName] ??

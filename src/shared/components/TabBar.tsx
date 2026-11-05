@@ -42,17 +42,17 @@ export function TabBar() {
         left: 0,
         right: 0,
         zIndex: 50,
-        background: 'rgba(10,10,10,0.95)',
+        background: 'rgba(26,32,48,0.95)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        borderTop: '1px solid #222',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
         display: 'flex',
         paddingBottom: 'env(safe-area-inset-bottom, 0px)',
       }}
     >
       {tabs.map(({ id, label, path, Icon }) => {
         const isActive = active === id
-        const color = isActive ? '#D7FF00' : '#555'
+        const color = isActive ? '#96C828' : '#8C9AAB'
         return (
           <button
             key={id}
@@ -85,8 +85,8 @@ export function TabBar() {
                   width: 7,
                   height: 7,
                   borderRadius: '50%',
-                  background: '#D7FF00',
-                  border: '1.5px solid #0a0a0a',
+                  background: '#96C828',
+                  border: '1.5px solid #1A2030',
                   animation: 'workoutPulse 1.6s ease-in-out infinite',
                 }}
               />

@@ -48,25 +48,25 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: 0,
-            color: '#f0f0f0',
+            color: '#C8D0DB',
             WebkitTapHighlightColor: 'transparent',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {expanded
-              ? <ChevronUp size={16} color="#555" />
-              : <ChevronDown size={16} color="#555" />}
+              ? <ChevronUp size={16} color="#8C9AAB" />
+              : <ChevronDown size={16} color="#8C9AAB" />}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
             {log.plan?.name && (
-              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '15px', fontWeight: 600, color: '#f0f0f0' }}>
+              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '15px', fontWeight: 600, color: '#C8D0DB' }}>
                 {log.plan.name}
               </span>
             )}
-            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '17px', fontWeight: 600, color: '#D7FF00' }}>
+            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '17px', fontWeight: 600, color: '#96C828' }}>
               {formatDate(log.date)}
             </span>
-            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#555' }}>
+            <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#8C9AAB' }}>
               {exercises.length} תרגילים · {totalSets} סטים
             </span>
           </div>
@@ -79,7 +79,7 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
             border: 'none',
             cursor: 'pointer',
             padding: '6px',
-            color: '#444',
+            color: '#8C9AAB',
             display: 'flex',
             alignItems: 'center',
             flexShrink: 0,
@@ -94,7 +94,7 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
         <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           {[...grouped.entries()].map(([name, sets]) => (
             <div key={name}>
-              <div style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666', marginBottom: '4px', textAlign: 'right' }}>
+              <div style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', marginBottom: '4px', textAlign: 'right' }}>
                 {name}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -106,17 +106,17 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
                       justifyContent: 'space-between',
                       alignItems: 'center',
                       padding: '5px 10px',
-                      background: '#1a1a1a',
+                      background: '#2C3545',
                       borderRadius: '6px',
                     }}
                   >
-                    <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>
+                    <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#8C9AAB' }}>
                       סט {s.set_number}
                     </span>
-                    <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '15px', color: '#f0f0f0' }}>
+                    <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '15px', color: '#C8D0DB' }}>
                       {s.reps ?? '—'} ×{' '}
                       {s.is_bodyweight
-                        ? <span className="text-xs font-body px-2 py-0.5 rounded-full bg-lime-dim text-lime">
+                        ? <span className="text-xs font-body px-2 py-0.5 rounded-full bg-accent-soft text-accent">
                             משקל גוף{s.added_weight_kg != null && s.added_weight_kg > 0 ? ` + ${s.added_weight_kg} ק"ג` : ''}
                           </span>
                         : s.weight_kg != null ? `${s.weight_kg}ק"ג` : '—'}
@@ -125,14 +125,14 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
                 ))}
               </div>
               {sets![0]?.notes && (
-                <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#555', textAlign: 'right', margin: '4px 0 0', lineHeight: 1.5 }}>
+                <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#8C9AAB', textAlign: 'right', margin: '4px 0 0', lineHeight: 1.5 }}>
                   {sets![0].notes}
                 </p>
               )}
             </div>
           ))}
           {log.notes && (
-            <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right', margin: 0 }}>
+            <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', textAlign: 'right', margin: 0 }}>
               {log.notes}
             </p>
           )}
@@ -179,7 +179,7 @@ export function WorkoutHistory() {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '32px', textAlign: 'center', color: '#555', fontFamily: '"Rubik", sans-serif' }}>
+      <div style={{ padding: '32px', textAlign: 'center', color: '#8C9AAB', fontFamily: '"Rubik", sans-serif' }}>
         טוען...
       </div>
     )
@@ -188,8 +188,8 @@ export function WorkoutHistory() {
   if (logs.length === 0) {
     return (
       <div style={{ padding: '48px 32px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-        <Dumbbell size={40} color="#222" strokeWidth={1.5} />
-        <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#444', margin: 0 }}>
+        <Dumbbell size={40} color="rgba(255,255,255,0.08)" strokeWidth={1.5} />
+        <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#8C9AAB', margin: 0 }}>
           עדיין לא תועד אימון
         </p>
       </div>
@@ -209,10 +209,10 @@ export function WorkoutHistory() {
               justifyContent: 'center',
               gap: '6px',
               padding: '10px',
-              background: copied ? 'rgba(74,222,128,0.08)' : '#1a1a1a',
-              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid #222',
+              background: copied ? 'rgba(74,222,128,0.08)' : '#2C3545',
+              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid rgba(255,255,255,0.08)',
               borderRadius: '10px',
-              color: copied ? '#4ade80' : '#666',
+              color: copied ? '#4ade80' : '#8C9AAB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '12px',
               cursor: 'pointer',
@@ -232,10 +232,10 @@ export function WorkoutHistory() {
               justifyContent: 'center',
               gap: '6px',
               padding: '10px',
-              background: '#1a1a1a',
-              border: '1px solid #222',
+              background: '#2C3545',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '10px',
-              color: '#666',
+              color: '#8C9AAB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '12px',
               cursor: 'pointer',

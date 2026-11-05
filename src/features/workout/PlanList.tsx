@@ -12,7 +12,7 @@ const DAY_NAMES = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 const DIFFICULTY_COLOR: Record<string, string> = {
   קל: '#4ade80',
   בינוני: '#fb923c',
-  קשה: '#ff4757',
+  קשה: '#F87171',
 }
 
 function PlanRow({ plan }: { plan: WorkoutPlan }) {
@@ -38,7 +38,7 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
                 background: 'none',
                 border: 'none',
                 borderRadius: '8px',
-                cursor: 'pointer', color: '#333',
+                cursor: 'pointer', color: '#516070',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
@@ -47,22 +47,22 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
             {plan.difficulty && (
               <span style={{
                 fontFamily: '"Rubik", sans-serif', fontSize: '11px',
-                color: DIFFICULTY_COLOR[plan.difficulty] ?? '#555',
+                color: DIFFICULTY_COLOR[plan.difficulty] ?? '#8C9AAB',
                 padding: '2px 8px',
-                background: `${DIFFICULTY_COLOR[plan.difficulty] ?? '#555'}15`,
+                background: `${DIFFICULTY_COLOR[plan.difficulty] ?? '#8C9AAB'}15`,
                 borderRadius: '20px',
-                border: `1px solid ${DIFFICULTY_COLOR[plan.difficulty] ?? '#555'}25`,
+                border: `1px solid ${DIFFICULTY_COLOR[plan.difficulty] ?? '#8C9AAB'}25`,
               }}>
                 {plan.difficulty}
               </span>
             )}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '20px', fontWeight: 600, color: '#f0f0f0' }}>
+            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '20px', fontWeight: 600, color: '#C8D0DB' }}>
               {plan.name}
             </span>
             {plan.description && (
-              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555' }}>
+              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB' }}>
                 {plan.description}
               </span>
             )}
@@ -70,7 +70,7 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#444' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB' }}>
             {(plan.exercises ?? []).length} תרגילים
           </span>
           <div style={{ display: 'flex', gap: '4px' }}>
@@ -79,12 +79,12 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
                 key={d}
                 style={{
                   padding: '3px 7px',
-                  background: 'rgba(215,255,0,0.08)',
-                  border: '1px solid rgba(215,255,0,0.15)',
+                  background: 'rgba(150,200,40,0.08)',
+                  border: '1px solid rgba(150,200,40,0.15)',
                   borderRadius: '6px',
                   fontFamily: '"Rubik", sans-serif',
                   fontSize: '11px',
-                  color: '#D7FF00',
+                  color: '#96C828',
                 }}
               >
                 {DAY_NAMES[d]}
@@ -96,12 +96,12 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
         {(plan.exercises ?? []).length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             {(plan.exercises ?? []).slice(0, 4).map((ex) => (
-              <span key={ex.id} style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#666', textAlign: 'right' }}>
+              <span key={ex.id} style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', textAlign: 'right' }}>
                 {ex.exercise_name}
               </span>
             ))}
             {(plan.exercises ?? []).length > 4 && (
-              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#333', textAlign: 'right' }}>
+              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#516070', textAlign: 'right' }}>
                 +{(plan.exercises ?? []).length - 4} תרגילים נוספים
               </span>
             )}
@@ -130,7 +130,7 @@ export function PlanList({ createOpen, onCreateChange }: PlanListProps) {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '32px', textAlign: 'center', color: '#555', fontFamily: '"Rubik", sans-serif' }}>
+      <div style={{ padding: '32px', textAlign: 'center', color: '#8C9AAB', fontFamily: '"Rubik", sans-serif' }}>
         טוען...
       </div>
     )
@@ -141,8 +141,8 @@ export function PlanList({ createOpen, onCreateChange }: PlanListProps) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {plans.length === 0 && (
           <div style={{ padding: '48px 32px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-            <Dumbbell size={40} color="#222" strokeWidth={1.5} />
-            <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#444', margin: 0 }}>
+            <Dumbbell size={40} color="rgba(255,255,255,0.08)" strokeWidth={1.5} />
+            <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '14px', color: '#8C9AAB', margin: 0 }}>
               אין תכניות אימון עדיין
             </p>
           </div>
@@ -162,18 +162,18 @@ export function PlanList({ createOpen, onCreateChange }: PlanListProps) {
           width: '52px',
           height: '52px',
           borderRadius: '14px',
-          background: '#D7FF00',
+          background: '#96C828',
           border: 'none',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          boxShadow: '0 4px 24px rgba(215,255,0,0.25)',
+          boxShadow: '0 4px 24px rgba(150,200,40,0.25)',
           zIndex: 40,
           WebkitTapHighlightColor: 'transparent',
         }}
       >
-        <Plus size={22} color="#0a0a0a" strokeWidth={2.5} />
+        <Plus size={22} color="#1A2030" strokeWidth={2.5} />
       </button>
 
       <CreatePlanModal isOpen={createOpen} onClose={() => onCreateChange(false)} />

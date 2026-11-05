@@ -130,7 +130,7 @@ export async function downloadNutritionPdf(logs: NutritionLog[], rangeLabel: str
   function drawTableHeader(atY: number) {
     setFill(doc, PDF_C.surface2)
     doc.rect(M, atY, W - M * 2, 8, 'F')
-    setDraw(doc, PDF_C.lime)
+    setDraw(doc, PDF_C.accent)
     doc.setLineWidth(0.3)
     doc.line(M, atY + 8, RIGHT, atY + 8)
     doc.setFont('helvetica', 'bold')
@@ -173,10 +173,10 @@ export async function downloadNutritionPdf(logs: NutritionLog[], rangeLabel: str
     if (y + DATE_H > PAGE_BOTTOM) newPage()
 
     // ── Date header (RTL) ──────────────────────────────────────
-    setFill(doc, '#161616')
+    setFill(doc, '#252D3A')
     doc.rect(M, y - 1, W - M * 2, DATE_H, 'F')
-    setFill(doc, PDF_C.lime)
-    doc.rect(RIGHT - 3, y - 1, 3, DATE_H, 'F')   // lime strip RIGHT
+    setFill(doc, PDF_C.accent)
+    doc.rect(RIGHT - 3, y - 1, 3, DATE_H, 'F')   // accent strip RIGHT
 
     const dayCalories = group.rows.reduce((s, l) => s + l.calories, 0)
     const dayProtein  = group.rows.reduce((s, l) => s + (l.protein_g ?? 0), 0)
@@ -185,12 +185,12 @@ export async function downloadNutritionPdf(logs: NutritionLog[], rangeLabel: str
 
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(8.5)
-    setTextColor(doc, PDF_C.lime)
+    setTextColor(doc, PDF_C.accent)
     doc.text(fmtDate(group.date), RIGHT - 6, y + 6, { align: 'right' })
 
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(7.5)
-    setTextColor(doc, '#aaaaaa')
+    setTextColor(doc, '#8C9AAB')
     doc.text(
       `F: ${Math.round(dayFat)}g  C: ${Math.round(dayCarbs)}g  P: ${Math.round(dayProtein)}g  |  ${dayCalories} kcal`,
       M, y + 6,
@@ -206,10 +206,10 @@ export async function downloadNutritionPdf(logs: NutritionLog[], rangeLabel: str
       if (y + ROW_H > PAGE_BOTTOM) newPage()
 
       if (ri % 2 === 0) {
-        setFill(doc, '#0d0d0d')
+        setFill(doc, '#1A2030')
         doc.rect(M, y - 1, W - M * 2, ROW_H, 'F')
       }
-      setDraw(doc, '#1e1e1e')
+      setDraw(doc, '#2C3545')
       doc.setLineWidth(0.1)
       doc.line(M, y + ROW_H - 1, RIGHT, y + ROW_H - 1)
 
@@ -217,18 +217,18 @@ export async function downloadNutritionPdf(logs: NutritionLog[], rangeLabel: str
       const mealCol = COLS[4]!
       doc.setFont('NotoSansHebrew', 'normal')
       doc.setFontSize(8)
-      setTextColor(doc, '#cccccc')
+      setTextColor(doc, '#C8D0DB')
       const mealText = doc.splitTextToSize(rtl(log.meal_name), mealCol.w - 4)[0] as string
       doc.text(mealText, mealCol.x + mealCol.w - 2, y + 6, { align: 'right' })
 
       // KCAL
       doc.setFont('helvetica', 'bold')
-      setTextColor(doc, PDF_C.lime)
+      setTextColor(doc, PDF_C.accent)
       doc.text(String(log.calories), COLS[3]!.x + COLS[3]!.w / 2, y + 6, { align: 'center' })
 
       // P / C / F
       doc.setFont('helvetica', 'normal')
-      setTextColor(doc, '#aaaaaa')
+      setTextColor(doc, '#8C9AAB')
       doc.text(log.protein_g != null ? String(Math.round(log.protein_g)) : '-', COLS[2]!.x + COLS[2]!.w / 2, y + 6, { align: 'center' })
       doc.text(log.carbs_g   != null ? String(Math.round(log.carbs_g))   : '-', COLS[1]!.x + COLS[1]!.w / 2, y + 6, { align: 'center' })
       doc.text(log.fat_g     != null ? String(Math.round(log.fat_g))     : '-', COLS[0]!.x + COLS[0]!.w / 2, y + 6, { align: 'center' })

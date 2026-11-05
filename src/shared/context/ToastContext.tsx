@@ -60,8 +60,8 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={t.id}
             style={{
-              background: '#1a1a1a',
-              border: `1px solid ${t.type === 'success' ? 'rgba(215,255,0,0.35)' : 'rgba(255,71,87,0.35)'}`,
+              background: '#2C3545',
+              border: `1px solid ${t.type === 'success' ? 'rgba(150,200,40,0.35)' : 'rgba(248,113,113,0.35)'}`,
               borderRadius: '12px',
               padding: '10px 20px',
               display: 'flex',
@@ -73,15 +73,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             }}
           >
             {t.type === 'success' ? (
-              <Check size={14} color="#D7FF00" strokeWidth={2.5} />
+              <Check size={14} color="#96C828" strokeWidth={2.5} />
             ) : (
-              <AlertCircle size={14} color="#ff4757" strokeWidth={2.5} />
+              <AlertCircle size={14} color="#F87171" strokeWidth={2.5} />
             )}
             <span
               style={{
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '13px',
-                color: t.type === 'success' ? '#D7FF00' : '#ff4757',
+                color: t.type === 'success' ? '#96C828' : '#F87171',
               }}
             >
               {t.message}

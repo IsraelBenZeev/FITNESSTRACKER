@@ -34,7 +34,7 @@ export function CalendarGrid({ year, month, dayMap, onDayPress, goalsConfig }: C
               textAlign: 'center',
               fontFamily: '"DM Sans", sans-serif',
               fontSize: '10px',
-              color: '#555',
+              color: '#8C9AAB',
               padding: '4px 0',
             }}
           >

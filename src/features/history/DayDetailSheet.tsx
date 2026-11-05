@@ -63,8 +63,8 @@ export function DayDetailSheet({ dateStr, totals, onClose }: DayDetailSheetProps
           bottom: 0,
           left: 0,
           right: 0,
-          background: '#111111',
-          borderTop: '2px solid #D7FF00',
+          background: '#252D3A',
+          borderTop: '2px solid #96C828',
           borderTopLeftRadius: '20px',
           borderTopRightRadius: '20px',
           maxHeight: '85vh',
@@ -78,7 +78,7 @@ export function DayDetailSheet({ dateStr, totals, onClose }: DayDetailSheetProps
       >
         {/* Drag handle */}
         <div style={{ display: 'flex', justifyContent: 'center', paddingTop: '12px', paddingBottom: '4px' }}>
-          <div style={{ width: '40px', height: '4px', background: '#333', borderRadius: '2px' }} />
+          <div style={{ width: '40px', height: '4px', background: '#516070', borderRadius: '2px' }} />
         </div>
 
         <div style={{ padding: '12px 16px 24px' }}>
@@ -88,7 +88,7 @@ export function DayDetailSheet({ dateStr, totals, onClose }: DayDetailSheetProps
               style={{
                 fontFamily: '"Bebas Neue", cursive',
                 fontSize: '22px',
-                color: '#f0f0f0',
+                color: '#C8D0DB',
                 margin: '0 0 16px 0',
                 letterSpacing: '0.05em',
               }}
@@ -114,14 +114,14 @@ export function DayDetailSheet({ dateStr, totals, onClose }: DayDetailSheetProps
             </div>
           )}
 
-          <div style={{ height: '1px', background: '#222', margin: '0 0 16px' }} />
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', margin: '0 0 16px' }} />
 
           {/* Meals heading */}
           <h3
             style={{
               fontFamily: '"Bebas Neue", cursive',
               fontSize: '18px',
-              color: '#888',
+              color: '#8C9AAB',
               margin: '0 0 12px 0',
               letterSpacing: '0.08em',
               textTransform: 'uppercase',
@@ -136,7 +136,7 @@ export function DayDetailSheet({ dateStr, totals, onClose }: DayDetailSheetProps
               style={{
                 padding: '32px 0',
                 textAlign: 'center',
-                color: '#555',
+                color: '#8C9AAB',
                 fontFamily: '"DM Sans", sans-serif',
                 fontSize: '14px',
               }}
@@ -165,8 +165,8 @@ function MacroStat({ label, value, unit, accent = false }: {
   return (
     <div
       style={{
-        background: '#1a1a1a',
-        border: `1px solid ${accent ? 'rgba(215,255,0,0.2)' : '#222'}`,
+        background: '#2C3545',
+        border: `1px solid ${accent ? 'rgba(150,200,40,0.2)' : 'rgba(255,255,255,0.08)'}`,
         borderRadius: '8px',
         padding: '10px 8px',
         textAlign: 'center',
@@ -176,7 +176,7 @@ function MacroStat({ label, value, unit, accent = false }: {
         style={{
           fontFamily: '"Bebas Neue", cursive',
           fontSize: '20px',
-          color: accent ? '#D7FF00' : '#f0f0f0',
+          color: accent ? '#96C828' : '#C8D0DB',
           lineHeight: 1,
           marginBottom: '4px',
         }}
@@ -187,7 +187,7 @@ function MacroStat({ label, value, unit, accent = false }: {
         style={{
           fontFamily: '"DM Sans", sans-serif',
           fontSize: '10px',
-          color: '#555',
+          color: '#8C9AAB',
         }}
       >
         {label}

@@ -155,10 +155,10 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
   const inputStyle: React.CSSProperties = {
     width: '72px',
     padding: '8px',
-    background: '#1a1a1a',
-    border: '1px solid #2a2a2a',
+    background: '#2C3545',
+    border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: '8px',
-    color: '#f0f0f0',
+    color: '#C8D0DB',
     fontFamily: '"Barlow Condensed", sans-serif',
     fontSize: '16px',
     textAlign: 'center',
@@ -177,13 +177,13 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
               justifyContent: 'flex-end',
               gap: '10px',
               paddingBottom: '6px',
-              borderBottom: '1px solid #1a1a1a',
+              borderBottom: '1px solid #2C3545',
             }}>
               <span style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: '17px',
                 fontWeight: 600,
-                color: '#D7FF00',
+                color: '#96C828',
               }}>
                 {ex.exercise_name}
               </span>
@@ -191,7 +191,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
                 <img
                   src={ex.gif_url}
                   alt={ex.exercise_name}
-                  style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: '#111' }}
+                  style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: '#252D3A' }}
                 />
               )}
             </div>
@@ -199,10 +199,10 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
             {/* Column headers */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'flex-end' }}>
               <span style={{ width: '28px' }} />
-              <span style={{ width: '72px', fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444', textAlign: 'center' }}>
+              <span style={{ width: '72px', fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#8C9AAB', textAlign: 'center' }}>
                 חזרות
               </span>
-              <span style={{ width: '72px', fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444', textAlign: 'center' }}>
+              <span style={{ width: '72px', fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#8C9AAB', textAlign: 'center' }}>
                 ק"ג
               </span>
               <span style={{ width: '32px' }} />
@@ -214,7 +214,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
                   width: '28px',
                   fontFamily: '"Rubik", sans-serif',
                   fontSize: '12px',
-                  color: '#555',
+                  color: '#8C9AAB',
                   textAlign: 'center',
                   flexShrink: 0,
                 }}>
@@ -247,7 +247,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    color: '#333',
+                    color: '#516070',
                     flexShrink: 0,
                     WebkitTapHighlightColor: 'transparent',
                   }}
@@ -266,9 +266,9 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
                 gap: '6px',
                 padding: '8px',
                 background: 'none',
-                border: '1px dashed #2a2a2a',
+                border: '1px dashed rgba(255,255,255,0.08)',
                 borderRadius: '8px',
-                color: '#555',
+                color: '#8C9AAB',
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '13px',
                 cursor: 'pointer',
@@ -288,10 +288,10 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                background: '#1a1a1a',
-                border: '1px solid #2a2a2a',
+                background: '#2C3545',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '8px',
-                color: '#888',
+                color: '#8C9AAB',
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '13px',
                 resize: 'none',
@@ -306,7 +306,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
 
         {/* Notes */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right' }}>
+          <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', textAlign: 'right' }}>
             הערות (אופציונלי)
           </label>
           <textarea
@@ -317,10 +317,10 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
             style={{
               width: '100%',
               padding: '10px',
-              background: '#1a1a1a',
-              border: '1px solid #2a2a2a',
+              background: '#2C3545',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '10px',
-              color: '#f0f0f0',
+              color: '#C8D0DB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '14px',
               resize: 'none',
@@ -338,10 +338,10 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
           style={{
             width: '100%',
             padding: '15px',
-            background: '#D7FF00',
+            background: '#96C828',
             border: 'none',
             borderRadius: '12px',
-            color: '#0a0a0a',
+            color: '#1A2030',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '18px',
             fontWeight: 700,
@@ -369,9 +369,9 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
           padding: '20px',
         }}>
           <div style={{
-            background: '#111',
+            background: '#252D3A',
             borderRadius: '16px',
-            borderTop: '2px solid #D7FF00',
+            borderTop: '2px solid #96C828',
             padding: '24px',
             width: '100%',
             maxWidth: '320px',
@@ -386,7 +386,7 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
                 width: 30, height: 30,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 background: 'none', border: 'none',
-                color: '#444', cursor: 'pointer',
+                color: '#8C9AAB', cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
               }}
             >
@@ -395,13 +395,13 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
 
             <span style={{
               fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '21px', fontWeight: 600, color: '#f0f0f0',
+              fontSize: '21px', fontWeight: 600, color: '#C8D0DB',
             }}>
               האם לסיים את האימון?
             </span>
             <p style={{
               fontFamily: '"Rubik", sans-serif', fontSize: '13px',
-              color: '#555', margin: 0, lineHeight: 1.5,
+              color: '#8C9AAB', margin: 0, lineHeight: 1.5,
             }}>
               האימון יישמר בהיסטוריה שלך
             </p>
@@ -412,8 +412,8 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
                 disabled={isPending}
                 style={{
                   padding: '14px',
-                  background: '#D7FF00', border: 'none', borderRadius: '12px',
-                  color: '#0a0a0a',
+                  background: '#96C828', border: 'none', borderRadius: '12px',
+                  color: '#1A2030',
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontSize: '17px', fontWeight: 700,
                   cursor: isPending ? 'not-allowed' : 'pointer',
@@ -430,8 +430,8 @@ export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {
                 onClick={() => setShowConfirm(false)}
                 style={{
                   padding: '12px',
-                  background: 'none', border: '1px solid #222', borderRadius: '12px',
-                  color: '#555',
+                  background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px',
+                  color: '#8C9AAB',
                   fontFamily: '"Rubik", sans-serif', fontSize: '14px',
                   cursor: 'pointer',
                   WebkitTapHighlightColor: 'transparent',

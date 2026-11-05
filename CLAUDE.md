@@ -33,24 +33,28 @@ START_WAIST   = 88    // cm
 הצבעים מוגדרים ב-`tailwind.config.js` תחת `theme.extend.colors` ומשמשים ישירות כ-Tailwind classes:
 
 ```
-bg-bg        → #0a0a0a   (background)
-bg-surface   → #111111
-bg-surface2  → #1a1a1a
-border-col   → #222222   (border-[border-col] / border-border-col)
-lime         → #D7FF00   ← accent ראשי: text-lime, bg-lime, border-lime
-bg-lime-dim  → rgba(215,255,0,0.12)
-text-muted   → #666666
-bg-danger / text-danger → #ff4757
+bg-bg            → #1A2030   (background)
+bg-surface       → #252D3A
+bg-surface2      → #2C3545   (inner)
+border-border-col→ rgba(255,255,255,0.08)  (line)
+accent           → #96C828   ← accent ראשי: text-accent, bg-accent, border-accent
+bg-accent-soft   → rgba(150,200,40,0.14)
+accent-line      → rgba(150,200,40,0.40)
+text-text-col    → #C8D0DB   (טקסט רגיל)
+text-heading     → #FFFFFF   (כותרות)
+text-muted       → #8C9AAB   (טקסט משני, 5.5:1)
+subtle           → #516070   (דקורטיבי/disabled בלבד — לא לטקסט)
+bg-danger / text-danger → #F87171
 
-font-display: "Barlow Condensed"  → class: font-display
+font-display: "Barlow Condensed"  → class: font-display (מספרים בלבד — אין לו עברית)
 font-body:    "Rubik"             → class: font-body (ברירת מחדל)
 ```
 
 ### כללי סטיילינג
 - **כל** סטיילינג — Tailwind utility classes בלבד
 - **אסור** `style={{}}` inline, CSS modules, או קבצי `.css` חדשים
-- כרטיסים: `border-t-2 border-lime`
-- hover כרטיסים: `hover:border-lime transition-colors duration-200`
+- אין להשתמש ב-hex ישירות — רק בטוקנים
+- hover כרטיסים: `hover:border-accent transition-colors duration-200`
 - אנימציית מעבר עמוד: class `page-enter` (מוגדר ב-`index.css`)
 
 ## Folder Structure

@@ -84,7 +84,7 @@ export function HistoryPage() {
         style={{
           padding: '32px 16px',
           textAlign: 'center',
-          color: '#555',
+          color: '#8C9AAB',
           fontFamily: '"DM Sans", sans-serif',
         }}
       >
@@ -104,8 +104,8 @@ export function HistoryPage() {
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 200,
-            background: '#1a1a1a',
-            border: '1px solid rgba(215,255,0,0.35)',
+            background: '#2C3545',
+            border: '1px solid rgba(150,200,40,0.35)',
             borderRadius: '12px',
             padding: '10px 20px',
             display: 'flex',
@@ -116,8 +116,8 @@ export function HistoryPage() {
             whiteSpace: 'nowrap',
           }}
         >
-          <Check size={14} color="#D7FF00" strokeWidth={2.5} />
-          <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#D7FF00' }}>
+          <Check size={14} color="#96C828" strokeWidth={2.5} />
+          <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#96C828' }}>
             {toast}
           </span>
         </div>
@@ -135,10 +135,10 @@ export function HistoryPage() {
               justifyContent: 'center',
               gap: '6px',
               padding: '10px',
-              background: copied ? 'rgba(74,222,128,0.08)' : '#1a1a1a',
-              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid #222',
+              background: copied ? 'rgba(74,222,128,0.08)' : '#2C3545',
+              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid rgba(255,255,255,0.08)',
               borderRadius: '10px',
-              color: copied ? '#4ade80' : '#666',
+              color: copied ? '#4ade80' : '#8C9AAB',
               fontFamily: '"DM Sans", sans-serif',
               fontSize: '12px',
               cursor: 'pointer',
@@ -158,10 +158,10 @@ export function HistoryPage() {
               justifyContent: 'center',
               gap: '6px',
               padding: '10px',
-              background: '#1a1a1a',
-              border: '1px solid #222',
+              background: '#2C3545',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '10px',
-              color: '#666',
+              color: '#8C9AAB',
               fontFamily: '"DM Sans", sans-serif',
               fontSize: '12px',
               cursor: 'pointer',
@@ -200,8 +200,8 @@ export function HistoryPage() {
         >
           <LegendItem color="#4ade80" label="עמידה ביעד" />
           <LegendItem color="#fb923c" label="קרוב ליעד" />
-          <LegendItem color="#ff4757" label="חריגה" />
-          <LegendItem color="#333" label="אין דיווח" />
+          <LegendItem color="#F87171" label="חריגה" />
+          <LegendItem color="#516070" label="אין דיווח" />
         </div>
 
         <DayDetailSheet
@@ -230,14 +230,14 @@ function LegendItem({ color, label }: { color: string; label: string }) {
           height: '12px',
           borderRadius: '3px',
           background: color,
-          opacity: color === '#333' ? 1 : 0.7,
+          opacity: color === '#516070' ? 1 : 0.7,
         }}
       />
       <span
         style={{
           fontFamily: '"DM Sans", sans-serif',
           fontSize: '11px',
-          color: '#555',
+          color: '#8C9AAB',
         }}
       >
         {label}

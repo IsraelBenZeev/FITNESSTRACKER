@@ -42,8 +42,8 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
       style={{
         flex: 1,
         padding: '9px 0',
-        background: tab === t ? '#D7FF00' : '#1a1a1a',
-        color: tab === t ? '#0a0a0a' : '#555',
+        background: tab === t ? '#96C828' : '#2C3545',
+        color: tab === t ? '#1A2030' : '#8C9AAB',
         border: 'none',
         borderRadius: '8px',
         fontFamily: '"Barlow Condensed", sans-serif',
@@ -64,7 +64,7 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '6px', background: '#111', borderRadius: '10px', padding: '4px' }}>
+        <div style={{ display: 'flex', gap: '6px', background: '#252D3A', borderRadius: '10px', padding: '4px' }}>
           {tabBtn('training', 'יום אימון')}
           {tabBtn('rest', 'יום מנוחה')}
         </div>
@@ -107,7 +107,7 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
           <span style={{
             fontFamily: '"Rubik", sans-serif',
             fontSize: '12px',
-            color: '#666',
+            color: '#8C9AAB',
             fontWeight: 500,
             letterSpacing: '0.04em',
             textTransform: 'uppercase',
@@ -126,9 +126,9 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
                     flex: 1,
                     height: '40px',
                     borderRadius: '8px',
-                    border: active ? '1.5px solid #D7FF00' : '1.5px solid #2a2a2a',
-                    background: active ? 'rgba(215,255,0,0.1)' : '#111',
-                    color: active ? '#D7FF00' : '#444',
+                    border: active ? '1.5px solid #96C828' : '1.5px solid rgba(255,255,255,0.08)',
+                    background: active ? 'rgba(150,200,40,0.1)' : '#252D3A',
+                    color: active ? '#96C828' : '#8C9AAB',
                     fontFamily: '"Barlow Condensed", sans-serif',
                     fontSize: '16px',
                     fontWeight: 600,
@@ -150,8 +150,8 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
           style={{
             width: '100%',
             padding: '14px',
-            background: '#D7FF00',
-            color: '#0a0a0a',
+            background: '#96C828',
+            color: '#1A2030',
             border: 'none',
             borderRadius: '12px',
             fontFamily: '"Barlow Condensed", sans-serif',

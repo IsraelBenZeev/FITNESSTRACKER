@@ -49,9 +49,9 @@ export function Modal({ isOpen, onClose, title, children, zIndexOverride }: Moda
         style={{
           position: 'relative',
           width: '100%',
-          background: '#111',
+          background: '#252D3A',
           borderRadius: '18px 18px 0 0',
-          borderTop: '2px solid #D7FF00',
+          borderTop: '2px solid #96C828',
           maxHeight: '92dvh',
           display: 'flex',
           flexDirection: 'column',
@@ -68,7 +68,7 @@ export function Modal({ isOpen, onClose, title, children, zIndexOverride }: Moda
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '18px 20px 14px',
-            borderBottom: '1px solid #1a1a1a',
+            borderBottom: '1px solid #2C3545',
           }}
         >
           <span
@@ -76,7 +76,7 @@ export function Modal({ isOpen, onClose, title, children, zIndexOverride }: Moda
               fontFamily: '"Barlow Condensed", sans-serif',
               fontSize: '20px',
               fontWeight: 600,
-              color: '#f0f0f0',
+              color: '#C8D0DB',
               letterSpacing: '0.04em',
             }}
           >
@@ -90,11 +90,11 @@ export function Modal({ isOpen, onClose, title, children, zIndexOverride }: Moda
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              background: '#1a1a1a',
-              border: '1px solid #222',
+              background: '#2C3545',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '8px',
               cursor: 'pointer',
-              color: '#666',
+              color: '#8C9AAB',
               flexShrink: 0,
             }}
           >

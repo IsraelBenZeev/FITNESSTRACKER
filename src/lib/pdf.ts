@@ -7,14 +7,14 @@ import { jsPDF } from 'jspdf'
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 export const PDF_C = {
-  bg:       '#0a0a0a',
-  surface:  '#111111',
-  surface2: '#1a1a1a',
-  border:   '#2a2a2a',
-  lime:     '#D7FF00',
-  white:    '#f0f0f0',
-  muted:    '#888888',
-  danger:   '#ff4757',
+  bg:       '#1A2030',
+  surface:  '#252D3A',
+  surface2: '#2C3545',
+  border:   '#343E4F',
+  accent:   '#96C828',
+  white:    '#C8D0DB',
+  muted:    '#8C9AAB',
+  danger:   '#F87171',
   good:     '#4ade80',
 } as const
 
@@ -85,14 +85,14 @@ interface HeaderOptions {
 }
 
 /**
- * Draw the lime top header bar (22mm tall).
+ * Draw the accent top header bar (22mm tall).
  * Title is right-aligned (RTL). Returns Y position after the bar.
  */
 export function drawHeaderBar(doc: jsPDF, { title, subtitle }: HeaderOptions): number {
   const W = 210
   const M = PDF_MARGIN
 
-  setFill(doc, PDF_C.lime)
+  setFill(doc, PDF_C.accent)
   doc.rect(0, 0, W, 22, 'F')
 
   doc.setFont('helvetica', 'bold')
@@ -131,7 +131,7 @@ export function drawSummaryCards(doc: jsPDF, cards: SummaryCard[], startY: numbe
     setDraw(doc, PDF_C.border)
     doc.roundedRect(cx, startY, cardW, 26, 2, 2, 'FD')
     // Lime top border
-    setFill(doc, PDF_C.lime)
+    setFill(doc, PDF_C.accent)
     doc.rect(cx, startY, cardW, 1.5, 'F')
 
     doc.setFont('helvetica', 'normal')
@@ -141,7 +141,7 @@ export function drawSummaryCards(doc: jsPDF, cards: SummaryCard[], startY: numbe
 
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(13)
-    setTextColor(doc, PDF_C.lime)
+    setTextColor(doc, PDF_C.accent)
     doc.text(card.value, cx + cardW / 2, startY + 16, { align: 'center' })
 
     if (card.sub) {
@@ -171,7 +171,7 @@ export function drawFooter(doc: jsPDF, label: string) {
     doc.line(M, 288, W - M, 288)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(7)
-    setTextColor(doc, '#333333')
+    setTextColor(doc, '#516070')
     doc.text(label, W - M, 293, { align: 'right' })
     doc.text(`${p} / ${totalPages}`, M, 293)
   }

@@ -18,7 +18,7 @@ export function ProgressBar({ value, goal, label, unit = '', size = 'secondary' 
   const track = size === 'primary' ? 'h-2.5' : 'h-1.5'
   const fill = isOver
     ? '[&::-webkit-progress-value]:bg-danger [&::-moz-progress-bar]:bg-danger'
-    : '[&::-webkit-progress-value]:bg-lime [&::-moz-progress-bar]:bg-lime'
+    : '[&::-webkit-progress-value]:bg-accent [&::-moz-progress-bar]:bg-accent'
 
   return (
     <div className="flex flex-col gap-1.5">

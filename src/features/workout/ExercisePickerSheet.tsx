@@ -80,7 +80,7 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
         zIndex: 110,
         display: 'flex',
         flexDirection: 'column',
-        background: '#111',
+        background: '#252D3A',
         animation: 'slideUp 0.22s cubic-bezier(0.32,0.72,0,1) forwards',
       }}
     >
@@ -95,18 +95,18 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
           paddingRight: '20px',
           paddingBottom: '14px',
           paddingLeft: '20px',
-          borderBottom: '1px solid #1a1a1a',
-          background: '#111',
+          borderBottom: '1px solid #2C3545',
+          background: '#252D3A',
         }}
       >
         <button
           onClick={onDone}
           style={{
             padding: '8px 18px',
-            background: '#D7FF00',
+            background: '#96C828',
             border: 'none',
             borderRadius: '10px',
-            color: '#0a0a0a',
+            color: '#1A2030',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '16px',
             fontWeight: 700,
@@ -117,7 +117,7 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
             gap: '6px',
           }}
         >
-          <CheckCheck size={16} strokeWidth={2.5} color="#0a0a0a" />
+          <CheckCheck size={16} strokeWidth={2.5} color="#1A2030" />
           סיום
         </button>
 
@@ -127,12 +127,12 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
               onClick={() => setSelectedOpen((v) => !v)}
               style={{
                 padding: '4px 10px',
-                background: selectedOpen ? 'rgba(215,255,0,0.18)' : 'rgba(215,255,0,0.1)',
-                border: '1px solid rgba(215,255,0,0.35)',
+                background: selectedOpen ? 'rgba(150,200,40,0.18)' : 'rgba(150,200,40,0.1)',
+                border: '1px solid rgba(150,200,40,0.35)',
                 borderRadius: '20px',
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '12px',
-                color: '#D7FF00',
+                color: '#96C828',
                 cursor: 'pointer',
                 WebkitTapHighlightColor: 'transparent',
               }}
@@ -145,7 +145,7 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
               fontFamily: '"Barlow Condensed", sans-serif',
               fontSize: '22px',
               fontWeight: 600,
-              color: '#f0f0f0',
+              color: '#C8D0DB',
               letterSpacing: '0.03em',
             }}
           >
@@ -159,8 +159,8 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
         <div
           style={{
             flexShrink: 0,
-            borderBottom: '1px solid #1a1a1a',
-            background: '#0d0d0d',
+            borderBottom: '1px solid #2C3545',
+            background: '#1A2030',
             maxHeight: '220px',
             overflowY: 'auto',
             display: 'flex',
@@ -177,15 +177,15 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                 alignItems: 'center',
                 gap: '10px',
                 padding: '8px 10px',
-                background: '#1a1a1a',
-                border: '1px solid #222',
+                background: '#2C3545',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '10px',
               }}
             >
               <span style={{
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: '13px',
-                color: '#444',
+                color: '#8C9AAB',
                 flexShrink: 0,
                 width: '18px',
                 textAlign: 'center',
@@ -197,16 +197,16 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                   src={ex.gif_url}
                   alt={ex.exercise_name}
                   loading="lazy"
-                  style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: '#0d0d0d' }}
+                  style={{ width: 40, height: 40, borderRadius: 6, objectFit: 'cover', flexShrink: 0, background: '#1A2030' }}
                 />
               ) : (
-                <div style={{ width: 40, height: 40, borderRadius: 6, background: '#0d0d0d', flexShrink: 0 }} />
+                <div style={{ width: 40, height: 40, borderRadius: 6, background: '#1A2030', flexShrink: 0 }} />
               )}
               <span style={{
                 flex: 1,
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '13px',
-                color: '#f0f0f0',
+                color: '#C8D0DB',
                 textAlign: 'right',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -218,8 +218,8 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                 onClick={() => handleRemove(ex.exercise_id)}
                 style={{
                   width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'none', border: '1px solid #2a2a2a', borderRadius: '8px',
-                  cursor: 'pointer', color: '#ff4757', flexShrink: 0,
+                  background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px',
+                  cursor: 'pointer', color: '#F87171', flexShrink: 0,
                   WebkitTapHighlightColor: 'transparent',
                 }}
               >
@@ -238,7 +238,7 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
           flexDirection: 'column',
           gap: '10px',
           padding: '12px 16px 8px',
-          background: '#111',
+          background: '#252D3A',
         }}
       >
         <div style={{ position: 'relative' }}>
@@ -250,10 +250,10 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
               width: '100%',
               padding: '11px 14px',
               paddingLeft: '38px',
-              background: '#1a1a1a',
-              border: '1px solid #2a2a2a',
+              background: '#2C3545',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '12px',
-              color: '#f0f0f0',
+              color: '#C8D0DB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '14px',
               outline: 'none',
@@ -264,7 +264,7 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
           />
           <Search
             size={16}
-            color="#444"
+            color="#8C9AAB"
             style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
           />
         </div>
@@ -288,10 +288,10 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                 style={{
                   padding: '7px 14px',
                   flexShrink: 0,
-                  background: active ? 'rgba(215,255,0,0.1)' : '#1a1a1a',
-                  border: active ? '1px solid rgba(215,255,0,0.3)' : '1px solid #222',
+                  background: active ? 'rgba(150,200,40,0.1)' : '#2C3545',
+                  border: active ? '1px solid rgba(150,200,40,0.3)' : '1px solid rgba(255,255,255,0.08)',
                   borderRadius: '20px',
-                  color: active ? '#D7FF00' : '#555',
+                  color: active ? '#96C828' : '#8C9AAB',
                   fontFamily: '"Rubik", sans-serif',
                   fontSize: '13px',
                   cursor: 'pointer',
@@ -321,12 +321,12 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
         }}
       >
         {isLoading && (
-          <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#444', textAlign: 'center', margin: '20px 0' }}>
+          <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#8C9AAB', textAlign: 'center', margin: '20px 0' }}>
             טוען תרגילים...
           </p>
         )}
         {!isLoading && allExercises.length === 0 && (
-          <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#444', textAlign: 'center', margin: '20px 0' }}>
+          <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#8C9AAB', textAlign: 'center', margin: '20px 0' }}>
             לא נמצאו תרגילים
           </p>
         )}
@@ -341,8 +341,8 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                 alignItems: 'center',
                 gap: '10px',
                 padding: '10px 12px',
-                background: selected ? 'rgba(215,255,0,0.05)' : '#1a1a1a',
-                border: selected ? '1px solid rgba(215,255,0,0.2)' : '1px solid #222',
+                background: selected ? 'rgba(150,200,40,0.05)' : '#2C3545',
+                border: selected ? '1px solid rgba(150,200,40,0.2)' : '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '12px',
               }}
             >
@@ -351,17 +351,17 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                   src={ex.gifUrl}
                   alt={ex.name_he}
                   loading="lazy"
-                  style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: '#0d0d0d' }}
+                  style={{ width: 56, height: 56, borderRadius: 8, objectFit: 'cover', flexShrink: 0, background: '#1A2030' }}
                 />
               ) : (
-                <div style={{ width: 56, height: 56, borderRadius: 8, background: '#0d0d0d', flexShrink: 0 }} />
+                <div style={{ width: 56, height: 56, borderRadius: 8, background: '#1A2030', flexShrink: 0 }} />
               )}
 
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '3px', alignItems: 'flex-end', minWidth: 0 }}>
                 <span style={{
                   fontFamily: '"Rubik", sans-serif',
                   fontSize: '14px',
-                  color: selected ? '#D7FF00' : '#f0f0f0',
+                  color: selected ? '#96C828' : '#C8D0DB',
                   textAlign: 'right',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -370,7 +370,7 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                 }}>
                   {ex.name_he}
                 </span>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>
+                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#8C9AAB' }}>
                   {ex.bodyParts_he.join(' · ')}
                 </span>
               </div>
@@ -379,8 +379,8 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                 onClick={() => setDetailEx(ex)}
                 style={{
                   width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: '#1e1e1e', border: '1px solid #2a2a2a', borderRadius: '9px',
-                  cursor: 'pointer', color: '#555', flexShrink: 0,
+                  background: '#2C3545', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '9px',
+                  cursor: 'pointer', color: '#8C9AAB', flexShrink: 0,
                   WebkitTapHighlightColor: 'transparent',
                 }}
               >
@@ -391,11 +391,11 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                 onClick={() => selected ? handleRemove(ex.exerciseId) : handleAdd(ex)}
                 style={{
                   width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: selected ? 'rgba(215,255,0,0.12)' : '#D7FF00',
-                  border: selected ? '1px solid rgba(215,255,0,0.25)' : 'none',
+                  background: selected ? 'rgba(150,200,40,0.12)' : '#96C828',
+                  border: selected ? '1px solid rgba(150,200,40,0.25)' : 'none',
                   borderRadius: '9px',
                   cursor: 'pointer',
-                  color: selected ? '#D7FF00' : '#0a0a0a',
+                  color: selected ? '#96C828' : '#1A2030',
                   flexShrink: 0,
                   WebkitTapHighlightColor: 'transparent',
                   transition: 'all 0.15s',
@@ -412,7 +412,7 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
 
         <div ref={sentinelRef} style={{ height: 8 }} />
         {isFetchingNextPage && (
-          <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#444', textAlign: 'center', margin: '8px 0' }}>
+          <p style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', textAlign: 'center', margin: '8px 0' }}>
             טוען עוד...
           </p>
         )}
@@ -431,13 +431,13 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
             gap: '10px',
             padding: '10px 16px',
             paddingBottom: 'env(safe-area-inset-bottom, 12px)',
-            background: '#161616',
-            borderTop: '1px solid #222',
+            background: '#252D3A',
+            borderTop: '1px solid rgba(255,255,255,0.08)',
             zIndex: 111,
             animation: 'trayIn 0.2s ease forwards',
           }}
         >
-          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', flexShrink: 0 }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', flexShrink: 0 }}>
             {count} נבחרו
           </span>
           <div
@@ -458,8 +458,8 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                   alignItems: 'center',
                   gap: '5px',
                   padding: '5px 8px 5px 5px',
-                  background: '#1e1e1e',
-                  border: '1px solid #2a2a2a',
+                  background: '#2C3545',
+                  border: '1px solid rgba(255,255,255,0.08)',
                   borderRadius: '8px',
                   flexShrink: 0,
                 }}
@@ -468,13 +468,13 @@ export function ExercisePickerSheet({ isOpen, selectedExercises, onAdd, onRemove
                   onClick={() => handleRemove(ex.exercise_id)}
                   style={{
                     width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'none', border: 'none', cursor: 'pointer', color: '#444', padding: 0,
+                    background: 'none', border: 'none', cursor: 'pointer', color: '#8C9AAB', padding: 0,
                     WebkitTapHighlightColor: 'transparent',
                   }}
                 >
                   <X size={12} strokeWidth={2.5} />
                 </button>
-                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#ccc', whiteSpace: 'nowrap', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#C8D0DB', whiteSpace: 'nowrap', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {ex.exercise_name}
                 </span>
               </div>

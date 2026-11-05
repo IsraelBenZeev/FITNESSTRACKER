@@ -12,8 +12,8 @@ interface CalendarDayProps {
 const COLOR_STYLES: Record<DayColor, { bg: string; border: string; text: string }> = {
   green:  { bg: 'rgba(74,222,128,0.15)',  border: 'rgba(74,222,128,0.4)',  text: '#4ade80' },
   orange: { bg: 'rgba(251,146,60,0.15)',  border: 'rgba(251,146,60,0.4)',  text: '#fb923c' },
-  red:    { bg: 'rgba(255,71,87,0.15)',   border: 'rgba(255,71,87,0.4)',   text: '#ff4757' },
-  gray:   { bg: '#1a1a1a',               border: '#222',                  text: '#444'    },
+  red:    { bg: 'rgba(248,113,113,0.15)',   border: 'rgba(248,113,113,0.4)',   text: '#F87171' },
+  gray:   { bg: '#2C3545',               border: 'rgba(255,255,255,0.08)',                  text: '#8C9AAB'    },
 }
 
 export function CalendarDay({ dayNumber, color, isToday, isFuture, onClick }: CalendarDayProps) {
@@ -38,7 +38,7 @@ export function CalendarDay({ dayNumber, color, isToday, isFuture, onClick }: Ca
         justifyContent: 'center',
         cursor: isInteractive ? 'pointer' : 'default',
         opacity: isFuture ? 0.3 : 1,
-        outline: isToday ? '2px solid #D7FF00' : 'none',
+        outline: isToday ? '2px solid #96C828' : 'none',
         outlineOffset: '2px',
         transition: 'background 0.12s',
         userSelect: 'none',

@@ -61,7 +61,7 @@ function SortableExerciseRow({ ex, onToggleBodyweight }: SortableRowProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2 bg-surface2 rounded-xl px-3 py-3 border border-[#222]"
+      className="flex items-center gap-2 bg-surface2 rounded-xl px-3 py-3 border border-[rgba(255,255,255,0.08)]"
     >
       <button
         {...attributes}
@@ -74,14 +74,14 @@ function SortableExerciseRow({ ex, onToggleBodyweight }: SortableRowProps) {
       </button>
       <span className="text-sm font-body text-white flex-1 text-right">{ex.exercise_name}</span>
       <div className="flex items-center gap-2 flex-shrink-0">
-        <span className={`text-xs font-body ${ex.is_bodyweight ? 'text-lime' : 'text-muted'}`}>
+        <span className={`text-xs font-body ${ex.is_bodyweight ? 'text-accent' : 'text-muted'}`}>
           משקל גוף
         </span>
         <button
           dir="ltr"
           type="button"
           onClick={() => onToggleBodyweight(ex.exercise_id)}
-          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${ex.is_bodyweight ? 'bg-lime' : 'bg-[#333]'}`}
+          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${ex.is_bodyweight ? 'bg-accent' : 'bg-[#516070]'}`}
         >
           <span
             className={`inline-block h-3.5 w-3.5 rounded-full bg-bg transition-transform ${ex.is_bodyweight ? 'translate-x-[18px]' : 'translate-x-[2px]'}`}
@@ -99,10 +99,10 @@ const DRAFT_KEY = 'ft_plan_draft'
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '10px 12px',
-  background: '#1a1a1a',
-  border: '1px solid #2a2a2a',
+  background: '#2C3545',
+  border: '1px solid rgba(255,255,255,0.08)',
   borderRadius: '10px',
-  color: '#f0f0f0',
+  color: '#C8D0DB',
   fontFamily: '"Rubik", sans-serif',
   fontSize: '14px',
   outline: 'none',
@@ -270,10 +270,10 @@ const exercisesPayload = exercises.map(
               style={{
                 flex: 1,
                 padding: '10px',
-                background: step === s ? 'rgba(215,255,0,0.1)' : '#1a1a1a',
-                border: step === s ? '1px solid rgba(215,255,0,0.3)' : '1px solid #222',
+                background: step === s ? 'rgba(150,200,40,0.1)' : '#2C3545',
+                border: step === s ? '1px solid rgba(150,200,40,0.3)' : '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '10px',
-                color: step === s ? '#D7FF00' : '#555',
+                color: step === s ? '#96C828' : '#8C9AAB',
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '13px',
                 cursor: 'pointer',
@@ -290,7 +290,7 @@ const exercisesPayload = exercises.map(
         {step === 'details' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', flex: 1, overflowY: 'auto', minHeight: 0 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right' }}>
+              <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', textAlign: 'right' }}>
                 שם האימון *
               </label>
               <input
@@ -302,7 +302,7 @@ const exercisesPayload = exercises.map(
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right' }}>
+              <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', textAlign: 'right' }}>
                 תיאור (אופציונלי)
               </label>
               <input
@@ -314,7 +314,7 @@ const exercisesPayload = exercises.map(
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right' }}>
+              <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', textAlign: 'right' }}>
                 רמת קושי
               </label>
               <div style={{ display: 'flex', gap: '8px' }}>
@@ -325,10 +325,10 @@ const exercisesPayload = exercises.map(
                     style={{
                       flex: 1,
                       padding: '10px 8px',
-                      background: difficulty === d ? 'rgba(215,255,0,0.1)' : '#1a1a1a',
-                      border: difficulty === d ? '1px solid rgba(215,255,0,0.35)' : '1px solid #222',
+                      background: difficulty === d ? 'rgba(150,200,40,0.1)' : '#2C3545',
+                      border: difficulty === d ? '1px solid rgba(150,200,40,0.35)' : '1px solid rgba(255,255,255,0.08)',
                       borderRadius: '10px',
-                      color: difficulty === d ? '#D7FF00' : '#666',
+                      color: difficulty === d ? '#96C828' : '#8C9AAB',
                       fontFamily: '"Rubik", sans-serif',
                       fontSize: '13px',
                       cursor: 'pointer',
@@ -342,7 +342,7 @@ const exercisesPayload = exercises.map(
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#555', textAlign: 'right' }}>
+              <label style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#8C9AAB', textAlign: 'right' }}>
                 ימי אימון
               </label>
               <div style={{ display: 'flex', gap: '6px' }}>
@@ -355,10 +355,10 @@ const exercisesPayload = exercises.map(
                       style={{
                         flex: 1,
                         padding: '10px 4px',
-                        background: active ? 'rgba(215,255,0,0.1)' : '#1a1a1a',
-                        border: active ? '1px solid rgba(215,255,0,0.35)' : '1px solid #222',
+                        background: active ? 'rgba(150,200,40,0.1)' : '#2C3545',
+                        border: active ? '1px solid rgba(150,200,40,0.35)' : '1px solid rgba(255,255,255,0.08)',
                         borderRadius: '8px',
-                        color: active ? '#D7FF00' : '#555',
+                        color: active ? '#96C828' : '#8C9AAB',
                         fontFamily: '"Rubik", sans-serif',
                         fontSize: '12px',
                         cursor: 'pointer',
@@ -379,10 +379,10 @@ const exercisesPayload = exercises.map(
                 style={{
                   flex: 1,
                   padding: '14px',
-                  background: canSave ? '#1a1a1a' : '#111',
-                  border: canSave ? '1px solid #2a2a2a' : '1px solid #1a1a1a',
+                  background: canSave ? '#2C3545' : '#252D3A',
+                  border: canSave ? '1px solid rgba(255,255,255,0.08)' : '1px solid #2C3545',
                   borderRadius: '12px',
-                  color: canSave ? '#888' : '#333',
+                  color: canSave ? '#8C9AAB' : '#516070',
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontSize: '16px',
                   fontWeight: 700,
@@ -398,10 +398,10 @@ const exercisesPayload = exercises.map(
                 style={{
                   flex: 2,
                   padding: '14px',
-                  background: '#D7FF00',
+                  background: '#96C828',
                   border: 'none',
                   borderRadius: '12px',
-                  color: '#0a0a0a',
+                  color: '#1A2030',
                   fontFamily: '"Barlow Condensed", sans-serif',
                   fontSize: '16px',
                   fontWeight: 700,
@@ -413,7 +413,7 @@ const exercisesPayload = exercises.map(
                   gap: '6px',
                 }}
               >
-                <Plus size={17} strokeWidth={2.5} color="#0a0a0a" />
+                <Plus size={17} strokeWidth={2.5} color="#1A2030" />
                 {exercises.length > 0 ? `תרגילים (${exercises.length})` : 'הוסף תרגילים'}
               </button>
             </div>
@@ -427,16 +427,16 @@ const exercisesPayload = exercises.map(
             <div
               style={{
                 padding: '16px',
-                background: exercises.length > 0 ? 'rgba(215,255,0,0.05)' : '#1a1a1a',
-                border: exercises.length > 0 ? '1px solid rgba(215,255,0,0.15)' : '1px solid #222',
+                background: exercises.length > 0 ? 'rgba(150,200,40,0.05)' : '#2C3545',
+                border: exercises.length > 0 ? '1px solid rgba(150,200,40,0.15)' : '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '12px',
                 textAlign: 'center',
               }}
             >
-              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '32px', fontWeight: 700, color: exercises.length > 0 ? '#D7FF00' : '#333' }}>
+              <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '32px', fontWeight: 700, color: exercises.length > 0 ? '#96C828' : '#516070' }}>
                 {exercises.length}
               </span>
-              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#555', display: 'block', marginTop: '2px' }}>
+              <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#8C9AAB', display: 'block', marginTop: '2px' }}>
                 תרגילים נבחרו
               </span>
             </div>
@@ -446,10 +446,10 @@ const exercisesPayload = exercises.map(
               style={{
                 width: '100%',
                 padding: '14px',
-                background: '#1a1a1a',
-                border: '1px solid #2a2a2a',
+                background: '#2C3545',
+                border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: '12px',
-                color: '#D7FF00',
+                color: '#96C828',
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: '16px',
                 fontWeight: 700,
@@ -492,7 +492,7 @@ const exercisesPayload = exercises.map(
                 padding: '10px',
                 background: 'none',
                 border: 'none',
-                color: '#555',
+                color: '#8C9AAB',
                 fontFamily: '"Rubik", sans-serif',
                 fontSize: '13px',
                 cursor: 'pointer',
@@ -515,10 +515,10 @@ const exercisesPayload = exercises.map(
               style={{
                 width: '100%',
                 padding: '14px',
-                background: canSave ? '#D7FF00' : '#1a1a1a',
+                background: canSave ? '#96C828' : '#2C3545',
                 border: 'none',
                 borderRadius: '12px',
-                color: canSave ? '#0a0a0a' : '#333',
+                color: canSave ? '#1A2030' : '#516070',
                 fontFamily: '"Barlow Condensed", sans-serif',
                 fontSize: '17px',
                 fontWeight: 700,

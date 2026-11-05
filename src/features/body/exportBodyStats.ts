@@ -78,7 +78,7 @@ export async function downloadStatsPdf(stats: BodyStat[]): Promise<void> {
   function drawTableHeader(atY: number) {
     setFill(doc, PDF_C.surface2)
     doc.rect(M, atY, W - M * 2, 8, 'F')
-    setDraw(doc, PDF_C.lime)
+    setDraw(doc, PDF_C.accent)
     doc.setLineWidth(0.3)
     doc.line(M, atY + 8, RIGHT, atY + 8)
     doc.setFont('helvetica', 'bold')
@@ -105,7 +105,7 @@ export async function downloadStatsPdf(stats: BodyStat[]): Promise<void> {
     }
 
     if (idx % 2 === 0) {
-      setFill(doc, '#0f0f0f')
+      setFill(doc, '#1A2030')
       doc.rect(M, y - 1, W - M * 2, ROW_H, 'F')
     }
 
@@ -114,14 +114,14 @@ export async function downloadStatsPdf(stats: BodyStat[]): Promise<void> {
     doc.line(M, y + ROW_H - 1, RIGHT, y + ROW_H - 1)
 
     // DATE (rightmost)
-    setTextColor(doc, PDF_C.lime)
+    setTextColor(doc, PDF_C.accent)
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(8)
     doc.text(fmtDate(stat.date), cols[3]!.x + cols[3]!.w - 2, y + 6, { align: 'right' })
 
     // WEIGHT
     if (stat.weight_kg != null) {
-      setTextColor(doc, PDF_C.lime)
+      setTextColor(doc, PDF_C.accent)
       doc.setFont('helvetica', 'bold')
       doc.text(stat.weight_kg.toFixed(1), cols[2]!.x + cols[2]!.w / 2, y + 6, { align: 'center' })
     } else {
@@ -132,7 +132,7 @@ export async function downloadStatsPdf(stats: BodyStat[]): Promise<void> {
 
     // WAIST
     if (stat.waist_cm != null) {
-      setTextColor(doc, '#aaaaaa')
+      setTextColor(doc, '#8C9AAB')
       doc.setFont('helvetica', 'bold')
       doc.text(stat.waist_cm.toFixed(1), cols[1]!.x + cols[1]!.w / 2, y + 6, { align: 'center' })
     } else {

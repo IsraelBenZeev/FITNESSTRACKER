@@ -41,9 +41,9 @@ export function QuickAddDock({ onAdd }: QuickAddDockProps) {
                 key={name}
                 type="button"
                 onClick={() => onAdd(name)}
-                className={`flex h-11 flex-shrink-0 items-center gap-1.5 rounded-full border px-3.5 font-body text-sm transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [-webkit-tap-highlight-color:transparent]
+                className={`flex h-11 flex-shrink-0 items-center gap-1.5 rounded-full border px-3.5 font-body text-sm transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [-webkit-tap-highlight-color:transparent]
                   ${isSuggested
-                    ? 'border-lime/60 bg-lime-dim font-medium text-lime'
+                    ? 'border-accent/60 bg-accent-soft font-medium text-accent'
                     : 'border-border-col bg-surface text-text-col hover:border-muted active:bg-surface2'}`}
               >
                 <MealIcon mealName={name} size={16} color="currentColor" />
@@ -56,7 +56,7 @@ export function QuickAddDock({ onAdd }: QuickAddDockProps) {
           type="button"
           onClick={() => onAdd(suggested)}
           aria-label="הוסף ארוחה"
-          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-lime text-bg shadow-[0_6px_18px_-6px_rgba(215,255,0,0.55)] transition-transform duration-150 ease-out active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [-webkit-tap-highlight-color:transparent]"
+          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-accent text-bg shadow-[0_6px_18px_-6px_rgba(150,200,40,0.55)] transition-transform duration-150 ease-out active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [-webkit-tap-highlight-color:transparent]"
         >
           <Plus size={24} strokeWidth={2.5} />
         </button>

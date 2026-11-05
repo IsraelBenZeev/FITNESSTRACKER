@@ -23,7 +23,7 @@ function SectionTitle({ children }: { children: string }) {
       style={{
         fontFamily: '"Barlow Condensed", sans-serif',
         fontSize: '18px',
-        color: '#888',
+        color: '#8C9AAB',
         margin: '0 0 14px 0',
         letterSpacing: '0.08em',
         textTransform: 'uppercase',
@@ -36,7 +36,7 @@ function SectionTitle({ children }: { children: string }) {
 
 function DeltaBadge({ delta, unit }: { delta: number; unit: string }) {
   const isGood = delta < 0
-  const color = isGood ? '#4ade80' : '#ff4757'
+  const color = isGood ? '#4ade80' : '#F87171'
   const sign = delta > 0 ? '+' : ''
   const Icon = isGood ? TrendingDown : TrendingUp
 
@@ -48,8 +48,8 @@ function DeltaBadge({ delta, unit }: { delta: number; unit: string }) {
         gap: '4px',
         padding: '3px 8px',
         borderRadius: '20px',
-        background: isGood ? 'rgba(74,222,128,0.08)' : 'rgba(255,71,87,0.08)',
-        border: `1px solid ${isGood ? 'rgba(74,222,128,0.2)' : 'rgba(255,71,87,0.2)'}`,
+        background: isGood ? 'rgba(74,222,128,0.08)' : 'rgba(248,113,113,0.08)',
+        border: `1px solid ${isGood ? 'rgba(74,222,128,0.2)' : 'rgba(248,113,113,0.2)'}`,
       }}
     >
       <Icon size={12} color={color} strokeWidth={2} />
@@ -75,7 +75,7 @@ function BigStatCard({ label, value, unit, delta, deltaUnit }: BigStatCardProps)
         style={{
           fontFamily: '"Rubik", sans-serif',
           fontSize: '11px',
-          color: '#555',
+          color: '#8C9AAB',
           fontWeight: 500,
           letterSpacing: '0.05em',
           textTransform: 'uppercase',
@@ -88,21 +88,21 @@ function BigStatCard({ label, value, unit, delta, deltaUnit }: BigStatCardProps)
           style={{
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '36px',
-            color: '#D7FF00',
+            color: '#96C828',
             lineHeight: 1,
           }}
         >
           {value != null ? value.toFixed(1) : '—'}
         </span>
         {value != null && (
-          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#555' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '13px', color: '#8C9AAB' }}>
             {unit}
           </span>
         )}
       </div>
       {delta != null && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#444' }}>
+          <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '11px', color: '#8C9AAB' }}>
             מהתחלה
           </span>
           <DeltaBadge delta={delta} unit={deltaUnit} />
@@ -136,7 +136,7 @@ export function BodyPage() {
 
   if (loading) {
     return (
-      <div style={{ padding: '32px 16px', textAlign: 'center', color: '#555', fontFamily: '"Rubik", sans-serif' }}>
+      <div style={{ padding: '32px 16px', textAlign: 'center', color: '#8C9AAB', fontFamily: '"Rubik", sans-serif' }}>
         טוען...
       </div>
     )
@@ -187,9 +187,9 @@ export function BodyPage() {
             gap: '8px',
             padding: '13px',
             background: 'transparent',
-            border: '1px solid rgba(215,255,0,0.3)',
+            border: '1px solid rgba(150,200,40,0.3)',
             borderRadius: '12px',
-            color: '#D7FF00',
+            color: '#96C828',
             fontFamily: '"Barlow Condensed", sans-serif',
             fontSize: '16px',
             fontWeight: 600,
@@ -215,8 +215,8 @@ export function BodyPage() {
         <div
           style={{
             display: 'flex',
-            background: '#1a1a1a',
-            border: '1px solid #222',
+            background: '#2C3545',
+            border: '1px solid rgba(255,255,255,0.08)',
             borderRadius: '12px',
             padding: '4px',
             gap: '4px',
@@ -235,11 +235,11 @@ export function BodyPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  background: active ? 'rgba(215,255,0,0.12)' : 'transparent',
-                  border: active ? '1px solid rgba(215,255,0,0.3)' : '1px solid transparent',
+                  background: active ? 'rgba(150,200,40,0.12)' : 'transparent',
+                  border: active ? '1px solid rgba(150,200,40,0.3)' : '1px solid transparent',
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  color: active ? '#D7FF00' : '#555',
+                  color: active ? '#96C828' : '#8C9AAB',
                   transition: 'all 0.15s',
                   WebkitTapHighlightColor: 'transparent',
                 }}
@@ -263,10 +263,10 @@ export function BodyPage() {
               justifyContent: 'center',
               gap: '6px',
               padding: '10px',
-              background: copied ? 'rgba(74,222,128,0.08)' : '#1a1a1a',
-              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid #222',
+              background: copied ? 'rgba(74,222,128,0.08)' : '#2C3545',
+              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid rgba(255,255,255,0.08)',
               borderRadius: '10px',
-              color: copied ? '#4ade80' : '#666',
+              color: copied ? '#4ade80' : '#8C9AAB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '12px',
               cursor: 'pointer',
@@ -286,10 +286,10 @@ export function BodyPage() {
               justifyContent: 'center',
               gap: '6px',
               padding: '10px',
-              background: '#1a1a1a',
-              border: '1px solid #222',
+              background: '#2C3545',
+              border: '1px solid rgba(255,255,255,0.08)',
               borderRadius: '10px',
-              color: '#666',
+              color: '#8C9AAB',
               fontFamily: '"Rubik", sans-serif',
               fontSize: '12px',
               cursor: 'pointer',
@@ -351,8 +351,8 @@ export function BodyPage() {
                     dataKey="value"
                     stroke={chartTheme.lineColor}
                     strokeWidth={2}
-                    dot={{ fill: '#D7FF00', r: 4, strokeWidth: 0 }}
-                    activeDot={{ r: 6, fill: '#D7FF00' }}
+                    dot={{ fill: '#96C828', r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: '#96C828' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -388,8 +388,8 @@ export function BodyPage() {
                     dataKey="value"
                     stroke={chartTheme.lineColor}
                     strokeWidth={2}
-                    dot={{ fill: '#D7FF00', r: 4, strokeWidth: 0 }}
-                    activeDot={{ r: 6, fill: '#D7FF00' }}
+                    dot={{ fill: '#96C828', r: 4, strokeWidth: 0 }}
+                    activeDot={{ r: 6, fill: '#96C828' }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -410,7 +410,7 @@ export function BodyPage() {
           style={{
             fontFamily: '"Rubik", sans-serif',
             fontSize: '14px',
-            color: '#444',
+            color: '#8C9AAB',
             textAlign: 'center',
             padding: '32px',
           }}

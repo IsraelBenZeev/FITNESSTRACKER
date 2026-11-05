@@ -14,10 +14,10 @@ export function Card({ children, style, hover = false }: CardProps) {
       onMouseEnter={hover ? () => setHovered(true) : undefined}
       onMouseLeave={hover ? () => setHovered(false) : undefined}
       style={{
-        background: '#111111',
-        borderTop: '2px solid #D7FF00',
-        border: `1px solid ${hover && hovered ? '#D7FF00' : '#222222'}`,
-        borderTopColor: '#D7FF00',
+        background: '#252D3A',
+        borderTop: '2px solid #96C828',
+        border: `1px solid ${hover && hovered ? '#96C828' : 'rgba(255,255,255,0.08)'}`,
+        borderTopColor: '#96C828',
         borderRadius: '10px',
         transition: hover ? 'border-color 0.2s ease' : undefined,
         ...style,
