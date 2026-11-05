@@ -1,7 +1,6 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Clock, RotateCcw, Trash2 } from 'lucide-react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { Clock, MoreHorizontal, Search, Sparkles, Trash2, X } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
-import { NumberField } from '../../shared/components/NumberField'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
 import { MealIcon } from '../../shared/icons/MealIcon'
 import { useAddMeal } from './useAddMeal'
@@ -10,33 +9,22 @@ import { useDeleteMeal } from './useDeleteMeal'
 import { useRecentMeals, type RecentMeal } from './useRecentMeals'
 import { useToday } from './useToday'
 import { useGoals } from '../../lib/useGoals'
-import type { NutritionLog } from '../../types/nutrition'
 import { todayLocal } from '../../lib/date'
+import { DayFillBar, MacroComposition, macroKcal } from './nutritionVisuals'
+import type { NutritionLog } from '../../types/nutrition'
 
-/** Order = how often each is picked; first ones are visible without scrolling */
-const MEAL_OPTIONS = [
-  'ארוחת בוקר',
-  'ארוחת צהריים',
-  'ארוחת ערב',
-  'חטיף',
-  'שייק',
-  'פוסט וורקאות',
-  'נשנוש',
-  'חלבון',
-  'פירות',
-  'ירקות',
-  'פחמימות',
-  'שומנים',
-  'אחר',
-]
+/** Primary types get a segment each; the rest live behind "עוד" */
+const PRIMARY_TYPES = ['ארוחת בוקר', 'ארוחת צהריים', 'ארוחת ערב', 'חטיף'] as const
+const MORE_TYPES = ['שייק', 'פוסט וורקאות', 'נשנוש', 'חלבון', 'פירות', 'ירקות', 'פחמימות', 'שומנים', 'אחר'] as const
+const MEAL_OPTIONS: string[] = [...PRIMARY_TYPES, ...MORE_TYPES]
 
-/** Short chip labels; the stored value stays the full name */
 const SHORT_LABEL: Record<string, string> = {
   'ארוחת בוקר': 'בוקר',
   'ארוחת צהריים': 'צהריים',
   'ארוחת ערב': 'ערב',
   'פוסט וורקאות': 'אחרי אימון',
 }
+const short = (t: string) => SHORT_LABEL[t] ?? t
 
 const ADD_MEAL_DRAFT_KEY = 'fitnesstracker:add-meal-draft'
 
@@ -59,8 +47,11 @@ interface AddMealModalProps {
 }
 
 const nowHHMM = () => new Date().toTimeString().slice(0, 5)
-const todayStr = todayLocal
 const fmt = (n: number) => Math.round(n).toLocaleString('he-IL')
+const digitsOnly = (v: string, max: number) => {
+  const d = v.replace(/[^\d]/g, '')
+  return d === '' ? 0 : Math.min(max, Number(d))
+}
 
 const focusRing =
   'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
@@ -68,7 +59,7 @@ const focusRing =
 export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: AddMealModalProps) {
   const isEditing = !!initialMeal
 
-  const [mealName, setMealName] = useState(MEAL_OPTIONS[0]!)
+  const [mealName, setMealName] = useState<string>(PRIMARY_TYPES[0])
   const [foodItems, setFoodItems] = useState('')
   const [calories, setCalories] = useState(0)
   const [proteinG, setProteinG] = useState(0)
@@ -77,15 +68,18 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
   const [eatTime, setEatTime] = useState(nowHHMM)
   const [draftReady, setDraftReady] = useState(false)
   const [triedSubmit, setTriedSubmit] = useState(false)
-  const [appliedRecent, setAppliedRecent] = useState<number | null>(null)
+  const [searchFocused, setSearchFocused] = useState(false)
+  const [filledFrom, setFilledFrom] = useState<string | null>(null)
+  const [showMoreTypes, setShowMoreTypes] = useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+  const caloriesRef = useRef<HTMLInputElement>(null)
 
   const { mutate: addMeal, isPending: isAdding } = useAddMeal()
   const { mutate: editMeal, isPending: isSavingEdit } = useEditMeal()
   const { mutate: deleteMeal, isPending: isDeleting } = useDeleteMeal()
   const isPending = isAdding || isSavingEdit || isDeleting
 
-  const { data: recentMeals = [] } = useRecentMeals(isOpen && !isEditing)
+  const { data: recentMeals = [] } = useRecentMeals(isOpen, 40)
   const { totals } = useToday()
   const { goalCalories, goalProtein } = useGoals()
 
@@ -93,7 +87,8 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
   useEffect(() => {
     if (!isOpen) return
     setTriedSubmit(false)
-    setAppliedRecent(null)
+    setFilledFrom(null)
+    setSearchFocused(false)
     if (initialMeal) {
       setMealName(initialMeal.meal_name)
       setFoodItems(initialMeal.food_items ?? '')
@@ -102,6 +97,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
       setCarbsG(Math.round(initialMeal.carbs_g ?? 0))
       setFatG(Math.round(initialMeal.fat_g ?? 0))
       setEatTime(initialMeal.time?.slice(0, 5) ?? nowHHMM())
+      setShowMoreTypes(!PRIMARY_TYPES.includes(initialMeal.meal_name as (typeof PRIMARY_TYPES)[number]))
       setDraftReady(false)
       return
     }
@@ -112,11 +108,10 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
     } catch {
       draft = null
     }
-    setMealName(
-      presetMealName && MEAL_OPTIONS.includes(presetMealName)
-        ? presetMealName
-        : draft?.mealName ?? MEAL_OPTIONS[0]!,
-    )
+    const type =
+      presetMealName && MEAL_OPTIONS.includes(presetMealName) ? presetMealName : draft?.mealName ?? PRIMARY_TYPES[0]
+    setMealName(type)
+    setShowMoreTypes(!PRIMARY_TYPES.includes(type as (typeof PRIMARY_TYPES)[number]))
     setFoodItems(draft?.foodItems ?? '')
     setCalories(draft?.calories ?? 0)
     setProteinG(draft?.proteinG ?? 0)
@@ -130,60 +125,59 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
   useEffect(() => {
     if (!isOpen || isEditing || !draftReady) return
     const draft: MealDraft = { mealName, foodItems, calories, proteinG, carbsG, fatG, eatTime }
-    try {
-      localStorage.setItem(ADD_MEAL_DRAFT_KEY, JSON.stringify(draft))
-    } catch {
-      /* storage unavailable: the draft is a convenience only */
-    }
+    try { localStorage.setItem(ADD_MEAL_DRAFT_KEY, JSON.stringify(draft)) } catch { /* convenience only */ }
   }, [isOpen, isEditing, draftReady, mealName, foodItems, calories, proteinG, carbsG, fatG, eatTime])
 
   const clearDraft = () => {
     try { localStorage.removeItem(ADD_MEAL_DRAFT_KEY) } catch { /* ignore */ }
   }
 
-  const isDirty = !isEditing && (calories > 0 || proteinG > 0 || carbsG > 0 || fatG > 0 || foodItems.trim() !== '')
+  // ── Search over what you've eaten before ──
+  const query = foodItems.trim().toLowerCase()
+  const suggestions = useMemo(() => {
+    if (filledFrom && filledFrom === foodItems) return []
+    if (!query) return isEditing ? [] : recentMeals.slice(0, 3)
+    return recentMeals
+      .filter((m) => m.food_items.toLowerCase().includes(query) && m.food_items.toLowerCase() !== query)
+      .slice(0, 4)
+  }, [query, recentMeals, isEditing, filledFrom, foodItems])
+  const showSuggestions = searchFocused && suggestions.length > 0
 
-  const resetForm = () => {
-    setFoodItems('')
-    setCalories(0)
-    setProteinG(0)
-    setCarbsG(0)
-    setFatG(0)
-    setEatTime(nowHHMM())
-    setAppliedRecent(null)
-    setTriedSubmit(false)
-    clearDraft()
-  }
-
-  const applyRecent = (m: RecentMeal, index: number) => {
-    if (MEAL_OPTIONS.includes(m.meal_name)) setMealName(m.meal_name)
+  const applySuggestion = (m: RecentMeal) => {
+    if (MEAL_OPTIONS.includes(m.meal_name)) {
+      setMealName(m.meal_name)
+      setShowMoreTypes(!PRIMARY_TYPES.includes(m.meal_name as (typeof PRIMARY_TYPES)[number]))
+    }
     setFoodItems(m.food_items)
     setCalories(m.calories)
     setProteinG(m.protein_g)
     setCarbsG(m.carbs_g)
     setFatG(m.fat_g)
-    setEatTime(nowHHMM())
-    setAppliedRecent(index)
+    setFilledFrom(m.food_items)
+    setSearchFocused(false)
   }
 
-  // ── Live impact on today's goals ──
+  // ── Derived ──
+  const fromMacros = macroKcal(proteinG, carbsG, fatG)
+  const canEstimate = calories === 0 && fromMacros > 0
+  const caloriesMissing = calories <= 0
+
   const impact = useMemo(() => {
     // Editing an older day's meal: today's goals don't apply
-    if (initialMeal && initialMeal.date !== todayStr()) return null
+    if (initialMeal && initialMeal.date !== todayLocal()) return null
     // When editing today's meal its old values are already inside today's totals
-    const baseCal = totals.calories - (initialMeal?.calories ?? 0)
-    const basePro = totals.protein - (initialMeal?.protein_g ?? 0)
-    return {
-      calLeft: goalCalories - (baseCal + calories),
-      proteinAfter: basePro + proteinG,
-    }
+    const before = Math.max(0, totals.calories - (initialMeal?.calories ?? 0))
+    const proteinBefore = Math.max(0, totals.protein - (initialMeal?.protein_g ?? 0))
+    return { before, left: goalCalories - before - calories, proteinAfter: proteinBefore + proteinG }
   }, [initialMeal, totals.calories, totals.protein, calories, proteinG, goalCalories])
-
-  const caloriesMissing = calories <= 0
 
   const handleSubmit = () => {
     setTriedSubmit(true)
-    if (caloriesMissing || isPending) return
+    if (caloriesMissing) {
+      caloriesRef.current?.focus()
+      return
+    }
+    if (isPending) return
     const payload = {
       meal_name: mealName,
       food_items: foodItems.trim(),
@@ -196,27 +190,45 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
     if (isEditing && initialMeal) {
       editMeal({ id: initialMeal.id, ...payload }, { onSuccess: onClose })
     } else {
-      addMeal(payload, {
-        onSuccess: () => {
-          clearDraft()
-          onClose()
-        },
-      })
+      addMeal(payload, { onSuccess: () => { clearDraft(); onClose() } })
     }
   }
 
+  const moreSelected = !PRIMARY_TYPES.includes(mealName as (typeof PRIMARY_TYPES)[number])
+
+  // ── Header: time as a compact chip that opens the native picker ──
+  const timeChip = (
+    <label className={`relative flex h-9 cursor-pointer items-center gap-1.5 rounded-full border border-border-col bg-bg px-3 font-body text-sm tabular-nums text-text-col transition-colors duration-150 focus-within:border-accent-line hover:border-subtle`}>
+      <Clock size={14} strokeWidth={2} className="text-muted" />
+      {eatTime}
+      <span className="sr-only">שעת הארוחה</span>
+      <input
+        type="time"
+        value={eatTime}
+        onChange={(e) => e.target.value && setEatTime(e.target.value)}
+        className="absolute inset-0 cursor-pointer opacity-0 [color-scheme:dark]"
+      />
+    </label>
+  )
+
   const footer = (
-    <div className="flex flex-col gap-2.5">
+    <div className="flex flex-col gap-3">
       {impact && (
-        <p className="text-center font-body text-sm tabular-nums text-muted" aria-live="polite">
-          {impact.calLeft >= 0 ? (
-            <>אחרי הארוחה יישארו <span className="font-medium text-accent">{fmt(impact.calLeft)}</span> קל'</>
-          ) : (
-            <>אחרי הארוחה תחרוג ב-<span className="font-medium text-danger">{fmt(-impact.calLeft)}</span> קל'</>
-          )}
-          <span className="mx-1.5" aria-hidden>·</span>
-          חלבון <span className="font-medium text-text-col">{fmt(impact.proteinAfter)}</span>/{goalProtein}g
-        </p>
+        <div className="flex flex-col gap-1.5" aria-live="polite">
+          <DayFillBar before={impact.before} meal={calories} goal={goalCalories} />
+          <p className="flex justify-between font-body text-sm tabular-nums text-muted">
+            <span>
+              {impact.left >= 0 ? (
+                <>יישארו <span className="font-semibold text-accent">{fmt(impact.left)}</span> קל'</>
+              ) : (
+                <>חריגה של <span className="font-semibold text-danger">{fmt(-impact.left)}</span> קל'</>
+              )}
+            </span>
+            <span>
+              חלבון <span className="font-medium text-text-col">{fmt(impact.proteinAfter)}</span>/{goalProtein}g
+            </span>
+          </p>
+        </div>
       )}
       <div className="flex gap-2.5">
         {isEditing && (
@@ -234,9 +246,8 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
           type="button"
           onClick={handleSubmit}
           disabled={isPending}
-          aria-disabled={caloriesMissing || undefined}
-          className={`flex h-[52px] flex-1 items-center justify-center rounded-2xl font-body text-base font-semibold transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-60 ${focusRing}
-            ${caloriesMissing ? 'bg-surface2 text-muted' : 'bg-accent text-bg'}`}
+          className={`flex h-[52px] flex-1 items-center justify-center rounded-2xl font-body text-base font-semibold transition-[background-color,color,transform] duration-200 active:scale-[0.98] disabled:opacity-60 ${focusRing}
+            ${caloriesMissing ? 'bg-surface2 text-muted' : 'bg-accent text-bg shadow-[0_8px_24px_-10px_rgba(150,200,40,0.7)]'}`}
         >
           {isAdding || isSavingEdit ? 'שומר…' : isEditing ? 'שמור שינויים' : 'הוסף ארוחה'}
         </button>
@@ -245,130 +256,179 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
   )
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={isEditing ? 'עריכת ארוחה' : 'ארוחה חדשה'} footer={footer}>
-      <form className="flex flex-col gap-6" onSubmit={(e) => { e.preventDefault(); handleSubmit() }}>
-        {/* Repeat a recent meal: the fastest way to log */}
-        {!isEditing && recentMeals.length > 0 && (
-          <section aria-labelledby="recent-heading" className="flex flex-col gap-2">
-            <div className="flex min-h-9 items-center justify-between">
-              <h3 id="recent-heading" className="font-body text-sm text-muted">חזרה על ארוחה</h3>
-              {isDirty && (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEditing ? 'עריכת ארוחה' : 'ארוחה חדשה'}
+      headerAction={timeChip}
+      footer={footer}
+    >
+      <form className="flex flex-col gap-5" onSubmit={(e) => { e.preventDefault(); handleSubmit() }}>
+        {/* 1 · What did you eat — searches your history and fills everything */}
+        <div className="relative">
+          <div className={`flex h-14 items-center gap-2.5 rounded-2xl border bg-bg px-4 transition-colors duration-150 ${searchFocused ? 'border-accent-line' : 'border-border-col'}`}>
+            <Search size={18} strokeWidth={2} className="flex-shrink-0 text-muted" />
+            <input
+              type="text"
+              value={foodItems}
+              onChange={(e) => { setFoodItems(e.target.value); setFilledFrom(null) }}
+              onFocus={() => setSearchFocused(true)}
+              onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+              placeholder="מה אכלת?"
+              aria-label="מה אכלת"
+              aria-autocomplete="list"
+              aria-expanded={showSuggestions}
+              enterKeyHint="next"
+              className="h-full min-w-0 flex-1 bg-transparent font-body text-base text-heading outline-none placeholder:text-muted"
+            />
+            {foodItems && (
+              <button
+                type="button"
+                onClick={() => { setFoodItems(''); setFilledFrom(null) }}
+                aria-label="נקה"
+                className={`-me-2 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-muted hover:text-text-col ${focusRing}`}
+              >
+                <X size={16} strokeWidth={2} />
+              </button>
+            )}
+          </div>
+
+          {showSuggestions && (
+            <ul role="listbox" aria-label={query ? 'תוצאות' : 'אחרונות'} className="mt-2 flex flex-col overflow-hidden rounded-2xl border border-border-col bg-surface2">
+              {!query && <li className="px-4 pb-1 pt-2.5 font-body text-xs text-muted">אחרונות</li>}
+              {suggestions.map((m) => (
+                <li key={`${m.food_items}-${m.calories}`} role="option" aria-selected={false}>
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => applySuggestion(m)}
+                    className="flex min-h-14 w-full items-center gap-3 px-4 py-2 text-right transition-colors duration-100 hover:bg-bg/50 active:bg-bg/70"
+                  >
+                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-bg text-muted">
+                      <MealIcon mealName={m.meal_name} size={15} color="currentColor" />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate font-body text-[15px] text-text-col">{m.food_items}</span>
+                    <span className="flex-shrink-0 font-body text-xs tabular-nums text-muted">
+                      <span className="text-heading">{fmt(m.calories)}</span> קל'
+                      {m.protein_g > 0 && <span className="text-macro-protein"> · {m.protein_g}g</span>}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {filledFrom && filledFrom === foodItems && (
+            <p className="mt-2 flex items-center gap-1.5 font-body text-xs text-accent">
+              <Sparkles size={13} strokeWidth={2} />
+              מולא מארוחה קודמת. אפשר לשנות כל ערך.
+            </p>
+          )}
+        </div>
+
+        {/* 2 · Meal type: four segments + more */}
+        <div className="flex flex-col gap-2">
+          <div role="radiogroup" aria-label="סוג ארוחה" className="grid grid-cols-5 gap-1 rounded-2xl bg-bg p-1">
+            {PRIMARY_TYPES.map((t) => {
+              const selected = mealName === t
+              return (
                 <button
+                  key={t}
                   type="button"
-                  onClick={resetForm}
-                  className={`-me-2 flex h-9 items-center gap-1 rounded-lg px-2 font-body text-sm text-muted transition-colors duration-150 hover:text-text-col ${focusRing}`}
+                  role="radio"
+                  aria-checked={selected}
+                  onClick={() => { setMealName(t); setShowMoreTypes(false) }}
+                  className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-xl font-body text-xs transition-colors duration-150 ${focusRing}
+                    ${selected ? 'bg-accent font-medium text-bg' : 'text-muted hover:text-text-col'}`}
                 >
-                  <RotateCcw size={14} strokeWidth={2} />
-                  נקה
+                  <MealIcon mealName={t} size={18} color="currentColor" />
+                  {short(t)}
                 </button>
-              )}
-            </div>
-            <div className="hide-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
-              {recentMeals.map((m, i) => {
-                const active = appliedRecent === i
+              )
+            })}
+            <button
+              type="button"
+              aria-expanded={showMoreTypes}
+              onClick={() => setShowMoreTypes((v) => !v)}
+              className={`flex h-14 flex-col items-center justify-center gap-0.5 rounded-xl font-body text-xs transition-colors duration-150 ${focusRing}
+                ${moreSelected ? 'bg-accent font-medium text-bg' : showMoreTypes ? 'bg-surface2 text-text-col' : 'text-muted hover:text-text-col'}`}
+            >
+              {moreSelected ? <MealIcon mealName={mealName} size={18} color="currentColor" /> : <MoreHorizontal size={18} strokeWidth={2} />}
+              <span className="max-w-full truncate px-0.5">{moreSelected ? short(mealName) : 'עוד'}</span>
+            </button>
+          </div>
+          {showMoreTypes && (
+            <div className="flex flex-wrap gap-1.5">
+              {MORE_TYPES.map((t) => {
+                const selected = mealName === t
                 return (
                   <button
-                    key={`${m.food_items}-${m.calories}`}
+                    key={t}
                     type="button"
-                    onClick={() => applyRecent(m, i)}
-                    aria-pressed={active}
-                    className={`flex w-40 flex-shrink-0 flex-col gap-1 rounded-2xl border p-3 text-right transition-colors duration-150 [-webkit-tap-highlight-color:transparent] ${focusRing}
-                      ${active ? 'border-accent-line bg-accent-soft' : 'border-border-col bg-surface2 hover:border-subtle'}`}
+                    onClick={() => setMealName(t)}
+                    aria-pressed={selected}
+                    className={`flex h-10 items-center gap-1.5 rounded-full border px-3 font-body text-sm transition-colors duration-150 ${focusRing}
+                      ${selected ? 'border-accent bg-accent-soft text-accent' : 'border-border-col text-text-col hover:border-subtle'}`}
                   >
-                    <span className="line-clamp-2 min-h-[2.5em] font-body text-sm leading-tight text-text-col">{m.food_items}</span>
-                    <span className="font-body text-xs tabular-nums text-muted">
-                      <span className={active ? 'text-accent' : 'text-text-col'}>{fmt(m.calories)}</span> קל'
-                      {m.protein_g > 0 && <> · {m.protein_g}g חלבון</>}
-                    </span>
+                    <MealIcon mealName={t} size={14} color="currentColor" />
+                    {short(t)}
                   </button>
                 )
               })}
             </div>
-          </section>
-        )}
-
-        {/* Meal type */}
-        <fieldset className="flex flex-col">
-          <legend className="mb-2 font-body text-sm text-muted">סוג ארוחה</legend>
-          <div className="hide-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
-            {MEAL_OPTIONS.map((opt) => {
-              const selected = opt === mealName
-              return (
-                <button
-                  key={opt}
-                  type="button"
-                  onClick={() => setMealName(opt)}
-                  aria-pressed={selected}
-                  className={`flex h-11 flex-shrink-0 items-center gap-1.5 rounded-full border px-4 font-body text-sm transition-colors duration-150 [-webkit-tap-highlight-color:transparent] ${focusRing}
-                    ${selected
-                      ? 'border-accent bg-accent font-medium text-bg'
-                      : 'border-border-col bg-surface2 text-text-col hover:border-subtle'}`}
-                >
-                  <MealIcon mealName={opt} size={16} color="currentColor" />
-                  {SHORT_LABEL[opt] ?? opt}
-                </button>
-              )
-            })}
-          </div>
-        </fieldset>
-
-        {/* What */}
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="meal-food" className="font-body text-sm text-muted">מה אכלת?</label>
-          <input
-            id="meal-food"
-            type="text"
-            value={foodItems}
-            onChange={(e) => setFoodItems(e.target.value)}
-            placeholder="לדוגמה: אורז, חזה עוף, סלט"
-            enterKeyHint="next"
-            className="h-12 w-full rounded-2xl border border-border-col bg-bg px-4 font-body text-base text-heading outline-none transition-colors duration-150 placeholder:text-subtle focus:border-accent-line"
-          />
+          )}
         </div>
 
-        {/* When */}
-        <div className="flex items-center justify-between gap-3">
-          <label htmlFor="meal-time" className="flex items-center gap-2 font-body text-sm text-muted">
-            <Clock size={16} strokeWidth={2} />
-            שעה
-          </label>
-          <div className="flex items-center gap-2">
-            {eatTime !== nowHHMM() && (
-              <button
-                type="button"
-                onClick={() => setEatTime(nowHHMM())}
-                className={`flex h-11 items-center rounded-xl px-3 font-body text-sm text-accent transition-colors duration-150 hover:bg-accent-soft ${focusRing}`}
-              >
-                עכשיו
-              </button>
-            )}
-            <input
-              id="meal-time"
-              type="time"
-              value={eatTime}
-              onChange={(e) => setEatTime(e.target.value)}
-              className="h-11 rounded-xl border border-border-col bg-bg px-3 font-body text-base tabular-nums text-heading outline-none [color-scheme:dark] focus:border-accent-line"
+        {/* 3 · The nutrition label */}
+        <section aria-label="ערכים תזונתיים" className="flex flex-col gap-4 rounded-3xl border border-border-col bg-bg p-4">
+          <div className="flex flex-col items-center gap-1">
+            <label htmlFor="meal-kcal" className="font-body text-sm text-muted">קלוריות</label>
+            <div className="flex items-baseline justify-center gap-2">
+              <input
+                ref={caloriesRef}
+                id="meal-kcal"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                autoComplete="off"
+                value={calories === 0 ? '' : String(calories)}
+                placeholder="0"
+                onFocus={(e) => e.currentTarget.select()}
+                onChange={(e) => setCalories(digitsOnly(e.target.value, 5000))}
+                aria-invalid={(triedSubmit && caloriesMissing) || undefined}
+                aria-describedby="meal-kcal-hint"
+                className="w-[5ch] bg-transparent text-center font-display text-[64px] font-bold leading-none tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
+              />
+              <span className="font-body text-base text-muted">קל'</span>
+            </div>
+            <span
+              aria-hidden
+              className={`h-0.5 w-24 rounded-full transition-colors duration-200 ${triedSubmit && caloriesMissing ? 'bg-danger' : calories > 0 ? 'bg-accent' : 'bg-border-col'}`}
             />
+            <p id="meal-kcal-hint" className="min-h-[1.25rem] font-body text-xs">
+              {triedSubmit && caloriesMissing && !canEstimate ? (
+                <span className="text-danger">צריך להזין קלוריות כדי לשמור</span>
+              ) : canEstimate ? (
+                <button
+                  type="button"
+                  onClick={() => setCalories(fromMacros)}
+                  className={`flex items-center gap-1 rounded-full bg-accent-soft px-2.5 py-1 text-accent ${focusRing}`}
+                >
+                  <Sparkles size={12} strokeWidth={2} />
+                  לפי המאקרו ≈ {fmt(fromMacros)} קל'. להשתמש?
+                </button>
+              ) : null}
+            </p>
           </div>
-        </div>
 
-        {/* Numbers: calories is the only required one */}
-        <NumberField
-          label="קלוריות"
-          value={calories}
-          onChange={setCalories}
-          unit="קל'"
-          step={10}
-          max={5000}
-          emphasis
-          invalid={triedSubmit && caloriesMissing}
-          hint={triedSubmit && caloriesMissing ? 'צריך להזין קלוריות כדי לשמור' : undefined}
-        />
-        <NumberField label="חלבון" value={proteinG} onChange={setProteinG} unit="g" step={5} max={400} />
-        <div className="grid grid-cols-2 gap-3">
-          <NumberField label="פחמימות" value={carbsG} onChange={setCarbsG} unit="g" step={5} max={600} />
-          <NumberField label="שומן" value={fatG} onChange={setFatG} unit="g" step={5} max={300} />
-        </div>
+          <div className="grid grid-cols-3 gap-2">
+            <MacroTile id="meal-p" label="חלבון" value={proteinG} onChange={setProteinG} dotClass="bg-macro-protein" />
+            <MacroTile id="meal-c" label="פחמימות" value={carbsG} onChange={setCarbsG} dotClass="bg-macro-carbs" />
+            <MacroTile id="meal-f" label="שומן" value={fatG} onChange={setFatG} dotClass="bg-macro-fat" />
+          </div>
+
+          <MacroComposition protein={proteinG} carbs={carbsG} fat={fatG} />
+        </section>
       </form>
 
       <ConfirmDialog
@@ -381,5 +441,36 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
         onCancel={() => setConfirmDeleteOpen(false)}
       />
     </Modal>
+  )
+}
+
+function MacroTile({
+  id, label, value, onChange, dotClass,
+}: { id: string; label: string; value: number; onChange: (v: number) => void; dotClass: string }) {
+  return (
+    <label
+      htmlFor={id}
+      className="flex cursor-text flex-col items-center gap-1 rounded-2xl border border-border-col bg-surface px-2 py-2.5 transition-colors duration-150 focus-within:border-accent-line"
+    >
+      <span className="flex items-center gap-1.5 font-body text-xs text-muted">
+        <span aria-hidden className={`h-2 w-2 rounded-full ${dotClass}`} />
+        {label}
+      </span>
+      <span className="flex items-baseline gap-0.5">
+        <input
+          id={id}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          autoComplete="off"
+          value={value === 0 ? '' : String(value)}
+          placeholder="0"
+          onFocus={(e) => e.currentTarget.select()}
+          onChange={(e) => onChange(digitsOnly(e.target.value, 999))}
+          className="w-[3.5ch] bg-transparent text-center font-display text-[28px] font-semibold leading-none tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
+        />
+        <span className="font-body text-xs text-muted">g</span>
+      </span>
+    </label>
   )
 }

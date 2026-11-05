@@ -20,6 +20,10 @@ export default {
         muted: '#8C9AAB',          // "text-2": secondary text, 5.5:1 on bg
         subtle: '#516070',         // "muted": decorative / disabled only (fails 4.5:1 for text)
         danger: '#F87171',         // "warning"
+        // Data series: macros (≥4.5:1 on surface)
+        'macro-protein': '#96C828',
+        'macro-carbs': '#6FA8DC',
+        'macro-fat': '#E0B354',
       },
       fontFamily: {
         display: ['"Barlow Condensed"', 'sans-serif'],

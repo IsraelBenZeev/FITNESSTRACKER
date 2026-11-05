@@ -9,6 +9,8 @@ interface ModalProps {
   children: React.ReactNode
   /** Sticky action area pinned to the bottom of the sheet (primary action lives here) */
   footer?: React.ReactNode
+  /** Compact control shown in the header next to the title (e.g. a time chip) */
+  headerAction?: React.ReactNode
   zIndexOverride?: number
 }
 
@@ -16,7 +18,7 @@ interface ModalProps {
  * Bottom sheet. Content scrolls; header and footer stay put,
  * so the primary action is always under the thumb.
  */
-export function Modal({ isOpen, onClose, title, children, footer, zIndexOverride }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, footer, headerAction, zIndexOverride }: ModalProps) {
   const titleId = useId()
 
   useEffect(() => {
@@ -47,9 +49,12 @@ export function Modal({ isOpen, onClose, title, children, footer, zIndexOverride
         <span aria-hidden className="mx-auto mt-2 h-1 w-10 flex-shrink-0 rounded-full bg-subtle/60" />
 
         <header className="flex flex-shrink-0 items-center justify-between gap-3 px-5 pb-2 pt-2">
-          <h2 id={titleId} className="font-body text-lg font-semibold text-heading">
-            {title}
-          </h2>
+          <div className="flex min-w-0 items-center gap-2.5">
+            <h2 id={titleId} className="truncate font-body text-lg font-semibold text-heading">
+              {title}
+            </h2>
+            {headerAction}
+          </div>
           <button
             type="button"
             onClick={onClose}
@@ -60,7 +65,7 @@ export function Modal({ isOpen, onClose, title, children, footer, zIndexOverride
           </button>
         </header>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-5 pb-5 pt-2">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overflow-x-hidden overscroll-contain px-5 pb-5 pt-2">
           {children}
         </div>
 
