@@ -14,7 +14,7 @@ export default {
         lime: '#D7FF00',
         'lime-dim': 'rgba(215,255,0,0.12)',
         'text-col': '#f0f0f0',
-        muted: '#666666',
+        muted: '#8f8f8f', // ≥4.5:1 on bg/surface/surface2
         danger: '#ff4757',
       },
       fontFamily: {

@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
+import { Trash2 } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
+import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { useDeleteMeal } from './useDeleteMeal'
 import { Stepper } from '../../shared/components/Stepper'
 import { useAddMeal } from './useAddMeal'
 import { useEditMeal } from './useEditMeal'
@@ -41,6 +44,8 @@ interface AddMealModalProps {
 
 export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps) {
   const isEditing = !!initialMeal
+  const { mutate: deleteMeal, isPending: isDeleting } = useDeleteMeal()
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
 
   const [mealName, setMealName] = useState(MEAL_OPTIONS[0]!)
   const [foodItems, setFoodItems] = useState('')
@@ -233,7 +238,28 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
         >
           {isPending ? 'שומר...' : isEditing ? 'שמור שינויים' : 'שמור ארוחה'}
         </button>
+
+        {isEditing && (
+          <button
+            type="button"
+            onClick={() => setConfirmDeleteOpen(true)}
+            disabled={isPending || isDeleting}
+            className="flex h-11 w-full items-center justify-center gap-2 rounded-xl font-body text-sm font-medium text-danger transition-colors duration-200 hover:bg-danger/10 disabled:opacity-40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+          >
+            <Trash2 size={16} strokeWidth={2} />
+            {isDeleting ? 'מוחק...' : 'מחק ארוחה'}
+          </button>
+        )}
       </div>
+      <ConfirmDialog
+        isOpen={confirmDeleteOpen}
+        message="האם למחוק את הארוחה?"
+        onConfirm={() => {
+          setConfirmDeleteOpen(false)
+          if (initialMeal) deleteMeal(initialMeal.id, { onSuccess: onClose })
+        }}
+        onCancel={() => setConfirmDeleteOpen(false)}
+      />
     </Modal>
   )
 }

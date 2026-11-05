@@ -1,161 +1,128 @@
 import { useState } from 'react'
-import { Plus, Settings2 } from 'lucide-react'
+import { Plus, SlidersHorizontal } from 'lucide-react'
 import { useToday } from './useToday'
 import { useGoals } from '../../lib/useGoals'
-import { useDeleteMeal } from './useDeleteMeal'
-import { StatCard } from '../../shared/components/StatCard'
 import { ProgressBar } from '../../shared/components/ProgressBar'
-import { Card } from '../../shared/components/Card'
 import { MealCard } from './MealCard'
 import { AddMealModal } from './AddMealModal'
 import { EditGoalsModal } from './EditGoalsModal'
 import type { NutritionLog } from '../../types/nutrition'
 
+const focusRing =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime'
+
 export function TodayPage() {
   const { meals, totals, loading } = useToday()
   const { goalCalories, goalProtein } = useGoals()
-  const { mutate: deleteMeal } = useDeleteMeal()
   const [addMealOpen, setAddMealOpen] = useState(false)
   const [editGoalsOpen, setEditGoalsOpen] = useState(false)
   const [editingMeal, setEditingMeal] = useState<NutritionLog | null>(null)
 
-  const remaining = goalCalories - totals.calories
-  const isOver = totals.calories > goalCalories
-
-  if (loading) {
-    return (
-      <div style={{ padding: '32px 16px', textAlign: 'center', color: '#555', fontFamily: '"Rubik", sans-serif' }}>
-        טוען...
-      </div>
-    )
-  }
+  const remaining = Math.round(goalCalories - totals.calories)
+  const isOver = remaining < 0
 
   return (
     <>
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-        {/* Stat cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
-          <StatCard label="קלוריות" value={totals.calories} unit=" קל'" danger={isOver} />
-          <StatCard label="חלבון" value={totals.protein} unit="g" />
-          <StatCard label="פחמימות" value={totals.carbs} unit="g" />
-        </div>
-
-        {/* Progress */}
-        <Card style={{ padding: '14px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
-            <span style={{ fontFamily: '"Barlow Condensed", sans-serif', fontSize: '15px', color: '#555', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              יעדים
-            </span>
-            <button
-              onClick={() => setEditGoalsOpen(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#444',
-                padding: '4px 6px',
-                borderRadius: '6px',
-                WebkitTapHighlightColor: 'transparent',
-              }}
+      <div className="flex flex-col gap-6 px-4 pb-28 pt-4">
+        {loading ? (
+          <TodaySkeleton />
+        ) : (
+          <>
+            {/* Daily summary: one answer to "how am I doing today?" */}
+            <section
+              aria-label="סיכום יומי"
+              className="flex flex-col gap-5 rounded-2xl border border-border-col border-t-2 border-t-lime bg-surface p-4"
             >
-              <Settings2 size={15} strokeWidth={1.5} color="#444" />
-            </button>
-          </div>
-          <ProgressBar value={totals.calories} goal={goalCalories} label="קלוריות" unit=" קל'" />
-          <ProgressBar value={totals.protein} goal={goalProtein} label="חלבון" unit="g" />
-        </Card>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-col gap-1">
+                  <p className="font-body text-sm text-muted">
+                    {isOver ? 'חרגת מהיעד ב-' : 'נשאר להיום'}
+                  </p>
+                  <p className="flex items-baseline gap-1.5">
+                    <span
+                      className={`font-display text-6xl font-bold leading-none tabular-nums ${isOver ? 'text-danger' : 'text-lime'}`}
+                    >
+                      {Math.abs(remaining).toLocaleString('he-IL')}
+                    </span>
+                    <span className="font-body text-base text-muted">קלוריות</span>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditGoalsOpen(true)}
+                  aria-label="עריכת יעדים"
+                  className={`-me-2 -mt-1 flex h-11 w-11 items-center justify-center rounded-xl text-muted transition-colors duration-200 hover:bg-surface2 hover:text-text-col [-webkit-tap-highlight-color:transparent] ${focusRing}`}
+                >
+                  <SlidersHorizontal size={20} strokeWidth={1.75} />
+                </button>
+              </div>
 
-        {/* Remaining banner */}
-        <div
-          style={{
-            borderRadius: '10px',
-            padding: '11px 16px',
-            background: isOver ? 'rgba(255,71,87,0.08)' : 'rgba(215,255,0,0.06)',
-            border: `1px solid ${isOver ? 'rgba(255,71,87,0.25)' : 'rgba(215,255,0,0.15)'}`,
-            textAlign: 'center',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: '"Rubik", sans-serif',
-              fontSize: '13px',
-              fontWeight: 500,
-              color: isOver ? '#ff4757' : '#D7FF00',
-            }}
-          >
-            {isOver
-              ? `חרגת ב-${Math.round(Math.abs(remaining))} קל'`
-              : `נשאר להיום: ${Math.round(remaining)} קל'`}
-          </span>
-        </div>
+              <div className="flex flex-col gap-4">
+                <ProgressBar value={totals.calories} goal={goalCalories} label="קלוריות" size="primary" />
+                <ProgressBar value={totals.protein} goal={goalProtein} label="חלבון" unit="g" />
+              </div>
 
-        {/* Meals */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <h2
-            style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '18px',
-              color: '#888',
-              margin: 0,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-            }}
-          >
-            ארוחות היום
-          </h2>
-          {meals.length === 0 ? (
-            <div
-              style={{
-                fontFamily: '"Rubik", sans-serif',
-                fontSize: '14px',
-                color: '#444',
-                textAlign: 'center',
-                padding: '28px',
-              }}
-            >
-              אין ארוחות רשומות להיום עדיין
-            </div>
-          ) : (
-            meals.map((meal) => (
-              <MealCard
-                key={meal.id}
-                meal={meal}
-                onEdit={(m) => setEditingMeal(m)}
-                onDelete={(m) => deleteMeal(m.id)}
-              />
-            ))
-          )}
-        </div>
+              <dl className="flex gap-6 border-t border-border-col pt-3 font-body text-sm">
+                <div className="flex items-baseline gap-1.5">
+                  <dt className="text-muted">פחמימות</dt>
+                  <dd className="font-medium tabular-nums text-text-col">{Math.round(totals.carbs)}g</dd>
+                </div>
+                <div className="flex items-baseline gap-1.5">
+                  <dt className="text-muted">שומן</dt>
+                  <dd className="font-medium tabular-nums text-text-col">{Math.round(totals.fat)}g</dd>
+                </div>
+              </dl>
+            </section>
 
-        {/* Bottom spacing for FAB */}
-        <div style={{ height: '72px' }} />
+            {/* Meals */}
+            <section aria-labelledby="meals-heading" className="flex flex-col gap-3">
+              <div className="flex items-baseline justify-between">
+                <h2 id="meals-heading" className="font-body text-base font-medium text-text-col">
+                  ארוחות היום
+                </h2>
+                {meals.length > 0 && (
+                  <span className="font-body text-sm tabular-nums text-muted">{meals.length}</span>
+                )}
+              </div>
+
+              {meals.length === 0 ? (
+                <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border-col px-6 py-10 text-center">
+                  <p className="font-body text-sm leading-relaxed text-muted">
+                    עוד לא רשמת ארוחות היום.
+                    <br />
+                    כל ארוחה שתוסיף תתעדכן ביעדים למעלה.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setAddMealOpen(true)}
+                    className={`flex h-11 items-center gap-2 rounded-xl border border-lime/40 px-5 font-body text-sm font-medium text-lime transition-colors duration-200 hover:bg-lime-dim ${focusRing}`}
+                  >
+                    <Plus size={16} strokeWidth={2.25} />
+                    הוסף ארוחה
+                  </button>
+                </div>
+              ) : (
+                <ul className="flex flex-col gap-2.5">
+                  {meals.map((meal) => (
+                    <li key={meal.id}>
+                      <MealCard meal={meal} onEdit={setEditingMeal} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </>
+        )}
       </div>
 
-      {/* FAB */}
+      {/* FAB: thumb zone, above TabBar + iOS safe area */}
       <button
+        type="button"
         onClick={() => setAddMealOpen(true)}
-        style={{
-          position: 'fixed',
-          bottom: 'calc(56px + 20px)',
-          right: '16px',
-          width: '52px',
-          height: '52px',
-          borderRadius: '50%',
-          background: '#D7FF00',
-          border: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          zIndex: 60,
-          boxShadow: '0 4px 20px rgba(215,255,0,0.28)',
-          WebkitTapHighlightColor: 'transparent',
-        }}
+        aria-label="הוסף ארוחה"
+        className={`fixed bottom-[calc(76px+env(safe-area-inset-bottom,0px))] right-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-lime text-bg shadow-[0_8px_24px_-6px_rgba(215,255,0,0.45)] transition-transform duration-150 ease-out active:scale-95 [-webkit-tap-highlight-color:transparent] ${focusRing}`}
       >
-        <Plus size={24} color="#0a0a0a" strokeWidth={2.5} />
+        <Plus size={26} strokeWidth={2.5} />
       </button>
 
       <AddMealModal isOpen={addMealOpen} onClose={() => setAddMealOpen(false)} />
@@ -166,5 +133,23 @@ export function TodayPage() {
       />
       <EditGoalsModal isOpen={editGoalsOpen} onClose={() => setEditGoalsOpen(false)} />
     </>
+  )
+}
+
+function TodaySkeleton() {
+  return (
+    <div aria-busy="true" aria-label="טוען" className="flex animate-pulse flex-col gap-6">
+      <div className="flex flex-col gap-5 rounded-2xl border border-border-col bg-surface p-4">
+        <div className="h-3 w-20 rounded bg-surface2" />
+        <div className="h-12 w-40 rounded bg-surface2" />
+        <div className="h-2.5 w-full rounded-full bg-surface2" />
+        <div className="h-1.5 w-full rounded-full bg-surface2" />
+      </div>
+      <div className="flex flex-col gap-2.5">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-20 rounded-xl border border-border-col bg-surface" />
+        ))}
+      </div>
+    </div>
   )
 }

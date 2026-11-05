@@ -1,185 +1,66 @@
-import { useState } from 'react'
-import { Pencil, Trash2, Clock } from 'lucide-react'
-import { Card } from '../../shared/components/Card'
-import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { ChevronLeft } from 'lucide-react'
 import { MealIcon } from '../../shared/icons/MealIcon'
 import type { NutritionLog } from '../../types/nutrition'
 
 interface MealCardProps {
   meal: NutritionLog
+  /** When provided the whole card becomes a button that opens the editor */
   onEdit?: (meal: NutritionLog) => void
-  onDelete?: (meal: NutritionLog) => void
 }
 
-export function MealCard({ meal, onEdit, onDelete }: MealCardProps) {
-  const [confirmOpen, setConfirmOpen] = useState(false)
+export function MealCard({ meal, onEdit }: MealCardProps) {
+  const interactive = !!onEdit
+  const Root = interactive ? 'button' : 'div'
 
   return (
-    <>
-    <Card hover style={{ padding: '14px', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+    <Root
+      {...(interactive ? { type: 'button' as const, onClick: () => onEdit(meal) } : {})}
+      aria-label={interactive ? `עריכת ${meal.meal_name}` : undefined}
+      className={`flex w-full items-start gap-3 rounded-xl border border-border-col border-t-2 border-t-lime bg-surface p-3.5 text-right
+        ${interactive
+          ? 'transition-colors duration-200 hover:border-lime active:bg-surface2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lime [-webkit-tap-highlight-color:transparent]'
+          : ''}`}
+    >
       {/* Icon */}
-      <div
-        style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '8px',
-          background: 'rgba(215,255,0,0.08)',
-          border: '1px solid rgba(215,255,0,0.15)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <MealIcon mealName={meal.meal_name} size={18} color="#D7FF00" />
-      </div>
+      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-surface2 text-muted">
+        <MealIcon mealName={meal.meal_name} size={20} color="currentColor" />
+      </span>
 
       {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px', marginBottom: '6px' }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px', flexWrap: 'wrap' }}>
-              <span
-                style={{
-                  fontFamily: '"Rubik", sans-serif',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: '#f0f0f0',
-                }}
-              >
-                {meal.meal_name}
-              </span>
-              {meal.time && (
-                <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                  <Clock size={11} color="#D7FF00" strokeWidth={2} />
-                  <span style={{ fontFamily: '"Rubik", sans-serif', fontSize: '12px', color: '#D7FF00', fontWeight: 500 }}>
-                    {meal.time.slice(0, 5)}
-                  </span>
-                </span>
-              )}
-            </div>
-            {meal.food_items && (
-              <div
-                style={{
-                  fontFamily: '"Rubik", sans-serif',
-                  fontSize: '12px',
-                  color: '#555',
-                  lineHeight: 1.4,
-                }}
-              >
-                {meal.food_items}
-              </div>
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="flex items-baseline justify-between gap-3">
+          <span className="flex min-w-0 items-baseline gap-2">
+            <span className="truncate font-body text-[15px] font-medium text-text-col">{meal.meal_name}</span>
+            {meal.time && (
+              <span className="font-body text-xs tabular-nums text-muted">{meal.time.slice(0, 5)}</span>
             )}
-            {meal.created_at && (
-              <div style={{ fontFamily: '"Rubik", sans-serif', fontSize: '10px', color: '#333', marginTop: '3px' }}>
-                הוכנס: {new Date(meal.created_at).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' })}
-              </div>
-            )}
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-            <span
-              style={{
-                fontFamily: '"Barlow Condensed", sans-serif',
-                fontSize: '20px',
-                color: '#D7FF00',
-                letterSpacing: '0.03em',
-                lineHeight: 1,
-              }}
-            >
-              {meal.calories}
+          </span>
+          <span className="flex flex-shrink-0 items-baseline gap-1">
+            <span className="font-display text-2xl font-semibold leading-none tabular-nums text-lime">
+              {Math.round(meal.calories).toLocaleString('he-IL')}
             </span>
-          </div>
-        </div>
+            <span className="font-body text-xs text-muted">קל'</span>
+          </span>
+        </span>
 
-        {/* Macro pills */}
-        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: (onEdit || onDelete) ? '10px' : 0 }}>
-          {meal.protein_g != null && (
-            <MacroPill label="חלבון" value={meal.protein_g} accent />
-          )}
-          {meal.carbs_g != null && (
-            <MacroPill label="פחמ'" value={meal.carbs_g} />
-          )}
-          {meal.fat_g != null && (
-            <MacroPill label="שומן" value={meal.fat_g} />
-          )}
-        </div>
-
-        {/* Actions */}
-        {(onEdit || onDelete) && (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px' }}>
-            {onEdit && (
-              <ActionButton onClick={() => onEdit(meal)} icon={<Pencil size={13} strokeWidth={2} />} />
-            )}
-            {onDelete && (
-              <ActionButton onClick={() => setConfirmOpen(true)} icon={<Trash2 size={13} strokeWidth={2} />} danger />
-            )}
-          </div>
+        {meal.food_items && (
+          <span className="line-clamp-2 font-body text-sm leading-snug text-muted">{meal.food_items}</span>
         )}
-      </div>
-    </Card>
-    <ConfirmDialog
-      isOpen={confirmOpen}
-      message="האם למחוק את הארוחה?"
-      onConfirm={() => { setConfirmOpen(false); onDelete?.(meal) }}
-      onCancel={() => setConfirmOpen(false)}
-    />
-    </>
-  )
-}
 
-function MacroPill({ label, value, accent = false }: { label: string; value: number; accent?: boolean }) {
-  return (
-    <span
-      style={{
-        fontFamily: '"Rubik", sans-serif',
-        fontSize: '11px',
-        padding: '2px 7px',
-        borderRadius: '20px',
-        background: accent ? 'rgba(215,255,0,0.08)' : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${accent ? 'rgba(215,255,0,0.2)' : '#222'}`,
-        color: accent ? '#D7FF00' : '#555',
-        fontWeight: 500,
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {label} {Math.round(value)}g
-    </span>
-  )
-}
+        <span className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 font-body text-xs tabular-nums text-muted">
+          {meal.protein_g != null && (
+            <span>
+              חלבון <span className="font-medium text-text-col">{Math.round(meal.protein_g)}g</span>
+            </span>
+          )}
+          {meal.carbs_g != null && <span>פחמ' {Math.round(meal.carbs_g)}g</span>}
+          {meal.fat_g != null && <span>שומן {Math.round(meal.fat_g)}g</span>}
+        </span>
+      </span>
 
-function ActionButton({
-  onClick,
-  icon,
-  label,
-  danger = false,
-}: {
-  onClick: () => void
-  icon?: React.ReactNode
-  label?: string
-  danger?: boolean
-}) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '3px',
-        background: danger ? 'rgba(255,71,87,0.08)' : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${danger ? 'rgba(255,71,87,0.2)' : '#2a2a2a'}`,
-        borderRadius: '6px',
-        color: danger ? '#ff4757' : '#555',
-        padding: '4px 8px',
-        cursor: 'pointer',
-        fontFamily: '"Rubik", sans-serif',
-        fontSize: '11px',
-        fontWeight: 500,
-        WebkitTapHighlightColor: 'transparent',
-        transition: 'opacity 0.15s',
-      }}
-    >
-      {icon}
-      {label}
-    </button>
+      {interactive && (
+        <ChevronLeft size={18} strokeWidth={2} className="mt-2.5 flex-shrink-0 text-muted" aria-hidden />
+      )}
+    </Root>
   )
 }
