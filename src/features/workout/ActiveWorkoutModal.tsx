@@ -3,6 +3,7 @@ import { Check, Plus, Trash2, X } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
 import { useLogWorkout } from './useWorkoutLog'
 import type { WorkoutPlan } from '../../types/workout'
+import { todayLocal } from '../../lib/date'
 
 interface SetEntry {
   reps: string
@@ -25,7 +26,7 @@ interface Props {
 }
 
 function todayDate() {
-  return new Date().toISOString().split('T')[0]!
+  return todayLocal()
 }
 
 export function ActiveWorkoutModal({ isOpen, onClose, plan }: Props) {

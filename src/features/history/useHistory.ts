@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
 import type { DayTotals, NutritionLog } from '../../types/nutrition'
 import { getDaysInMonth, localDateStr } from './calendarUtils'
+import { daysAgoLocal } from '../../lib/date'
 
 interface UseHistoryResult {
   days: DayTotals[]
@@ -18,9 +19,7 @@ export function useHistory(daysBack = 14): UseHistoryResult {
     queryKey: ['nutrition', 'history', daysBack, userId],
     enabled: !!userId,
     queryFn: async () => {
-      const since = new Date()
-      since.setDate(since.getDate() - daysBack)
-      const sinceStr = since.toISOString().split('T')[0]
+      const sinceStr = daysAgoLocal(daysBack)
 
       const { data, error: err } = await supabase
         .from('nutrition_log')

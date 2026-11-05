@@ -4,10 +4,11 @@ import { useAuth } from '../../lib/AuthContext'
 import { getCurrentUserId } from '../../lib/auth-helpers'
 import { useToast } from '../../shared/context/ToastContext'
 import type { WorkoutLog, WorkoutSetLog } from '../../types/workout'
+import { todayLocal } from '../../lib/date'
 
 export function useTodayWorkoutLog() {
   const { user } = useAuth()
-  const today = new Date().toISOString().split('T')[0]!
+  const today = todayLocal()
 
   return useQuery({
     queryKey: ['workout', 'logs', 'today', user?.id, today],

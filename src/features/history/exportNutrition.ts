@@ -8,6 +8,7 @@ import {
   drawBackground, drawHeaderBar, drawSummaryCards, drawFooter,
   todayLabel, fmtDate,
 } from '../../lib/pdf'
+import { todayLocal } from '../../lib/date'
 
 // ─── JSON copy ────────────────────────────────────────────────────────────────
 
@@ -239,5 +240,5 @@ export async function downloadNutritionPdf(logs: NutritionLog[], rangeLabel: str
 
   drawFooter(doc, 'FITNESS TRACKER — NUTRITION EXPORT')
   const rangeSlug = rangeLabel.replace(/\s+/g, '-').replace(/[^\w-]/g, '')
-  doc.save(`nutrition-${rangeSlug}-${new Date().toISOString().slice(0, 10)}.pdf`)
+  doc.save(`nutrition-${rangeSlug}-${todayLocal()}.pdf`)
 }

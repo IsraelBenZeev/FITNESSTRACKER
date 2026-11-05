@@ -11,6 +11,7 @@ import { useRecentMeals, type RecentMeal } from './useRecentMeals'
 import { useToday } from './useToday'
 import { useGoals } from '../../lib/useGoals'
 import type { NutritionLog } from '../../types/nutrition'
+import { todayLocal } from '../../lib/date'
 
 /** Order = how often each is picked; first ones are visible without scrolling */
 const MEAL_OPTIONS = [
@@ -58,7 +59,7 @@ interface AddMealModalProps {
 }
 
 const nowHHMM = () => new Date().toTimeString().slice(0, 5)
-const todayStr = () => new Date().toISOString().split('T')[0]!
+const todayStr = todayLocal
 const fmt = (n: number) => Math.round(n).toLocaleString('he-IL')
 
 const focusRing =

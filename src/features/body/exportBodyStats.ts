@@ -8,6 +8,7 @@ import {
   drawBackground, drawHeaderBar, drawSummaryCards, drawFooter,
   todayLabel, fmtDate,
 } from '../../lib/pdf'
+import { todayLocal } from '../../lib/date'
 
 // ─── JSON copy ────────────────────────────────────────────────────────────────
 
@@ -158,5 +159,5 @@ export async function downloadStatsPdf(stats: BodyStat[]): Promise<void> {
   })
 
   drawFooter(doc, 'FITNESS TRACKER — BODY STATS EXPORT')
-  doc.save(`body-stats-${new Date().toISOString().slice(0, 10)}.pdf`)
+  doc.save(`body-stats-${todayLocal()}.pdf`)
 }

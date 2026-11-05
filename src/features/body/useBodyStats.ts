@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
 import type { BodyStat } from '../../types/body'
+import { todayLocal } from '../../lib/date'
 
 interface UseBodyStatsResult {
   stats: BodyStat[]
@@ -12,7 +13,7 @@ interface UseBodyStatsResult {
 }
 
 function todayDateString(): string {
-  return new Date().toISOString().split('T')[0] ?? ''
+  return todayLocal()
 }
 
 export function useBodyStats(): UseBodyStatsResult {

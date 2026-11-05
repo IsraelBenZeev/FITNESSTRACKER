@@ -6,6 +6,7 @@ import { getSession, saveSession, clearSession, WorkoutSessionData } from './wor
 import { useLogWorkout, usePreviousExerciseSets } from './useWorkoutLog'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
 import type { WorkoutSetLog } from '../../types/workout'
+import { todayLocal } from '../../lib/date'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -610,7 +611,7 @@ export function WorkoutSessionPage() {
 
     logWorkout(
       {
-        date: new Date().toISOString().split('T')[0]!,
+        date: todayLocal(),
         workout_plan_id: session.planId,
         notes: values.notes,
         sets,

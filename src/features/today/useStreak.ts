@@ -1,10 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
-
-function todayDateString(): string {
-  return new Date().toISOString().split('T')[0] ?? ''
-}
+import { todayLocal, daysAgoLocal, toLocalDateStr } from '../../lib/date'
 
 /** מחזיר את מספר הימים הרצופים שנוסף לוג תזונה (כולל היום אם הוגדר) */
 export function useStreak(): number {
@@ -22,33 +19,25 @@ export function useStreak(): number {
       if (error) throw new Error(error.message)
 
       // ימים ייחודיים, ממוינים מהחדש לישן
-      const uniqueDays = [...new Set((data ?? []).map((r: { date: string }) => r.date))].sort(
+      const uniqueDays = [...new Set<string>((data ?? []).map((r: { date: string }) => r.date))].sort(
         (a, b) => b.localeCompare(a)
       )
 
       if (uniqueDays.length === 0) return 0
 
-      const today = todayDateString()
-      // מתחילים מהיום או מאתמול
-      const startDate = uniqueDays[0] === today ? today : (() => {
-        const yesterday = new Date()
-        yesterday.setDate(yesterday.getDate() - 1)
-        return yesterday.toISOString().split('T')[0] ?? ''
-      })()
-
-      if (uniqueDays[0] !== today && uniqueDays[0] !== startDate) return 0
+      const today = todayLocal()
+      const yesterday = daysAgoLocal(1)
+      // The streak is alive if the latest logged day is today or yesterday
+      if (uniqueDays[0] !== today && uniqueDays[0] !== yesterday) return 0
 
       let streak = 0
-      let cursor = new Date(startDate + 'T00:00:00')
+      // Walk back one local calendar day at a time (noon avoids DST edge cases)
+      const cursor = new Date(uniqueDays[0] + 'T12:00:00')
 
       for (const day of uniqueDays) {
-        const expected = cursor.toISOString().split('T')[0]
-        if (day === expected) {
-          streak++
-          cursor.setDate(cursor.getDate() - 1)
-        } else {
-          break
-        }
+        if (day !== toLocalDateStr(cursor)) break
+        streak++
+        cursor.setDate(cursor.getDate() - 1)
       }
 
       return streak

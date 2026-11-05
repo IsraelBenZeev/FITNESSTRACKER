@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { GOAL_CALORIES, GOAL_PROTEIN } from './constants'
 import { supabase } from './supabase'
+import { todayLocal } from './date'
 
 export type GoalsConfig = {
   trainingCalories: number
@@ -66,7 +67,7 @@ export async function saveGoalsConfig(config: GoalsConfig): Promise<void> {
 
   // Today's goal changed: re-stamp today's meals so the day is judged by the goal now in effect.
   // Past days keep the goal they were logged with.
-  const today = new Date().toISOString().split('T')[0]!
+  const today = todayLocal()
   const { goalCalories, goalProtein } = goalsForDate(config, new Date())
   await supabase
     .from('nutrition_log')

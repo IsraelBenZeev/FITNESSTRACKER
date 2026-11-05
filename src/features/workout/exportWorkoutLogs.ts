@@ -7,6 +7,7 @@ import {
   drawBackground, drawHeaderBar, drawSummaryCards, drawFooter,
   todayLabel, fmtDateWeekday,
 } from '../../lib/pdf'
+import { todayLocal } from '../../lib/date'
 
 // ─── JSON copy ────────────────────────────────────────────────────────────────
 
@@ -215,5 +216,5 @@ export async function downloadWorkoutLogsPdf(logs: WorkoutLog[]): Promise<void> 
   }
 
   drawFooter(doc, 'FITNESS TRACKER — WORKOUT HISTORY')
-  doc.save(`workout-history-${new Date().toISOString().slice(0, 10)}.pdf`)
+  doc.save(`workout-history-${todayLocal()}.pdf`)
 }

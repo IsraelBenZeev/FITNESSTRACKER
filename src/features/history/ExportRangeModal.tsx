@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Calendar, ArrowRight } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
+import { todayLocal, toLocalDateStr } from '../../lib/date'
 
 export type ExportRange = {
   label: string
@@ -9,19 +10,19 @@ export type ExportRange = {
 }
 
 function getTodayStr(): string {
-  return new Date().toISOString().slice(0, 10)
+  return todayLocal()
 }
 
 function daysAgo(n: number): string {
   const d = new Date()
   d.setDate(d.getDate() - n)
-  return d.toISOString().slice(0, 10)
+  return toLocalDateStr(d)
 }
 
 function thisWeekSunday(): string {
   const d = new Date()
   d.setDate(d.getDate() - d.getDay()) // d.getDay(): 0=ראשון … 6=שבת
-  return d.toISOString().slice(0, 10)
+  return toLocalDateStr(d)
 }
 
 const RANGES: ExportRange[] = [

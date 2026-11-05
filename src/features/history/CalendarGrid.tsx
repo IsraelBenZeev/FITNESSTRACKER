@@ -2,6 +2,7 @@ import { buildCalendarCells, getDayColor, HEBREW_DAY_NAMES } from './calendarUti
 import { CalendarDay } from './CalendarDay'
 import type { GoalsConfig } from '../../lib/useGoals'
 import type { DayTotals } from '../../types/nutrition'
+import { todayLocal } from '../../lib/date'
 
 interface CalendarGridProps {
   year: number
@@ -11,9 +12,9 @@ interface CalendarGridProps {
   goalsConfig?: GoalsConfig
 }
 
-const todayStr = new Date().toISOString().split('T')[0]
 
 export function CalendarGrid({ year, month, dayMap, onDayPress, goalsConfig }: CalendarGridProps) {
+  const todayStr = todayLocal()
   const cells = buildCalendarCells(year, month)
 
   return (

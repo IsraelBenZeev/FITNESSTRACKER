@@ -2,9 +2,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { getCurrentUserId } from '../../lib/auth-helpers'
 import { useToast } from '../../shared/context/ToastContext'
+import { todayLocal } from '../../lib/date'
 
 function todayDateString(): string {
-  return new Date().toISOString().split('T')[0] ?? ''
+  return todayLocal()
 }
 
 interface BodyStatPayload {

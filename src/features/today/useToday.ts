@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
 import type { NutritionLog } from '../../types/nutrition'
+import { todayLocal } from '../../lib/date'
 
 interface Totals {
   calories: number
@@ -19,7 +20,7 @@ interface UseTodayResult {
 }
 
 function todayDateString(): string {
-  return new Date().toISOString().split('T')[0] ?? ''
+  return todayLocal()
 }
 
 export function useToday(): UseTodayResult {

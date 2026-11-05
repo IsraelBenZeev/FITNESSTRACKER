@@ -7,6 +7,7 @@ import {
   drawBackground, drawHeaderBar, drawSummaryCards, drawFooter,
   todayLabel,
 } from '../../lib/pdf'
+import { todayLocal } from '../../lib/date'
 
 const DAY_NAMES = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
 
@@ -133,5 +134,5 @@ export async function downloadPlanPdf(plan: WorkoutPlan): Promise<void> {
   })
 
   drawFooter(doc, `FITNESS TRACKER — ${plan.name.toUpperCase()}`)
-  doc.save(`plan-${plan.name.replace(/\s+/g, '-').toLowerCase()}-${new Date().toISOString().slice(0, 10)}.pdf`)
+  doc.save(`plan-${plan.name.replace(/\s+/g, '-').toLowerCase()}-${todayLocal()}.pdf`)
 }
