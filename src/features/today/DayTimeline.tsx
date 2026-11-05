@@ -28,7 +28,8 @@ export function DayTimeline({ meals, onSelect }: DayTimelineProps) {
       {meals.map((meal, i) => (
         <Fragment key={meal.id}>
           {i === nowIndex && <NowMarker time={now} />}
-          <li>
+          {/* Hairline inset divider: starts at the content column (time 44 + gap 12 + node 36 + gap 12 = 104px), never crosses the rail */}
+          <li className="relative after:pointer-events-none after:absolute after:bottom-0 after:end-2 after:start-[104px] after:h-px after:bg-white/[0.06] last:after:hidden">
             <button
               type="button"
               onClick={() => onSelect(meal)}
