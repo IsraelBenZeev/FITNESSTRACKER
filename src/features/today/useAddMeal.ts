@@ -42,7 +42,7 @@ export function useAddMeal() {
       if (error) throw new Error(error.message)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['nutrition', 'today'] })
+      queryClient.invalidateQueries({ queryKey: ['nutrition'] })
       showSuccess('הארוחה נוספה בהצלחה')
     },
     onError: () => {

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
+import { Info } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
-import { Stepper } from '../../shared/components/Stepper'
-import { useGoals, GoalsConfig } from '../../lib/useGoals'
+import { NumberField } from '../../shared/components/NumberField'
+import { useGoals, type GoalsConfig } from '../../lib/useGoals'
 
 interface EditGoalsModalProps {
   isOpen: boolean
@@ -9,160 +10,139 @@ interface EditGoalsModalProps {
 }
 
 const DAY_LABELS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש']
-const DAY_NAMES  = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
+const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
-type Tab = 'training' | 'rest'
+type DayType = 'training' | 'rest'
+
+const focusRing =
+  'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 
 export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
-  const { goalsConfig, setGoals } = useGoals()
+  const { goalsConfig, setGoals, isTrainingDay } = useGoals()
   const [local, setLocal] = useState<GoalsConfig>(goalsConfig)
-  const [tab, setTab] = useState<Tab>('training')
+  const [dayType, setDayType] = useState<DayType>('training')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (isOpen) setLocal(goalsConfig)
-  }, [isOpen, goalsConfig])
+    if (!isOpen) return
+    setLocal(goalsConfig)
+    // Open on the kind of day today is: that's the goal the user is looking at
+    setDayType(isTrainingDay ? 'training' : 'rest')
+  }, [isOpen, goalsConfig, isTrainingDay])
 
-  const toggleDay = (dow: number) => {
+  const toggleDay = (dow: number) =>
     setLocal((prev) => ({
       ...prev,
       trainingDays: prev.trainingDays.includes(dow)
         ? prev.trainingDays.filter((d) => d !== dow)
-        : [...prev.trainingDays, dow],
+        : [...prev.trainingDays, dow].sort(),
     }))
+
+  const isDirty = JSON.stringify(local) !== JSON.stringify(goalsConfig)
+
+  const handleSave = async () => {
+    if (!isDirty) return onClose()
+    setSaving(true)
+    try {
+      await setGoals(local)
+      onClose()
+    } finally {
+      setSaving(false)
+    }
   }
 
-  const handleSave = () => {
-    setGoals(local)
-    onClose()
-  }
+  const calKey = dayType === 'training' ? 'trainingCalories' : 'restCalories'
+  const proKey = dayType === 'training' ? 'trainingProtein' : 'restProtein'
 
-  const tabBtn = (t: Tab, label: string) => (
+  const footer = (
     <button
-      onClick={() => setTab(t)}
-      style={{
-        flex: 1,
-        padding: '9px 0',
-        background: tab === t ? '#96C828' : '#2C3545',
-        color: tab === t ? '#1A2030' : '#8C9AAB',
-        border: 'none',
-        borderRadius: '8px',
-        fontFamily: '"Barlow Condensed", sans-serif',
-        fontSize: '15px',
-        fontWeight: 600,
-        letterSpacing: '0.04em',
-        cursor: 'pointer',
-        transition: 'background 0.15s, color 0.15s',
-        WebkitTapHighlightColor: 'transparent',
-      }}
+      type="button"
+      onClick={handleSave}
+      disabled={saving}
+      className={`flex h-[52px] w-full items-center justify-center rounded-2xl font-body text-base font-semibold transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-60 ${focusRing}
+        ${isDirty ? 'bg-accent text-bg' : 'bg-surface2 text-text-col'}`}
     >
-      {label}
+      {saving ? 'שומר…' : isDirty ? 'שמור יעדים' : 'סגור'}
     </button>
   )
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="עריכת יעדים">
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-        {/* Tabs */}
-        <div style={{ display: 'flex', gap: '6px', background: '#252D3A', borderRadius: '10px', padding: '4px' }}>
-          {tabBtn('training', 'יום אימון')}
-          {tabBtn('rest', 'יום מנוחה')}
+    <Modal isOpen={isOpen} onClose={onClose} title="יעדים יומיים" footer={footer}>
+      <div className="flex flex-col gap-6">
+        {/* Day type: segmented control */}
+        <div role="tablist" aria-label="סוג יום" className="grid grid-cols-2 gap-1 rounded-2xl bg-bg p-1">
+          {([['training', 'יום אימון'], ['rest', 'יום מנוחה']] as const).map(([value, label]) => {
+            const selected = dayType === value
+            return (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => setDayType(value)}
+                className={`h-11 rounded-xl font-body text-sm transition-colors duration-150 ${focusRing}
+                  ${selected ? 'bg-surface2 font-medium text-heading shadow-[0_1px_2px_rgba(0,0,0,0.3)]' : 'text-muted hover:text-text-col'}`}
+              >
+                {label}
+              </button>
+            )
+          })}
         </div>
 
-        {/* Steppers */}
-        {tab === 'training' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <Stepper
-              label="קלוריות — יום אימון"
-              value={local.trainingCalories}
-              onChange={(v) => setLocal((p) => ({ ...p, trainingCalories: v }))}
-              min={500} max={4000} step={50} unit="קל'"
-            />
-            <Stepper
-              label="חלבון — יום אימון"
-              value={local.trainingProtein}
-              onChange={(v) => setLocal((p) => ({ ...p, trainingProtein: v }))}
-              min={20} max={300} step={1} unit="g"
-            />
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <Stepper
-              label="קלוריות — יום מנוחה"
-              value={local.restCalories}
-              onChange={(v) => setLocal((p) => ({ ...p, restCalories: v }))}
-              min={500} max={4000} step={50} unit="קל'"
-            />
-            <Stepper
-              label="חלבון — יום מנוחה"
-              value={local.restProtein}
-              onChange={(v) => setLocal((p) => ({ ...p, restProtein: v }))}
-              min={20} max={300} step={1} unit="g"
-            />
-          </div>
-        )}
+        <NumberField
+          label={dayType === 'training' ? 'קלוריות ביום אימון' : 'קלוריות ביום מנוחה'}
+          value={local[calKey]}
+          onChange={(v) => setLocal((p) => ({ ...p, [calKey]: v }))}
+          unit="קל'"
+          step={50}
+          min={500}
+          max={6000}
+          emphasis
+        />
+        <NumberField
+          label={dayType === 'training' ? 'חלבון ביום אימון' : 'חלבון ביום מנוחה'}
+          value={local[proKey]}
+          onChange={(v) => setLocal((p) => ({ ...p, [proKey]: v }))}
+          unit="g"
+          step={5}
+          min={20}
+          max={400}
+        />
 
-        {/* Day picker */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <span style={{
-            fontFamily: '"Rubik", sans-serif',
-            fontSize: '12px',
-            color: '#8C9AAB',
-            fontWeight: 500,
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-          }}>
-            ימי אימון
-          </span>
-          <div style={{ display: 'flex', gap: '6px', justifyContent: 'space-between' }}>
+        {/* Training days */}
+        <fieldset className="flex flex-col">
+          <legend className="mb-2 font-body text-sm text-muted">ימי אימון</legend>
+          <div className="grid grid-cols-7 gap-1.5">
             {DAY_LABELS.map((label, dow) => {
               const active = local.trainingDays.includes(dow)
               return (
                 <button
                   key={dow}
+                  type="button"
                   onClick={() => toggleDay(dow)}
-                  title={DAY_NAMES[dow]}
-                  style={{
-                    flex: 1,
-                    height: '40px',
-                    borderRadius: '8px',
-                    border: active ? '1.5px solid #96C828' : '1.5px solid rgba(255,255,255,0.08)',
-                    background: active ? 'rgba(150,200,40,0.1)' : '#252D3A',
-                    color: active ? '#96C828' : '#8C9AAB',
-                    fontFamily: '"Barlow Condensed", sans-serif',
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
-                    WebkitTapHighlightColor: 'transparent',
-                  }}
+                  aria-pressed={active}
+                  aria-label={`${DAY_NAMES[dow]}${active ? ', יום אימון' : ', יום מנוחה'}`}
+                  className={`h-11 rounded-xl border font-body text-base transition-colors duration-150 ${focusRing}
+                    ${active ? 'border-accent-line bg-accent-soft font-medium text-accent' : 'border-border-col bg-surface2 text-muted hover:text-text-col'}`}
                 >
                   {label}
                 </button>
               )
             })}
           </div>
-        </div>
+          <p className="mt-2 font-body text-xs text-muted">
+            {local.trainingDays.length === 7
+              ? 'כל הימים מוגדרים כימי אימון'
+              : local.trainingDays.length === 0
+                ? 'כל הימים מוגדרים כימי מנוחה'
+                : `${local.trainingDays.length} ימי אימון בשבוע`}
+          </p>
+        </fieldset>
 
-        {/* Save */}
-        <button
-          onClick={handleSave}
-          style={{
-            width: '100%',
-            padding: '14px',
-            background: '#96C828',
-            color: '#1A2030',
-            border: 'none',
-            borderRadius: '12px',
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: '18px',
-            fontWeight: 600,
-            letterSpacing: '0.04em',
-            cursor: 'pointer',
-          }}
-        >
-          שמור יעדים
-        </button>
+        <p className="flex items-start gap-2 rounded-2xl bg-bg p-3 font-body text-sm leading-relaxed text-muted">
+          <Info size={16} strokeWidth={2} className="mt-0.5 flex-shrink-0 text-accent" />
+          שינוי היעדים חל מהיום והלאה. ימים קודמים נשמרים עם היעד שהיה בתוקף בהם, כך שההיסטוריה לא משתנה.
+        </p>
       </div>
     </Modal>
   )

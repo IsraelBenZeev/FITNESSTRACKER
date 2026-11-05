@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useId } from 'react'
 import ReactDOM from 'react-dom'
 import { X } from 'lucide-react'
 
@@ -7,10 +7,18 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: React.ReactNode
+  /** Sticky action area pinned to the bottom of the sheet (primary action lives here) */
+  footer?: React.ReactNode
   zIndexOverride?: number
 }
 
-export function Modal({ isOpen, onClose, title, children, zIndexOverride }: ModalProps) {
+/**
+ * Bottom sheet. Content scrolls; header and footer stay put,
+ * so the primary action is always under the thumb.
+ */
+export function Modal({ isOpen, onClose, title, children, footer, zIndexOverride }: ModalProps) {
+  const titleId = useId()
+
   useEffect(() => {
     if (!isOpen) return
     const handler = (e: KeyboardEvent) => {
@@ -24,90 +32,46 @@ export function Modal({ isOpen, onClose, title, children, zIndexOverride }: Moda
 
   return ReactDOM.createPortal(
     <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: zIndexOverride ?? 100,
-        display: 'flex',
-        alignItems: 'flex-end',
-      }}
+      // Stacked sheets (e.g. exercise detail over the picker) pass a higher layer
+      className={`fixed inset-0 flex items-end ${zIndexOverride != null && zIndexOverride > 100 ? 'z-[120]' : 'z-[100]'}`}
     >
-      {/* Overlay */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'rgba(0,0,0,0.72)',
-          backdropFilter: 'blur(4px)',
-          WebkitBackdropFilter: 'blur(4px)',
-        }}
-      />
+      <div onClick={onClose} aria-hidden className="absolute inset-0 bg-black/60 backdrop-blur-[3px]" />
 
-      {/* Panel */}
       <div
-        style={{
-          position: 'relative',
-          width: '100%',
-          background: '#252D3A',
-          borderRadius: '18px 18px 0 0',
-          borderTop: '2px solid #96C828',
-          maxHeight: '92dvh',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          paddingBottom: 'env(safe-area-inset-bottom, 20px)',
-          animation: 'slideUp 0.22s cubic-bezier(0.32,0.72,0,1) forwards',
-        }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="relative flex max-h-[92dvh] w-full animate-[slideUp_0.24s_cubic-bezier(0.32,0.72,0,1)_forwards] flex-col overflow-hidden rounded-t-[20px] border-t border-border-col bg-surface shadow-[0_-12px_40px_-12px_rgba(0,0,0,0.6)]"
       >
-        {/* Header */}
-        <div
-          style={{
-            flexShrink: 0,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '18px 20px 14px',
-            borderBottom: '1px solid #2C3545',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '20px',
-              fontWeight: 600,
-              color: '#C8D0DB',
-              letterSpacing: '0.04em',
-            }}
-          >
-            {title}
-          </span>
-          <button
-            onClick={onClose}
-            style={{
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              background: '#2C3545',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              color: '#8C9AAB',
-              flexShrink: 0,
-            }}
-          >
-            <X size={16} strokeWidth={2} />
-          </button>
-        </div>
+        {/* Grab handle */}
+        <span aria-hidden className="mx-auto mt-2 h-1 w-10 flex-shrink-0 rounded-full bg-subtle/60" />
 
-        {/* Content */}
-        <div style={{ padding: '20px', flex: 1, overflowY: 'auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+        <header className="flex flex-shrink-0 items-center justify-between gap-3 px-5 pb-2 pt-2">
+          <h2 id={titleId} className="font-body text-lg font-semibold text-heading">
+            {title}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="סגירה"
+            className="-me-2.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-muted transition-colors duration-150 hover:bg-surface2 hover:text-text-col focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          >
+            <X size={20} strokeWidth={2} />
+          </button>
+        </header>
+
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-5 pb-5 pt-2">
           {children}
         </div>
+
+        {footer && (
+          <footer className="flex-shrink-0 border-t border-border-col bg-surface px-5 pb-[calc(12px+env(safe-area-inset-bottom,0px))] pt-3">
+            {footer}
+          </footer>
+        )}
+        {!footer && <span aria-hidden className="h-[env(safe-area-inset-bottom,0px)] flex-shrink-0" />}
       </div>
     </div>,
-    document.body
+    document.body,
   )
 }
