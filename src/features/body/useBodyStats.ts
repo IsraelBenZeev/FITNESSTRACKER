@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
 import type { BodyStat } from '../../types/body'
 import { todayLocal } from '../../lib/date'
+import { fetchAllRows } from '../../lib/fetchAllRows'
 
 interface UseBodyStatsResult {
   stats: BodyStat[]
@@ -24,12 +25,14 @@ export function useBodyStats(): UseBodyStatsResult {
     queryKey: ['body-stats', userId],
     enabled: !!userId,
     queryFn: async () => {
-      const { data, error: err } = await supabase
-        .from('body_stats')
-        .select('*')
-        .order('date', { ascending: true })
-      if (err) throw new Error(err.message)
-      return (data ?? []) as BodyStat[]
+      return fetchAllRows<BodyStat>((from, to) =>
+        supabase
+          .from('body_stats')
+          .select('*')
+          .order('date', { ascending: true })
+          .order('id', { ascending: true })
+          .range(from, to),
+      )
     },
   })
 

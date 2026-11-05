@@ -4,6 +4,7 @@ import { useAuth } from '../../lib/AuthContext'
 import type { DayTotals, NutritionLog } from '../../types/nutrition'
 import { getDaysInMonth, localDateStr } from './calendarUtils'
 import { daysAgoLocal } from '../../lib/date'
+import { fetchAllRows } from '../../lib/fetchAllRows'
 
 interface UseHistoryResult {
   days: DayTotals[]
@@ -109,18 +110,18 @@ export async function fetchNutritionForExport(
   sinceDate: string | null,
   untilDate?: string | null,
 ): Promise<NutritionLog[]> {
-  let query = supabase
-    .from('nutrition_log')
-    .select('*')
-    .order('date', { ascending: true })
-    .order('time', { ascending: true })
-
-  if (sinceDate != null) query = query.gte('date', sinceDate)
-  if (untilDate != null) query = query.lte('date', untilDate)
-
-  const { data, error: err } = await query
-  if (err) throw new Error(err.message)
-  return (data ?? []) as NutritionLog[]
+  // "All time" exceeds the 1,000-row response cap: page through
+  return fetchAllRows<NutritionLog>((from, to) => {
+    let query = supabase
+      .from('nutrition_log')
+      .select('*')
+      .order('date', { ascending: true })
+      .order('time', { ascending: true })
+      .order('id', { ascending: true })
+    if (sinceDate != null) query = query.gte('date', sinceDate)
+    if (untilDate != null) query = query.lte('date', untilDate)
+    return query.range(from, to)
+  })
 }
 
 export function useDayMeals(date: string | null): UseDayMealsResult {

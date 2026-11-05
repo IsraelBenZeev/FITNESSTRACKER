@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
 import { todayLocal, daysAgoLocal, toLocalDateStr } from '../../lib/date'
+import { fetchAllRows } from '../../lib/fetchAllRows'
 
 /** מחזיר את מספר הימים הרצופים שנוסף לוג תזונה (כולל היום אם הוגדר) */
 export function useStreak(): number {
@@ -12,11 +13,15 @@ export function useStreak(): number {
     queryKey: ['nutrition', 'streak', userId],
     enabled: !!userId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('nutrition_log')
-        .select('date')
-        .order('date', { ascending: false })
-      if (error) throw new Error(error.message)
+      // All rows: a long streak spans more than the 1,000-row response cap
+      const data = await fetchAllRows<{ date: string }>((from, to) =>
+        supabase
+          .from('nutrition_log')
+          .select('date')
+          .order('date', { ascending: false })
+          .order('id', { ascending: true })
+          .range(from, to),
+      )
 
       // ימים ייחודיים, ממוינים מהחדש לישן
       const uniqueDays = [...new Set<string>((data ?? []).map((r: { date: string }) => r.date))].sort(

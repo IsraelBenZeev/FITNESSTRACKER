@@ -5,6 +5,7 @@ import { getCurrentUserId } from '../../lib/auth-helpers'
 import { useToast } from '../../shared/context/ToastContext'
 import type { WorkoutLog, WorkoutSetLog } from '../../types/workout'
 import { todayLocal } from '../../lib/date'
+import { fetchAllRows } from '../../lib/fetchAllRows'
 
 export function useTodayWorkoutLog() {
   const { user } = useAuth()
@@ -101,26 +102,30 @@ export async function fetchWorkoutLogsForExport(
   sinceDate: string | null,
   untilDate?: string | null,
 ): Promise<WorkoutLog[]> {
-  let query = supabase
-    .from('workout_logs')
-    .select('*, workout_plans(id, name)')
-    .order('date', { ascending: false })
+  // Exports can span all time: sets alone pass the 1,000-row response cap
+  const logs = await fetchAllRows<WorkoutLog & { workout_plans?: { id: string; name: string } | null }>((from, to) => {
+    let query = supabase
+      .from('workout_logs')
+      .select('*, workout_plans(id, name)')
+      .order('date', { ascending: false })
+      .order('id', { ascending: true })
+    if (sinceDate != null) query = query.gte('date', sinceDate)
+    if (untilDate != null) query = query.lte('date', untilDate)
+    return query.range(from, to)
+  })
 
-  if (sinceDate != null) query = query.gte('date', sinceDate)
-  if (untilDate != null) query = query.lte('date', untilDate)
-
-  const { data: logs, error } = await query
-  if (error) throw new Error(error.message)
-
-  const logIds = (logs ?? []).map((l) => l.id)
+  const logIds = logs.map((l) => l.id)
   if (logIds.length === 0) return []
 
-  const { data: setLogs, error: setErr } = await supabase
-    .from('workout_set_logs')
-    .select('*')
-    .in('workout_log_id', logIds)
-    .order('set_number', { ascending: true })
-  if (setErr) throw new Error(setErr.message)
+  const setLogs = await fetchAllRows<WorkoutSetLog>((from, to) =>
+    supabase
+      .from('workout_set_logs')
+      .select('*')
+      .in('workout_log_id', logIds)
+      .order('set_number', { ascending: true })
+      .order('id', { ascending: true })
+      .range(from, to),
+  )
 
   return (logs ?? []).map((log) => {
     const { workout_plans, ...rest } = log as typeof log & { workout_plans?: { id: string; name: string } | null }
