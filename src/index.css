@@ -61,15 +61,12 @@ body {
   }
 }
 
+/* Opacity only: a transform on <main> (even translateY(0) kept by fill-mode)
+   makes it the containing block for position:fixed children, so FABs
+   would scroll with the page instead of staying pinned to the viewport. */
 @keyframes pageEnter {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes workoutPulse {
