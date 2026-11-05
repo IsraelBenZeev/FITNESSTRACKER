@@ -94,20 +94,13 @@ body {
   to { transform: translateY(0); }
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
+/* Scrollbars: app-like — scrolling works everywhere, no bar is drawn.
+   (A styled ::-webkit-scrollbar forces classic, always-reserved bars in Chromium,
+   which showed up even when there was only a pixel or two to scroll.) */
+* {
+  scrollbar-width: none;
 }
-::-webkit-scrollbar-track {
-  background: var(--bg);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
-}
-
-/* Hide scrollbar utility */
-.hide-scrollbar::-webkit-scrollbar {
+*::-webkit-scrollbar {
   display: none;
 }
 
