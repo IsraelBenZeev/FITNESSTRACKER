@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { getCurrentUserId } from '../../lib/auth-helpers'
+import { fetchGoalsConfig, goalsForDate } from '../../lib/useGoals'
 import { useToast } from '../../shared/context/ToastContext'
 
 function todayDateString(): string {
@@ -23,6 +24,8 @@ export function useAddMeal() {
 
   return useMutation({
     mutationFn: async (payload: AddMealPayload) => {
+      // Snapshot today's goal on the row, so later goal changes don't rewrite history
+      const { goalCalories, goalProtein } = goalsForDate(await fetchGoalsConfig(), new Date())
       const { error } = await supabase.from('nutrition_log').insert({
         date: todayDateString(),
         time: payload.time,
@@ -32,6 +35,8 @@ export function useAddMeal() {
         protein_g: payload.protein_g,
         carbs_g: payload.carbs_g,
         fat_g: payload.fat_g,
+        goal_calories: goalCalories,
+        goal_protein: goalProtein,
         user_id: await getCurrentUserId(),
       })
       if (error) throw new Error(error.message)

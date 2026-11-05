@@ -86,20 +86,26 @@ export async function downloadNutritionPdf(logs: NutritionLog[], rangeLabel: str
   const PAGE_BOTTOM = 280
 
   // ── Stats for summary cards ────────────────────────────────────
-  const dayMap = new Map<string, { calories: number; protein: number }>()
+  const dayMap = new Map<string, { calories: number; protein: number; goalCal: number; goalPro: number }>()
   for (const log of logs) {
-    const ex = dayMap.get(log.date) ?? { calories: 0, protein: 0 }
+    const ex = dayMap.get(log.date) ?? { calories: 0, protein: 0, goalCal: GOAL_CALORIES, goalPro: GOAL_PROTEIN }
     dayMap.set(log.date, {
       calories: ex.calories + log.calories,
       protein: ex.protein + (log.protein_g ?? 0),
+      // Each day is compared to the goal in effect that day
+      goalCal: log.goal_calories ?? ex.goalCal,
+      goalPro: log.goal_protein ?? ex.goalPro,
     })
   }
+  const dayValues = [...dayMap.values()]
+  const avgGoalCal = dayValues.length ? dayValues.reduce((s, d) => s + d.goalCal, 0) / dayValues.length : GOAL_CALORIES
+  const avgGoalPro = dayValues.length ? dayValues.reduce((s, d) => s + d.goalPro, 0) / dayValues.length : GOAL_PROTEIN
   const totalDays = dayMap.size
   const avgCalories = totalDays > 0 ? logs.reduce((s, l) => s + l.calories, 0) / totalDays : 0
   const avgProtein  = totalDays > 0 ? logs.reduce((s, l) => s + (l.protein_g ?? 0), 0) / totalDays : 0
 
-  const calDelta  = avgCalories > 0 ? Math.round(avgCalories - GOAL_CALORIES) : null
-  const protDelta = avgProtein  > 0 ? Math.round(avgProtein  - GOAL_PROTEIN)  : null
+  const calDelta  = avgCalories > 0 ? Math.round(avgCalories - avgGoalCal) : null
+  const protDelta = avgProtein  > 0 ? Math.round(avgProtein  - avgGoalPro)  : null
 
   // ── First page ─────────────────────────────────────────────────
   drawBackground(doc)
@@ -109,8 +115,8 @@ export async function downloadNutritionPdf(logs: NutritionLog[], rangeLabel: str
   })
   let y = drawSummaryCards(doc, [
     { label: 'TOTAL DAYS',     value: String(totalDays),             sub: `${logs.length} meals` },
-    { label: 'AVG KCAL / DAY', value: String(Math.round(avgCalories)), sub: calDelta  != null ? `${calDelta  > 0 ? '+' : ''}${calDelta} vs goal`  : `goal: ${GOAL_CALORIES}`, subColor: calDelta  != null ? (calDelta  <= 0 ? PDF_C.good : PDF_C.danger) : undefined },
-    { label: 'AVG PROTEIN / DAY', value: `${Math.round(avgProtein)}g`, sub: protDelta != null ? `${protDelta > 0 ? '+' : ''}${protDelta}g vs goal` : `goal: ${GOAL_PROTEIN}g`, subColor: protDelta != null ? (protDelta <= 0 ? PDF_C.good : PDF_C.danger) : undefined },
+    { label: 'AVG KCAL / DAY', value: String(Math.round(avgCalories)), sub: calDelta  != null ? `${calDelta  > 0 ? '+' : ''}${calDelta} vs goal`  : `goal: ${Math.round(avgGoalCal)}`, subColor: calDelta  != null ? (calDelta  <= 0 ? PDF_C.good : PDF_C.danger) : undefined },
+    { label: 'AVG PROTEIN / DAY', value: `${Math.round(avgProtein)}g`, sub: protDelta != null ? `${protDelta > 0 ? '+' : ''}${protDelta}g vs goal` : `goal: ${Math.round(avgGoalPro)}g`, subColor: protDelta != null ? (protDelta <= 0 ? PDF_C.good : PDF_C.danger) : undefined },
   ], 28)
 
   // Range label

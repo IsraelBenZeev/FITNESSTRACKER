@@ -24,7 +24,7 @@ export function useHistory(daysBack = 14): UseHistoryResult {
 
       const { data, error: err } = await supabase
         .from('nutrition_log')
-        .select('date, calories, protein_g, carbs_g, fat_g')
+        .select('date, calories, protein_g, carbs_g, fat_g, goal_calories, goal_protein')
         .gte('date', sinceStr)
         .order('date', { ascending: true })
 
@@ -32,7 +32,7 @@ export function useHistory(daysBack = 14): UseHistoryResult {
 
       const map = new Map<string, DayTotals>()
       for (const row of data ?? []) {
-        const existing = map.get(row.date) ?? {
+        const existing: DayTotals = map.get(row.date) ?? {
           date: row.date,
           calories: 0,
           protein: 0,
@@ -45,6 +45,8 @@ export function useHistory(daysBack = 14): UseHistoryResult {
           protein: existing.protein + (row.protein_g ?? 0),
           carbs: existing.carbs + (row.carbs_g ?? 0),
           fat: existing.fat + (row.fat_g ?? 0),
+          goalCalories: row.goal_calories ?? existing.goalCalories ?? null,
+          goalProtein: row.goal_protein ?? existing.goalProtein ?? null,
         })
       }
       return Array.from(map.values())
@@ -72,7 +74,7 @@ export function useCalendarMonth(year: number, month: number): UseCalendarMonthR
     queryFn: async () => {
       const { data, error: err } = await supabase
         .from('nutrition_log')
-        .select('date, calories, protein_g, carbs_g, fat_g')
+        .select('date, calories, protein_g, carbs_g, fat_g, goal_calories, goal_protein')
         .gte('date', firstDay)
         .lte('date', lastDay)
         .order('date', { ascending: true })
@@ -81,13 +83,15 @@ export function useCalendarMonth(year: number, month: number): UseCalendarMonthR
 
       const map = new Map<string, DayTotals>()
       for (const row of data ?? []) {
-        const existing = map.get(row.date) ?? { date: row.date, calories: 0, protein: 0, carbs: 0, fat: 0 }
+        const existing: DayTotals = map.get(row.date) ?? { date: row.date, calories: 0, protein: 0, carbs: 0, fat: 0 }
         map.set(row.date, {
           ...existing,
           calories: existing.calories + (row.calories ?? 0),
           protein: existing.protein + (row.protein_g ?? 0),
           carbs: existing.carbs + (row.carbs_g ?? 0),
           fat: existing.fat + (row.fat_g ?? 0),
+          goalCalories: row.goal_calories ?? existing.goalCalories ?? null,
+          goalProtein: row.goal_protein ?? existing.goalProtein ?? null,
         })
       }
       return map

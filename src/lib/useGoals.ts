@@ -63,6 +63,26 @@ export async function saveGoalsConfig(config: GoalsConfig): Promise<void> {
       updated_at:        new Date().toISOString(),
     }, { onConflict: 'user_id' })
   notifyAll(config)
+
+  // Today's goal changed: re-stamp today's meals so the day is judged by the goal now in effect.
+  // Past days keep the goal they were logged with.
+  const today = new Date().toISOString().split('T')[0]!
+  const { goalCalories, goalProtein } = goalsForDate(config, new Date())
+  await supabase
+    .from('nutrition_log')
+    .update({ goal_calories: goalCalories, goal_protein: goalProtein })
+    .eq('date', today)
+    .eq('user_id', user.id)
+}
+
+/** Goal that applies on a given date under a config (training vs rest day) */
+export function goalsForDate(config: GoalsConfig, date: Date): { goalCalories: number; goalProtein: number; isTrainingDay: boolean } {
+  const isTrainingDay = config.trainingDays.includes(date.getDay())
+  return {
+    goalCalories: isTrainingDay ? config.trainingCalories : config.restCalories,
+    goalProtein:  isTrainingDay ? config.trainingProtein  : config.restProtein,
+    isTrainingDay,
+  }
 }
 
 export function useGoals() {
@@ -83,12 +103,11 @@ export function useGoals() {
     })
   }, [loaded])
 
-  const todayDow = new Date().getDay() // 0–6
-  const isTrainingDay = config.trainingDays.includes(todayDow)
+  const { goalCalories, goalProtein, isTrainingDay } = goalsForDate(config, new Date())
 
   return {
-    goalCalories:  isTrainingDay ? config.trainingCalories : config.restCalories,
-    goalProtein:   isTrainingDay ? config.trainingProtein  : config.restProtein,
+    goalCalories,
+    goalProtein,
     isTrainingDay,
     goalsConfig:   config,
     setGoals:      saveGoalsConfig,

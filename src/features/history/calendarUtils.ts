@@ -26,7 +26,12 @@ export function getDayColor(
   let goalCal = GOAL_CALORIES
   let goalPro = GOAL_PROTEIN
 
-  if (goalsConfig) {
+  if (totals.goalCalories && totals.goalProtein) {
+    // Goal that was in effect that day (snapshot) — immune to later goal changes
+    goalCal = totals.goalCalories
+    goalPro = totals.goalProtein
+  } else if (goalsConfig) {
+    // Legacy rows without a snapshot
     const dow = new Date(dateStr + 'T00:00:00').getDay()
     const isTraining = goalsConfig.trainingDays.includes(dow)
     goalCal = isTraining ? goalsConfig.trainingCalories : goalsConfig.restCalories
