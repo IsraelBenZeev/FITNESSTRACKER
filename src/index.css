@@ -27,7 +27,14 @@ html, body, #root {
   padding: 0;
 }
 
+::selection {
+  background: var(--lime);
+  color: var(--bg);
+}
+
 body {
+  caret-color: var(--lime);
+  accent-color: var(--lime);
   font-family: 'Rubik', sans-serif;
   background-color: var(--bg);
   color: var(--text);

@@ -40,9 +40,11 @@ interface AddMealModalProps {
   isOpen: boolean
   onClose: () => void
   initialMeal?: NutritionLog
+  /** Meal type to preselect when adding (overrides a saved draft's type) */
+  presetMealName?: string
 }
 
-export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps) {
+export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: AddMealModalProps) {
   const isEditing = !!initialMeal
   const { mutate: deleteMeal, isPending: isDeleting } = useDeleteMeal()
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
@@ -80,7 +82,11 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
           draft = null
         }
 
-        setMealName(draft?.mealName ?? MEAL_OPTIONS[0]!)
+        setMealName(
+          presetMealName && MEAL_OPTIONS.includes(presetMealName)
+            ? presetMealName
+            : draft?.mealName ?? MEAL_OPTIONS[0]!,
+        )
         setFoodItems(draft?.foodItems ?? '')
         setCalories(draft?.calories ?? 0)
         setProteinG(draft?.proteinG ?? 0)
@@ -90,7 +96,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal }: AddMealModalProps
         setDraftReady(true)
       }
     }
-  }, [isOpen, initialMeal])
+  }, [isOpen, initialMeal, presetMealName])
 
   useEffect(() => {
     if (!isOpen || isEditing || !draftReady) return
