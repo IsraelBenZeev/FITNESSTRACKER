@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react'
 import { Dumbbell, Info, Moon } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
 import { useGoals, type GoalsConfig } from '../../lib/useGoals'
+import { StepButton, StepSizePicker, clampTo, useStepSize } from '../../shared/components/StepControls'
+
+const clampKcal = clampTo(0, 6000)
+const clampProtein = clampTo(0, 400)
 
 interface EditGoalsModalProps {
   isOpen: boolean
@@ -26,6 +30,7 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
   const [local, setLocal] = useState<GoalsConfig>(goalsConfig)
   const [editing, setEditing] = useState<DayType>('training')
   const [saving, setSaving] = useState(false)
+  const [step, setStep] = useStepSize()
 
   useEffect(() => {
     if (!isOpen) return
@@ -107,7 +112,9 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
         <section aria-label={editing === 'training' ? 'עריכת יום אימון' : 'עריכת יום מנוחה'} className="flex flex-col gap-4 rounded-3xl border border-border-col bg-bg p-4">
           <div className="flex flex-col items-center gap-1">
             <label htmlFor="goal-kcal" className="font-body text-sm text-muted">קלוריות ליום</label>
-            <div className="flex items-baseline gap-2">
+            <div className="flex w-full items-center justify-between gap-2">
+              <StepButton size="lg" direction="down" label={`הפחת ${step} קלוריות`} disabled={local[calKey] <= 0} onStep={() => setLocal((p) => ({ ...p, [calKey]: clampKcal(p[calKey] - step) }))} />
+              <div className="flex min-w-0 items-baseline justify-center gap-1.5">
               <input
                 id="goal-kcal"
                 type="text"
@@ -119,21 +126,25 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
                 onFocus={(e) => e.currentTarget.select()}
                 onChange={(e) => setLocal((p) => ({ ...p, [calKey]: digitsOnly(e.target.value, 6000) }))}
                 aria-invalid={local[calKey] < 500 || undefined}
-                className="w-[5ch] bg-transparent text-center font-display text-[56px] font-bold leading-none tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
+                className="w-[4.2ch] min-w-0 bg-transparent text-center font-display text-[56px] font-bold leading-none tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
               />
               <span className="font-body text-base text-muted">קל'</span>
+              </div>
+              <StepButton size="lg" direction="up" label={`הוסף ${step} קלוריות`} disabled={local[calKey] >= 6000} onStep={() => setLocal((p) => ({ ...p, [calKey]: clampKcal(p[calKey] + step) }))} />
             </div>
             <span aria-hidden className="h-0.5 w-24 rounded-full bg-accent" />
             {local[calKey] > 0 && local[calKey] < 500 && (
               <p className="font-body text-xs text-danger">יעד של פחות מ-500 קלוריות לא נשמר</p>
             )}
           </div>
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-border-col bg-surface px-4 py-2">
+          <div className="flex items-center justify-between gap-2 rounded-2xl border border-border-col bg-surface py-1.5 pe-1.5 ps-3.5">
             <label htmlFor="goal-protein" className="flex items-center gap-2 font-body text-sm text-muted">
               <span aria-hidden className="h-2 w-2 rounded-full bg-macro-protein" />
               חלבון ליום
             </label>
-            <span className="flex items-baseline gap-1">
+            <div className="flex items-center gap-1">
+            <StepButton direction="down" label={`הפחת ${step} גרם חלבון`} disabled={local[proKey] <= 0} onStep={() => setLocal((p) => ({ ...p, [proKey]: clampProtein(p[proKey] - step) }))} />
+            <span className="flex w-[4.5rem] items-baseline justify-center gap-0.5">
               <input
                 id="goal-protein"
                 type="text"
@@ -144,11 +155,14 @@ export function EditGoalsModal({ isOpen, onClose }: EditGoalsModalProps) {
                 placeholder="0"
                 onFocus={(e) => e.currentTarget.select()}
                 onChange={(e) => setLocal((p) => ({ ...p, [proKey]: digitsOnly(e.target.value, 400) }))}
-                className="h-11 w-[4ch] bg-transparent text-center font-display text-[28px] font-semibold tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
+                className="h-11 w-[3ch] bg-transparent text-center font-display text-[26px] font-semibold tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
               />
-              <span className="font-body text-sm text-muted">g</span>
+              <span className="font-body text-xs text-muted">g</span>
             </span>
+            <StepButton direction="up" label={`הוסף ${step} גרם חלבון`} disabled={local[proKey] >= 400} onStep={() => setLocal((p) => ({ ...p, [proKey]: clampProtein(p[proKey] + step) }))} />
+            </div>
           </div>
+          <StepSizePicker value={step} onChange={setStep} />
         </section>
 
         {/* The week, drawn: column height = that day's calorie goal. Tap to switch training/rest. */}

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { Clock, MoreHorizontal, Search, Sparkles, Trash2, X } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
 import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { StepButton, StepSizePicker, clampTo, useStepSize } from '../../shared/components/StepControls'
 import { MealIcon } from '../../shared/icons/MealIcon'
 import { useAddMeal } from './useAddMeal'
 import { useEditMeal } from './useEditMeal'
@@ -73,6 +74,7 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
   const [showMoreTypes, setShowMoreTypes] = useState(false)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
   const caloriesRef = useRef<HTMLInputElement>(null)
+  const [step, setStep] = useStepSize()
 
   const { mutate: addMeal, isPending: isAdding } = useAddMeal()
   const { mutate: editMeal, isPending: isSavingEdit } = useEditMeal()
@@ -383,7 +385,9 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
         <section aria-label="ערכים תזונתיים" className="flex flex-col gap-4 rounded-3xl border border-border-col bg-bg p-4">
           <div className="flex flex-col items-center gap-1">
             <label htmlFor="meal-kcal" className="font-body text-sm text-muted">קלוריות</label>
-            <div className="flex items-baseline justify-center gap-2">
+            <div className="flex w-full items-center justify-between gap-2">
+              <StepButton size="lg" direction="down" label={`הפחת ${step} קלוריות`} disabled={calories <= 0} onStep={() => setCalories((v) => clampKcal(v - step))} />
+              <div className="flex min-w-0 items-baseline justify-center gap-1.5">
               <input
                 ref={caloriesRef}
                 id="meal-kcal"
@@ -397,9 +401,11 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
                 onChange={(e) => setCalories(digitsOnly(e.target.value, 5000))}
                 aria-invalid={(triedSubmit && caloriesMissing) || undefined}
                 aria-describedby="meal-kcal-hint"
-                className="w-[5ch] bg-transparent text-center font-display text-[64px] font-bold leading-none tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
+                className="w-[4.2ch] min-w-0 bg-transparent text-center font-display text-[60px] font-bold leading-none tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
               />
               <span className="font-body text-base text-muted">קל'</span>
+              </div>
+              <StepButton size="lg" direction="up" label={`הוסף ${step} קלוריות`} disabled={calories >= 5000} onStep={() => setCalories((v) => clampKcal(v + step))} />
             </div>
             <span
               aria-hidden
@@ -421,11 +427,13 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
-            <MacroTile id="meal-p" label="חלבון" value={proteinG} onChange={setProteinG} dotClass="bg-macro-protein" />
-            <MacroTile id="meal-c" label="פחמימות" value={carbsG} onChange={setCarbsG} dotClass="bg-macro-carbs" />
-            <MacroTile id="meal-f" label="שומן" value={fatG} onChange={setFatG} dotClass="bg-macro-fat" />
+          <div className="flex flex-col divide-y divide-white/[0.06] rounded-2xl border border-border-col bg-surface">
+            <MacroTile id="meal-p" label="חלבון" value={proteinG} onChange={setProteinG} step={step} dotClass="bg-macro-protein" />
+            <MacroTile id="meal-c" label="פחמימות" value={carbsG} onChange={setCarbsG} step={step} dotClass="bg-macro-carbs" />
+            <MacroTile id="meal-f" label="שומן" value={fatG} onChange={setFatG} step={step} dotClass="bg-macro-fat" />
           </div>
+
+          <StepSizePicker value={step} onChange={setStep} />
 
           <MacroComposition protein={proteinG} carbs={carbsG} fat={fatG} />
         </section>
@@ -444,33 +452,44 @@ export function AddMealModal({ isOpen, onClose, initialMeal, presetMealName }: A
   )
 }
 
+const clampKcal = clampTo(0, 5000)
+const clampGrams = clampTo(0, 999)
+
 function MacroTile({
-  id, label, value, onChange, dotClass,
-}: { id: string; label: string; value: number; onChange: (v: number) => void; dotClass: string }) {
+  id, label, value, onChange, step, dotClass,
+}: {
+  id: string
+  label: string
+  value: number
+  onChange: React.Dispatch<React.SetStateAction<number>>
+  step: number
+  dotClass: string
+}) {
   return (
-    <label
-      htmlFor={id}
-      className="flex cursor-text flex-col items-center gap-1 rounded-2xl border border-border-col bg-surface px-2 py-2.5 transition-colors duration-150 focus-within:border-accent-line"
-    >
-      <span className="flex items-center gap-1.5 font-body text-xs text-muted">
-        <span aria-hidden className={`h-2 w-2 rounded-full ${dotClass}`} />
+    <div className="flex items-center justify-between gap-2 py-1.5 pe-1.5 ps-3.5">
+      <label htmlFor={id} className="flex items-center gap-2 font-body text-[15px] text-text-col">
+        <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${dotClass}`} />
         {label}
-      </span>
-      <span className="flex items-baseline gap-0.5">
-        <input
-          id={id}
-          type="text"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          autoComplete="off"
-          value={value === 0 ? '' : String(value)}
-          placeholder="0"
-          onFocus={(e) => e.currentTarget.select()}
-          onChange={(e) => onChange(digitsOnly(e.target.value, 999))}
-          className="w-[3.5ch] bg-transparent text-center font-display text-[28px] font-semibold leading-none tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
-        />
-        <span className="font-body text-xs text-muted">g</span>
-      </span>
-    </label>
+      </label>
+      <div className="flex items-center gap-1">
+        <StepButton direction="down" label={`הפחת ${step} גרם ${label}`} disabled={value <= 0} onStep={() => onChange((v) => clampGrams(v - step))} />
+        <span className="flex w-[4.5rem] items-baseline justify-center gap-0.5">
+          <input
+            id={id}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            autoComplete="off"
+            value={value === 0 ? '' : String(value)}
+            placeholder="0"
+            onFocus={(e) => e.currentTarget.select()}
+            onChange={(e) => onChange(digitsOnly(e.target.value, 999))}
+            className="w-[3ch] bg-transparent text-center font-display text-[26px] font-semibold leading-none tabular-nums text-heading caret-accent outline-none placeholder:text-subtle"
+          />
+          <span className="font-body text-xs text-muted">g</span>
+        </span>
+        <StepButton direction="up" label={`הוסף ${step} גרם ${label}`} disabled={value >= 999} onStep={() => onChange((v) => clampGrams(v + step))} />
+      </div>
+    </div>
   )
 }
