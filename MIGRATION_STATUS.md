@@ -30,6 +30,8 @@
 - RLS פתוח (anon can read+write)
 
 ## שלב 2: nutrition_log → nutrition_entries ⏳ בתהליך
+
+> **עודכן 2026-11-19:** הגישה השתנתה. ההיסטוריה מומרת למאכלים וארוחות (לא שורה אחת לטקסט), ה-policy `temp_migration_read` הוסר, ו-`body_stats` ב-BodyBuddy חסר 111 שורות. המעקב המלא, ההחלטות והשלבים הבאים: [MIGRATION_NUTRITION.md](MIGRATION_NUTRITION.md). התוכן שלמטה הוא התכנית המקורית מיוני.
 ### מה סוכם:
 - כל שורה מ-`nutrition_log` נכנסת כ-entry אחד ב-`nutrition_entries`
 - מיפוי: food_items→food_name, meal_name→group_name, מאקרו מעוגל ל-int
