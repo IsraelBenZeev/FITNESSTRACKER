@@ -1,12 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
-import { getCurrentUserId } from '../../lib/auth-helpers'
+import { bb } from '../../lib/supabaseBodyBuddy'
+import { useBodyBuddyAuth } from '../../lib/BodyBuddyAuthContext'
 import { useToast } from '../../shared/context/ToastContext'
 import { todayLocal } from '../../lib/date'
-
-function todayDateString(): string {
-  return todayLocal()
-}
 
 interface BodyStatPayload {
   id?: string
@@ -16,35 +12,36 @@ interface BodyStatPayload {
   notes: string
 }
 
+/** Writes to BodyBuddy's body_stats under the connected BodyBuddy user */
 export function useAddBodyStat() {
   const queryClient = useQueryClient()
   const { showSuccess, showError } = useToast()
+  const { bbUser } = useBodyBuddyAuth()
 
   return useMutation({
     mutationFn: async (payload: BodyStatPayload) => {
+      const userId = bbUser?.id
+      if (!userId) throw new Error('לא מחובר ל-BodyBuddy')
       if (payload.id) {
-        const { error } = await supabase
+        const { error } = await bb()
           .from('body_stats')
-          .update({
-            weight_kg: payload.weight_kg,
-            waist_cm: payload.waist_cm,
-            notes: payload.notes || null,
-          })
+          .update({ weight_kg: payload.weight_kg, waist_cm: payload.waist_cm, notes: payload.notes || null })
           .eq('id', payload.id)
+          .eq('user_id', userId)
         if (error) throw new Error(error.message)
       } else {
-        const { error } = await supabase.from('body_stats').insert({
-          date: payload.date ?? todayDateString(),
+        const { error } = await bb().from('body_stats').insert({
+          date: payload.date ?? todayLocal(),
           weight_kg: payload.weight_kg,
           waist_cm: payload.waist_cm,
           notes: payload.notes || null,
-          user_id: await getCurrentUserId(),
+          user_id: userId,
         })
         if (error) throw new Error(error.message)
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['body-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['bb', 'body-stats'] })
       showSuccess('הנתונים נשמרו בהצלחה')
     },
     onError: () => {

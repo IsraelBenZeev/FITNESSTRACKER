@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/AuthContext'
+import { bb } from '../../lib/supabaseBodyBuddy'
+import { useBodyBuddyAuth } from '../../lib/BodyBuddyAuthContext'
 import type { BodyStat } from '../../types/body'
 import { todayLocal } from '../../lib/date'
 import { fetchAllRows } from '../../lib/fetchAllRows'
@@ -13,31 +13,31 @@ interface UseBodyStatsResult {
   error: string | null
 }
 
-function todayDateString(): string {
-  return todayLocal()
-}
-
+/** Body stats from BodyBuddy (same table the app uses), for the connected BodyBuddy user */
 export function useBodyStats(): UseBodyStatsResult {
-  const { user } = useAuth()
-  const userId = user?.id
+  const { bbUser } = useBodyBuddyAuth()
+  const userId = bbUser?.id
 
   const { data: stats = [], isLoading, error } = useQuery({
-    queryKey: ['body-stats', userId],
+    queryKey: ['bb', 'body-stats', userId],
     enabled: !!userId,
-    queryFn: async () => {
-      return fetchAllRows<BodyStat>((from, to) =>
-        supabase
+    queryFn: async () =>
+      fetchAllRows<BodyStat>((from, to) =>
+        bb()
           .from('body_stats')
-          .select('*')
+          .select('id, date, weight_kg, waist_cm, notes, created_at')
+          .eq('user_id', userId!)
           .order('date', { ascending: true })
+          .order('created_at', { ascending: true })
           .order('id', { ascending: true })
           .range(from, to),
-      )
-    },
+      ).then((rows) =>
+        rows.map((r) => ({ ...r, weight_kg: r.weight_kg == null ? null : Number(r.weight_kg), waist_cm: r.waist_cm == null ? null : Number(r.waist_cm) })),
+      ),
   })
 
   const latest = stats.length > 0 ? stats[stats.length - 1] ?? null : null
-  const todayStat = stats.find((s) => s.date === todayDateString()) ?? null
+  const todayStat = stats.find((s) => s.date === todayLocal()) ?? null
 
   return { stats, latest, todayStat, loading: isLoading, error: error ? (error as Error).message : null }
 }
