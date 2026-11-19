@@ -1,10 +1,26 @@
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
-import { useAuth } from '../../lib/AuthContext'
+import { useMemo } from 'react'
 import type { DayTotals, NutritionLog } from '../../types/nutrition'
 import { getDaysInMonth, localDateStr } from './calendarUtils'
-import { daysAgoLocal } from '../../lib/date'
-import { fetchAllRows } from '../../lib/fetchAllRows'
+import { daysAgoLocal, todayLocal } from '../../lib/date'
+import { useMealGroups } from '../nutrition/hooks'
+import { fetchEntries } from '../nutrition/api'
+import { groupEntries, groupToLog } from '../nutrition/foodMath'
+import { supabaseBodyBuddy } from '../../lib/supabaseBodyBuddy'
+import type { MealGroup, NutritionEntry } from '../nutrition/types'
+
+/** Day totals from entries. BodyBuddy has no per-day goal snapshot → goals fall back to the configured goals */
+function toDayMap(entries: NutritionEntry[]): Map<string, DayTotals> {
+  const map = new Map<string, DayTotals>()
+  for (const e of entries) {
+    const d = map.get(e.date) ?? { date: e.date, calories: 0, protein: 0, carbs: 0, fat: 0 }
+    d.calories += e.calories
+    d.protein += e.protein
+    d.carbs += e.carbs
+    d.fat += e.fat
+    map.set(e.date, d)
+  }
+  return map
+}
 
 interface UseHistoryResult {
   days: DayTotals[]
@@ -13,135 +29,29 @@ interface UseHistoryResult {
 }
 
 export function useHistory(daysBack = 14): UseHistoryResult {
-  const { user } = useAuth()
-  const userId = user?.id
-
-  const { data: days = [], isLoading, error } = useQuery({
-    queryKey: ['nutrition', 'history', daysBack, userId],
-    enabled: !!userId,
-    queryFn: async () => {
-      const sinceStr = daysAgoLocal(daysBack)
-
-      const { data, error: err } = await supabase
-        .from('nutrition_log')
-        .select('date, calories, protein_g, carbs_g, fat_g, goal_calories, goal_protein')
-        .gte('date', sinceStr)
-        .order('date', { ascending: true })
-
-      if (err) throw new Error(err.message)
-
-      const map = new Map<string, DayTotals>()
-      for (const row of data ?? []) {
-        const existing: DayTotals = map.get(row.date) ?? {
-          date: row.date,
-          calories: 0,
-          protein: 0,
-          carbs: 0,
-          fat: 0,
-        }
-        map.set(row.date, {
-          ...existing,
-          calories: existing.calories + (row.calories ?? 0),
-          protein: existing.protein + (row.protein_g ?? 0),
-          carbs: existing.carbs + (row.carbs_g ?? 0),
-          fat: existing.fat + (row.fat_g ?? 0),
-          goalCalories: row.goal_calories ?? existing.goalCalories ?? null,
-          goalProtein: row.goal_protein ?? existing.goalProtein ?? null,
-        })
-      }
-      return Array.from(map.values())
-    },
-  })
-
-  return { days, loading: isLoading, error: error ? (error as Error).message : null }
+  const { entries, loading, error } = useMealGroups(daysAgoLocal(daysBack), todayLocal())
+  const days = useMemo(() => [...toDayMap(entries).values()], [entries])
+  return { days, loading, error }
 }
 
-interface UseCalendarMonthResult {
-  dayMap: Map<string, DayTotals>
-  loading: boolean
-}
-
-export function useCalendarMonth(year: number, month: number): UseCalendarMonthResult {
-  const { user } = useAuth()
-  const userId = user?.id
+export function useCalendarMonth(year: number, month: number): { dayMap: Map<string, DayTotals>; loading: boolean } {
   const firstDay = localDateStr(year, month, 1)
   const lastDay = localDateStr(year, month, getDaysInMonth(year, month))
-
-  const { data: dayMap = new Map(), isLoading } = useQuery({
-    queryKey: ['nutrition', 'calendar', year, month, userId],
-    enabled: !!userId,
-    staleTime: 5 * 60 * 1000,
-    queryFn: async () => {
-      const { data, error: err } = await supabase
-        .from('nutrition_log')
-        .select('date, calories, protein_g, carbs_g, fat_g, goal_calories, goal_protein')
-        .gte('date', firstDay)
-        .lte('date', lastDay)
-        .order('date', { ascending: true })
-
-      if (err) throw new Error(err.message)
-
-      const map = new Map<string, DayTotals>()
-      for (const row of data ?? []) {
-        const existing: DayTotals = map.get(row.date) ?? { date: row.date, calories: 0, protein: 0, carbs: 0, fat: 0 }
-        map.set(row.date, {
-          ...existing,
-          calories: existing.calories + (row.calories ?? 0),
-          protein: existing.protein + (row.protein_g ?? 0),
-          carbs: existing.carbs + (row.carbs_g ?? 0),
-          fat: existing.fat + (row.fat_g ?? 0),
-          goalCalories: row.goal_calories ?? existing.goalCalories ?? null,
-          goalProtein: row.goal_protein ?? existing.goalProtein ?? null,
-        })
-      }
-      return map
-    },
-  })
-
-  return { dayMap, loading: isLoading }
+  const { entries, loading } = useMealGroups(firstDay, lastDay)
+  const dayMap = useMemo(() => toDayMap(entries), [entries])
+  return { dayMap, loading }
 }
 
-interface UseDayMealsResult {
-  meals: NutritionLog[]
-  loading: boolean
+/** Export: one row per meal (group) in the legacy shape the PDF/JSON exporters use */
+export async function fetchNutritionForExport(sinceDate: string | null, untilDate?: string | null): Promise<NutritionLog[]> {
+  const { data } = (await supabaseBodyBuddy?.auth.getUser()) ?? { data: { user: null } }
+  if (!data.user) throw new Error('לא מחובר ל-BodyBuddy')
+  const entries = await fetchEntries(data.user.id, sinceDate, untilDate ?? null)
+  return groupEntries(entries).map(groupToLog)
 }
 
-export async function fetchNutritionForExport(
-  sinceDate: string | null,
-  untilDate?: string | null,
-): Promise<NutritionLog[]> {
-  // "All time" exceeds the 1,000-row response cap: page through
-  return fetchAllRows<NutritionLog>((from, to) => {
-    let query = supabase
-      .from('nutrition_log')
-      .select('*')
-      .order('date', { ascending: true })
-      .order('time', { ascending: true })
-      .order('id', { ascending: true })
-    if (sinceDate != null) query = query.gte('date', sinceDate)
-    if (untilDate != null) query = query.lte('date', untilDate)
-    return query.range(from, to)
-  })
-}
-
-export function useDayMeals(date: string | null): UseDayMealsResult {
-  const { user } = useAuth()
-  const userId = user?.id
-
-  const { data: meals = [], isLoading } = useQuery({
-    queryKey: ['nutrition', 'day', date, userId],
-    enabled: !!date && !!userId,
-    queryFn: async () => {
-      const { data, error: err } = await supabase
-        .from('nutrition_log')
-        .select('*')
-        .eq('date', date!)
-        .order('time', { ascending: true })
-
-      if (err) throw new Error(err.message)
-      return (data ?? []) as NutritionLog[]
-    },
-  })
-
-  return { meals, loading: isLoading }
+export function useDayMeals(date: string | null): { meals: NutritionLog[]; groups: MealGroup[]; loading: boolean } {
+  const { groups, loading } = useMealGroups(date, date, !!date)
+  const meals = useMemo(() => groups.map(groupToLog), [groups])
+  return { meals, groups, loading }
 }

@@ -1,7 +1,7 @@
 import { Plus } from 'lucide-react'
 import { MealIcon } from '../../shared/icons/MealIcon'
 
-/** Meal names must match AddMealModal's MEAL_OPTIONS */
+/** Meal names must match AddFoodSheet's MEAL_TYPES */
 const QUICK_MEALS = [
   { name: 'ארוחת בוקר', label: 'בוקר' },
   { name: 'ארוחת צהריים', label: 'צהריים' },

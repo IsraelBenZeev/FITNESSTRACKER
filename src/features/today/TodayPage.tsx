@@ -4,21 +4,27 @@ import { useGoals } from '../../lib/useGoals'
 import { DailySummary } from './DailySummary'
 import { DayTimeline } from './DayTimeline'
 import { QuickAddDock, suggestedMeal } from './QuickAddDock'
-import { AddMealModal } from './AddMealModal'
+import { AddFoodSheet } from '../nutrition/AddFoodSheet'
+import { MealGroupSheet } from '../nutrition/MealGroupSheet'
+import { AccountMismatchBanner } from '../nutrition/ConnectBodyBuddy'
 import { EditGoalsModal } from './EditGoalsModal'
 import type { NutritionLog } from '../../types/nutrition'
+import type { MealGroup } from '../nutrition/types'
 
 export function TodayPage() {
-  const { meals, totals, loading } = useToday()
+  const { meals, groups, totals, loading } = useToday()
   const { goalCalories, goalProtein, isTrainingDay } = useGoals()
   const [addMealName, setAddMealName] = useState<string | null>(null)
   const [editGoalsOpen, setEditGoalsOpen] = useState(false)
-  const [editingMeal, setEditingMeal] = useState<NutritionLog | null>(null)
+  const [openGroup, setOpenGroup] = useState<MealGroup | null>(null)
+  const [appendTo, setAppendTo] = useState<MealGroup | null>(null)
+  const selectMeal = (m: NutritionLog) => setOpenGroup(groups.find((g) => g.key === m.id) ?? null)
 
   return (
     <>
       {/* pb: dock (~68px) above the TabBar padding <main> already reserves */}
       <div className="flex flex-col gap-7 px-4 pb-24 pt-4">
+        <AccountMismatchBanner />
         {loading ? (
           <TodaySkeleton />
         ) : (
@@ -49,7 +55,7 @@ export function TodayPage() {
                   <p className="font-body text-sm text-muted">בחר סוג ארוחה בסרגל למטה כדי להתחיל</p>
                 </div>
               ) : (
-                <DayTimeline meals={meals} onSelect={setEditingMeal} />
+                <DayTimeline meals={meals} onSelect={selectMeal} />
               )}
             </section>
           </>
@@ -58,15 +64,17 @@ export function TodayPage() {
 
       <QuickAddDock onAdd={setAddMealName} />
 
-      <AddMealModal
-        isOpen={addMealName != null}
-        onClose={() => setAddMealName(null)}
+      <AddFoodSheet
+        isOpen={addMealName != null || appendTo != null}
+        onClose={() => { setAddMealName(null); setAppendTo(null) }}
         presetMealName={addMealName ?? suggestedMeal()}
+        appendTo={appendTo && appendTo.groupId ? { groupId: appendTo.groupId, groupName: appendTo.name, date: appendTo.date, calories: appendTo.calories, protein: appendTo.protein } : undefined}
+        dayTotals={{ calories: totals.calories, protein: totals.protein }}
       />
-      <AddMealModal
-        isOpen={!!editingMeal}
-        onClose={() => setEditingMeal(null)}
-        initialMeal={editingMeal ?? undefined}
+      <MealGroupSheet
+        group={openGroup && (groups.find((g) => g.key === openGroup.key) ?? null)}
+        onClose={() => setOpenGroup(null)}
+        onAddMore={(g) => { setOpenGroup(null); setAppendTo(g) }}
       />
       <EditGoalsModal isOpen={editGoalsOpen} onClose={() => setEditGoalsOpen(false)} />
     </>

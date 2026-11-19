@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { GOAL_CALORIES, GOAL_PROTEIN } from './constants'
 import { supabase } from './supabase'
-import { todayLocal } from './date'
 
 export type GoalsConfig = {
   trainingCalories: number
@@ -64,16 +63,7 @@ export async function saveGoalsConfig(config: GoalsConfig): Promise<void> {
       updated_at:        new Date().toISOString(),
     }, { onConflict: 'user_id' })
   notifyAll(config)
-
-  // Today's goal changed: re-stamp today's meals so the day is judged by the goal now in effect.
-  // Past days keep the goal they were logged with.
-  const today = todayLocal()
-  const { goalCalories, goalProtein } = goalsForDate(config, new Date())
-  await supabase
-    .from('nutrition_log')
-    .update({ goal_calories: goalCalories, goal_protein: goalProtein })
-    .eq('date', today)
-    .eq('user_id', user.id)
+  // Nutrition now lives in BodyBuddy, which keeps no per-day goal snapshot: every day is judged by the configured goals.
 }
 
 /** Goal that applies on a given date under a config (training vs rest day) */

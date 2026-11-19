@@ -9,6 +9,8 @@ import { PlanDetailPage } from './features/workout/PlanDetailPage'
 import { WorkoutSessionPage } from './features/workout/WorkoutSessionPage'
 import { LoginPage } from './features/auth/LoginPage'
 import { AuthProvider, useAuth } from './lib/AuthContext'
+import { BodyBuddyAuthProvider } from './lib/BodyBuddyAuthContext'
+import { RequireBodyBuddy } from './features/nutrition/ConnectBodyBuddy'
 import { ToastProvider } from './shared/context/ToastContext'
 
 // Routes that hide the TabBar and Header for a focused experience
@@ -38,9 +40,9 @@ function AnimatedRoutes() {
       >
         <Routes>
           <Route path="/" element={<Navigate to="/today" replace />} />
-          <Route path="/today" element={<TodayPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/body" element={<BodyPage />} />
+          <Route path="/today" element={<RequireBodyBuddy what="התזונה והשקילות"><TodayPage /></RequireBodyBuddy>} />
+          <Route path="/history" element={<RequireBodyBuddy what="היסטוריית התזונה"><HistoryPage /></RequireBodyBuddy>} />
+          <Route path="/body" element={<RequireBodyBuddy what="השקילות ומדדי הגוף"><BodyPage /></RequireBodyBuddy>} />
           <Route path="/workout" element={<WorkoutPage />} />
           <Route path="/workout/plan/:planId" element={<PlanDetailPage />} />
           <Route path="/workout/session" element={<WorkoutSessionPage />} />
@@ -88,11 +90,13 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
+      <BodyBuddyAuthProvider>
       <div style={{ minHeight: '100dvh', background: '#1A2030', display: 'flex', flexDirection: 'column' }}>
         <ToastProvider>
           <AppContent />
         </ToastProvider>
       </div>
+      </BodyBuddyAuthProvider>
     </AuthProvider>
   )
 }
