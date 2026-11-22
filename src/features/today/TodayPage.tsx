@@ -8,7 +8,7 @@ import { suggestedMeal } from '../nutrition/suggestedMeal'
 import { AddFoodSheet } from '../nutrition/AddFoodSheet'
 import { MealGroupSheet } from '../nutrition/MealGroupSheet'
 import { AccountMismatchBanner } from '../nutrition/ConnectBodyBuddy'
-import { EditGoalsModal } from './EditGoalsModal'
+import { useNavigate } from 'react-router-dom'
 import type { NutritionLog } from '../../types/nutrition'
 import type { MealGroup } from '../nutrition/types'
 
@@ -18,7 +18,7 @@ export function TodayPage() {
   const [addMode, setAddMode] = useState<'food' | 'meal' | null>(null)
   const [addMealName, setAddMealName] = useState<string | null>(null)
   const openAdd = (mode: 'food' | 'meal') => { setAddMealName(suggestedMeal()); setAddMode(mode) }
-  const [editGoalsOpen, setEditGoalsOpen] = useState(false)
+  const navigate = useNavigate()
   const [openGroup, setOpenGroup] = useState<MealGroup | null>(null)
   const [appendTo, setAppendTo] = useState<MealGroup | null>(null)
   const selectMeal = (m: NutritionLog) => setOpenGroup(groups.find((g) => g.key === m.id) ?? null)
@@ -37,7 +37,7 @@ export function TodayPage() {
               goalCalories={goalCalories}
               goalProtein={goalProtein}
               isTrainingDay={isTrainingDay}
-              onEditGoals={() => setEditGoalsOpen(true)}
+              onEditGoals={() => navigate("/profile")}
             />
 
             <section aria-labelledby="day-heading" className="flex flex-col gap-2">
@@ -79,7 +79,6 @@ export function TodayPage() {
         group={openGroup && (groups.find((g) => g.key === openGroup.key) ?? null)}
         onClose={() => setOpenGroup(null)}
       />
-      <EditGoalsModal isOpen={editGoalsOpen} onClose={() => setEditGoalsOpen(false)} />
     </>
   )
 }

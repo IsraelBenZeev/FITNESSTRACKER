@@ -7,6 +7,7 @@ import { BodyPage } from './features/body/BodyPage'
 import { WorkoutPage } from './features/workout/WorkoutPage'
 import { PlanDetailPage } from './features/workout/PlanDetailPage'
 import { WorkoutSessionPage } from './features/workout/WorkoutSessionPage'
+import { ProfilePage } from './features/profile/ProfilePage'
 import { LoginPage } from './features/auth/LoginPage'
 import { AuthProvider, useAuth } from './lib/AuthContext'
 import { BodyBuddyAuthProvider } from './lib/BodyBuddyAuthContext'
@@ -43,6 +44,7 @@ function AnimatedRoutes() {
           <Route path="/today" element={<RequireBodyBuddy what="התזונה והשקילות"><TodayPage /></RequireBodyBuddy>} />
           <Route path="/history" element={<RequireBodyBuddy what="היסטוריית התזונה"><HistoryPage /></RequireBodyBuddy>} />
           <Route path="/body" element={<RequireBodyBuddy what="השקילות ומדדי הגוף"><BodyPage /></RequireBodyBuddy>} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="/workout" element={<WorkoutPage />} />
           <Route path="/workout/plan/:planId" element={<PlanDetailPage />} />
           <Route path="/workout/session" element={<WorkoutSessionPage />} />

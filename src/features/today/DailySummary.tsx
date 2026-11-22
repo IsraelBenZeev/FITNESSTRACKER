@@ -13,7 +13,8 @@ interface DailySummaryProps {
   totals: Totals
   goalCalories: number
   goalProtein: number
-  isTrainingDay: boolean
+  /** @deprecated goals are no longer split by training / rest day */
+  isTrainingDay?: boolean
   onEditGoals: () => void
 }
 
@@ -23,7 +24,7 @@ const fmt = (n: number) => Math.round(n).toLocaleString('he-IL')
  * The day's answer, written as a sentence ("1,240 calories and 47g protein left"),
  * plus a compact strip that pins to the top once the full block scrolls away.
  */
-export function DailySummary({ totals, goalCalories, goalProtein, isTrainingDay, onEditGoals }: DailySummaryProps) {
+export function DailySummary({ totals, goalCalories, goalProtein, onEditGoals }: DailySummaryProps) {
   const calLeft = goalCalories - totals.calories
   const proteinLeft = goalProtein - totals.protein
   const calOver = calLeft < 0
@@ -70,9 +71,9 @@ export function DailySummary({ totals, goalCalories, goalProtein, isTrainingDay,
       <section ref={sectionRef} aria-label="סיכום יומי" className="flex flex-col gap-5 rounded-2xl border border-border-col bg-surface px-4 pb-4 pt-3.5">
         <div className="flex items-center justify-between gap-3">
           <span className="font-body text-sm text-muted">
-            {isTrainingDay ? 'יום אימון' : 'יום מנוחה'}
-            <span className="mx-1.5" aria-hidden>·</span>
             יעד {fmt(goalCalories)} קל'
+            <span className="mx-1.5" aria-hidden>·</span>
+            {fmt(goalProtein)}g חלבון
           </span>
           <button
             type="button"
