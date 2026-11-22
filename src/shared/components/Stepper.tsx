@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { Minus, Plus } from 'lucide-react'
 
 interface StepperProps {
   value: number
@@ -12,148 +13,70 @@ interface StepperProps {
   decimals?: number
 }
 
+const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
+const roundBtn = `flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-accent transition-[background-color,opacity] duration-150 hover:bg-accent-soft active:bg-accent-soft disabled:opacity-30 disabled:hover:bg-transparent select-none touch-manipulation [-webkit-tap-highlight-color:transparent] ${focusRing}`
+
+/** Capsule stepper: − value + (hold to repeat), with selectable step sizes underneath */
 export function Stepper({ value, onChange, min, max, step, stepOptions = [step], label, unit, decimals = 0 }: StepperProps) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [activeStep, setActiveStep] = useState(step)
+  // Long-press repeats read the latest value, not the one captured when the press started
+  const valueRef = useRef(value)
+  valueRef.current = value
 
   const clamp = (v: number) => Math.min(max, Math.max(min, parseFloat(v.toFixed(decimals))))
-
-  const increment = () => onChange(clamp(value + activeStep))
-  const decrement = () => onChange(clamp(value - activeStep))
-
-  const startLongPress = (fn: () => void) => {
-    fn()
-    timeoutRef.current = setTimeout(() => {
-      intervalRef.current = setInterval(fn, 80)
-    }, 400)
-  }
+  const nudge = (dir: 1 | -1) => () => onChange(clamp(valueRef.current + dir * activeStep))
 
   const stopLongPress = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)
     if (intervalRef.current) clearInterval(intervalRef.current)
   }
+  const startLongPress = (fn: () => void) => {
+    fn()
+    timeoutRef.current = setTimeout(() => { intervalRef.current = setInterval(fn, 80) }, 400)
+  }
+  useEffect(() => stopLongPress, [])
 
   const atMin = value <= min
   const atMax = value >= max
-
-  const btnStyle = (disabled: boolean): React.CSSProperties => ({
-    width: '44px',
-    height: '44px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: '#2C3545',
-    border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: '10px',
-    cursor: disabled ? 'not-allowed' : 'pointer',
-    color: disabled ? '#516070' : '#96C828',
-    fontSize: '22px',
-    fontFamily: '"Rubik", sans-serif',
-    fontWeight: 300,
-    lineHeight: 1,
-    flexShrink: 0,
-    userSelect: 'none',
-    WebkitTapHighlightColor: 'transparent',
-    transition: 'opacity 0.15s',
-    opacity: disabled ? 0.35 : 1,
-  })
+  const fmt = (n: number) => n.toLocaleString('he-IL', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {label && (
-        <span
-          style={{
-            fontFamily: '"Rubik", sans-serif',
-            fontSize: '12px',
-            color: '#8C9AAB',
-            fontWeight: 500,
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-          }}
-        >
-          {label}
-        </span>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <button
-          style={btnStyle(atMin)}
-          disabled={atMin}
-          onPointerDown={() => startLongPress(decrement)}
-          onPointerUp={stopLongPress}
-          onPointerLeave={stopLongPress}
-        >
-          −
+    <div className="flex flex-col gap-2.5">
+      {label && <span className="px-1 font-body text-sm font-medium text-text-col">{label}</span>}
+
+      <div className="flex items-center gap-2 rounded-full border border-border-col bg-bg p-1">
+        <button type="button" aria-label={`הפחת ${fmt(activeStep)}`} disabled={atMin} className={roundBtn}
+          onPointerDown={() => startLongPress(nudge(-1))} onPointerUp={stopLongPress} onPointerLeave={stopLongPress}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nudge(-1)() } }}>
+          <Minus size={22} strokeWidth={2.25} />
         </button>
 
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'baseline',
-            justifyContent: 'center',
-            gap: '4px',
-          }}
-        >
-          <span
-            style={{
-              fontFamily: '"Barlow Condensed", sans-serif',
-              fontSize: '32px',
-              fontWeight: 600,
-              color: '#96C828',
-              lineHeight: 1,
-              minWidth: '60px',
-              textAlign: 'center',
-            }}
-          >
-            {value.toFixed(decimals)}
-          </span>
-          {unit && (
-            <span
-              style={{
-                fontFamily: '"Rubik", sans-serif',
-                fontSize: '13px',
-                color: '#8C9AAB',
-              }}
-            >
-              {unit}
-            </span>
-          )}
-        </div>
+        <output aria-live="polite" className="flex flex-1 items-baseline justify-center gap-1.5">
+          <span className="font-display text-[34px] font-semibold leading-none tabular-nums text-heading">{fmt(value)}</span>
+          {unit && <span className="font-body text-sm text-muted">{unit}</span>}
+        </output>
 
-        <button
-          style={btnStyle(atMax)}
-          disabled={atMax}
-          onPointerDown={() => startLongPress(increment)}
-          onPointerUp={stopLongPress}
-          onPointerLeave={stopLongPress}
-        >
-          +
+        <button type="button" aria-label={`הוסף ${fmt(activeStep)}`} disabled={atMax} className={roundBtn}
+          onPointerDown={() => startLongPress(nudge(1))} onPointerUp={stopLongPress} onPointerLeave={stopLongPress}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); nudge(1)() } }}>
+          <Plus size={22} strokeWidth={2.25} />
         </button>
       </div>
 
       {stepOptions.length > 1 && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+        <div role="radiogroup" aria-label="גודל צעד" className="flex items-center justify-center gap-1.5">
           {stepOptions.map((option) => (
             <button
               key={option}
               type="button"
+              role="radio"
+              aria-checked={activeStep === option}
               onClick={() => setActiveStep(option)}
-              aria-pressed={activeStep === option}
-              style={{
-                minWidth: '34px',
-                height: '28px',
-                padding: '0 8px',
-                background: activeStep === option ? '#96C828' : '#2C3545',
-                color: activeStep === option ? '#1A2030' : '#8C9AAB',
-                border: `1px solid ${activeStep === option ? '#96C828' : 'rgba(255,255,255,0.08)'}`,
-                borderRadius: '7px',
-                fontFamily: '"Rubik", sans-serif',
-                fontSize: '12px',
-                cursor: 'pointer',
-              }}
+              className={`h-8 min-w-[44px] rounded-full border px-3 font-body text-sm tabular-nums transition-colors duration-150 ${focusRing} ${activeStep === option ? 'border-accent bg-accent-soft font-medium text-accent' : 'border-border-col text-muted hover:text-text-col'}`}
             >
-              {option}
+              {option.toLocaleString('he-IL')}
             </button>
           ))}
         </div>
