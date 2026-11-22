@@ -1,247 +1,224 @@
-import { useState } from 'react'
-import { Copy, FileDown, Check } from 'lucide-react'
-import { useCalendarMonth } from './useHistory'
-import { fetchNutritionForExport } from './useHistory'
+import { useMemo, useState } from 'react'
+import { Check, ChevronLeft, ClipboardCopy, FileDown } from 'lucide-react'
+import { useCalendarMonth, fetchNutritionForExport } from './useHistory'
 import { useGoals } from '../../lib/useGoals'
+import { useToast } from '../../shared/context/ToastContext'
+import { todayLocal } from '../../lib/date'
 import { CalendarHeader } from './CalendarHeader'
 import { CalendarGrid } from './CalendarGrid'
 import { DayDetailSheet } from './DayDetailSheet'
 import { ExportRangeModal } from './ExportRangeModal'
 import type { ExportRange } from './ExportRangeModal'
 import { copyNutritionAsJsonFromPromise, downloadNutritionPdf } from './exportNutrition'
+import { DAY_COLOR_LABEL, HEBREW_MONTHS, daysLabel, getDayColor } from './calendarUtils'
+import type { DayColor } from './calendarUtils'
 import type { DayTotals } from '../../types/nutrition'
 
+const fmt = (n: number) => Math.round(n).toLocaleString('he-IL')
+
+const DOT: Record<Exclude<DayColor, 'gray'>, string> = {
+  green: 'bg-accent',
+  orange: 'bg-macro-fat',
+  red: 'bg-danger',
+}
+
 export function HistoryPage() {
-  const today = new Date()
-  const [year, setYear] = useState(today.getFullYear())
-  const [month, setMonth] = useState(today.getMonth() + 1)
+  const now = new Date()
+  const [year, setYear] = useState(now.getFullYear())
+  const [month, setMonth] = useState(now.getMonth() + 1)
+  const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1
 
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [selectedTotals, setSelectedTotals] = useState<DayTotals | null>(null)
-
+  const [selected, setSelected] = useState<{ date: string; totals: DayTotals } | null>(null)
   const [exportTarget, setExportTarget] = useState<'json' | 'pdf' | null>(null)
   const [copied, setCopied] = useState(false)
-  const [toast, setToast] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const { showSuccess, showError } = useToast()
 
-  const { dayMap, loading } = useCalendarMonth(year, month)
+  const { dayMap, weekDayMap, loading } = useCalendarMonth(year, month)
   const { goalsConfig } = useGoals()
 
-  const disableNext =
-    year === today.getFullYear() && month === today.getMonth() + 1
-
-  function showToast(msg: string) {
-    setToast(msg)
-    setTimeout(() => setToast(null), 2800)
-  }
+  const stats = useMemo(() => {
+    const today = todayLocal()
+    const counts = { green: 0, orange: 0, red: 0 }
+    let calories = 0
+    let protein = 0
+    for (const [date, totals] of dayMap) {
+      if (date > today) continue
+      const c = getDayColor(totals, date, goalsConfig)
+      if (c !== 'gray') counts[c]++
+      calories += totals.calories
+      protein += totals.protein
+    }
+    const logged = counts.green + counts.orange + counts.red
+    return { counts, logged, avgCalories: logged ? calories / logged : 0, avgProtein: logged ? protein / logged : 0 }
+  }, [dayMap, goalsConfig])
 
   function handlePrev() {
-    if (month === 1) { setMonth(12); setYear((y) => y - 1) }
-    else setMonth((m) => m - 1)
+    if (month === 1) { setMonth(12); setYear((y) => y - 1) } else setMonth((m) => m - 1)
   }
-
   function handleNext() {
-    if (month === 12) { setMonth(1); setYear((y) => y + 1) }
-    else setMonth((m) => m + 1)
+    if (month === 12) { setMonth(1); setYear((y) => y + 1) } else setMonth((m) => m + 1)
   }
-
-  function handleDayPress(dateStr: string, totals: DayTotals) {
-    setSelectedDate(dateStr)
-    setSelectedTotals(totals)
-  }
-
-  function handleClose() {
-    setSelectedDate(null)
-    setSelectedTotals(null)
+  function handleToday() {
+    setYear(now.getFullYear()); setMonth(now.getMonth() + 1)
   }
 
   async function handleExportSelect(range: ExportRange) {
+    const target = exportTarget
+    setBusy(true)
     try {
-      if (exportTarget === 'json') {
-        // Start clipboard write synchronously (within the gesture) and pass the
-        // fetch as a Promise — iOS Safari keeps gesture trust alive this way.
+      if (target === 'json') {
+        // Start the clipboard write synchronously (within the tap) and hand it the fetch
+        // as a Promise — iOS Safari keeps the gesture trust alive this way.
         await copyNutritionAsJsonFromPromise(fetchNutritionForExport(range.sinceDate, range.untilDate))
         setCopied(true)
-        showToast('הועתק בהצלחה')
+        showSuccess('הנתונים הועתקו ללוח')
         setTimeout(() => setCopied(false), 2800)
-      } else if (exportTarget === 'pdf') {
+      } else if (target === 'pdf') {
         const logs = await fetchNutritionForExport(range.sinceDate, range.untilDate)
-        if (logs.length === 0) { showToast('אין נתונים בטווח זה'); return }
+        if (logs.length === 0) { showError('אין ארוחות בטווח הזה'); return }
         await downloadNutritionPdf(logs, range.label)
-        showToast('PDF הורד בהצלחה')
+        showSuccess('קובץ ה-PDF ירד למכשיר')
       }
     } catch (e) {
-      if (e instanceof Error && e.message === 'empty') {
-        showToast('אין נתונים בטווח זה')
-      } else {
-        showToast('שגיאה בייצוא הנתונים')
-      }
+      showError(e instanceof Error && e.message === 'empty' ? 'אין ארוחות בטווח הזה' : 'הייצוא נכשל, נסה שוב')
+    } finally {
+      setBusy(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div
-        style={{
-          padding: '32px 16px',
-          textAlign: 'center',
-          color: '#8C9AAB',
-          fontFamily: '"DM Sans", sans-serif',
-        }}
-      >
-        טוען...
-      </div>
-    )
-  }
+  const { counts, logged } = stats
 
   return (
     <>
-      {/* Toast notification */}
-      {toast && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '80px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 200,
-            background: '#2C3545',
-            border: '1px solid rgba(150,200,40,0.35)',
-            borderRadius: '12px',
-            padding: '10px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-            animation: 'slideUp 0.2s cubic-bezier(0.32,0.72,0,1) forwards',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          <Check size={14} color="#96C828" strokeWidth={2.5} />
-          <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#96C828' }}>
-            {toast}
-          </span>
-        </div>
-      )}
+      <div className="flex flex-col gap-7 px-4 pb-28 pt-4">
+        <section aria-label="לוח חודשי" className="flex flex-col gap-5 rounded-2xl border border-border-col bg-surface px-4 pb-4 pt-2">
+          <CalendarHeader
+            year={year}
+            month={month}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            disableNext={isCurrentMonth}
+            onToday={isCurrentMonth ? undefined : handleToday}
+          />
 
-      <div style={{ padding: '16px' }}>
-        {/* Export buttons */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
-          <button
-            onClick={() => setExportTarget('json')}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              padding: '10px',
-              background: copied ? 'rgba(74,222,128,0.08)' : '#2C3545',
-              border: copied ? '1px solid rgba(74,222,128,0.3)' : '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '10px',
-              color: copied ? '#4ade80' : '#8C9AAB',
-              fontFamily: '"DM Sans", sans-serif',
-              fontSize: '12px',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
-            {copied ? <Check size={14} strokeWidth={2.5} /> : <Copy size={14} strokeWidth={2} />}
-            {copied ? 'הועתק!' : 'העתק JSON'}
-          </button>
-          <button
-            onClick={() => setExportTarget('pdf')}
-            style={{
-              flex: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              padding: '10px',
-              background: '#2C3545',
-              border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: '10px',
-              color: '#8C9AAB',
-              fontFamily: '"DM Sans", sans-serif',
-              fontSize: '12px',
-              cursor: 'pointer',
-              WebkitTapHighlightColor: 'transparent',
-            }}
-          >
-            <FileDown size={14} strokeWidth={2} />
-            הורד PDF
-          </button>
-        </div>
+          {/* The month's answer, as a sentence — like the Today summary */}
+          {loading ? (
+            <div aria-hidden className="flex animate-pulse flex-col gap-2.5">
+              <div className="h-10 w-56 rounded bg-surface2" />
+              <div className="h-4 w-44 rounded bg-surface2" />
+            </div>
+          ) : logged === 0 ? (
+            <p className="font-body text-xl leading-snug text-text-col">
+              {isCurrentMonth ? 'עוד לא תיעדת ארוחות החודש' : `לא תועדו ארוחות ב${HEBREW_MONTHS[month]}`}
+              <br />
+              <span className="text-base text-muted">ימים עם תיעוד יופיעו כאן בצבע</span>
+            </p>
+          ) : (
+            <p className="font-body text-xl leading-snug text-text-col [text-wrap:balance]">
+              עמדת ביעד ב-
+              <span className="font-display text-[44px] font-bold leading-none tabular-nums text-accent">{counts.green}</span>
+              {' '}מתוך {daysLabel(logged)} שתיעדת
+            </p>
+          )}
 
-        <CalendarHeader
-          year={year}
-          month={month}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          disableNext={disableNext}
-        />
-        <CalendarGrid
-          year={year}
-          month={month}
-          dayMap={dayMap}
-          onDayPress={handleDayPress}
-          goalsConfig={goalsConfig}
-        />
+          <CalendarGrid
+            year={year}
+            month={month}
+            dayMap={dayMap}
+            weekDayMap={weekDayMap}
+            onDayPress={(date, totals) => setSelected({ date, totals })}
+            goalsConfig={goalsConfig}
+            loading={loading}
+          />
 
-        {/* Legend */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '16px',
-            marginTop: '20px',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-          }}
-        >
-          <LegendItem color="#4ade80" label="עמידה ביעד" />
-          <LegendItem color="#fb923c" label="קרוב ליעד" />
-          <LegendItem color="#F87171" label="חריגה" />
-          <LegendItem color="#516070" label="אין דיווח" />
-        </div>
+          {/* Monthly average, under the month */}
+          <div className="flex items-center justify-between gap-3 rounded-2xl bg-bg px-4 py-3">
+            <span className="font-body text-sm font-medium text-text-col">ממוצע חודשי</span>
+            {loading ? (
+              <span aria-hidden className="h-6 w-36 animate-pulse rounded bg-surface2" />
+            ) : logged === 0 ? (
+              <span className="font-body text-sm text-muted">אין תיעוד</span>
+            ) : (
+              <span className="flex items-baseline gap-4" aria-label={`ממוצע חודשי: ${fmt(stats.avgCalories)} קלוריות ו-${fmt(stats.avgProtein)} גרם חלבון ביום`}>
+                <span className="flex items-baseline gap-1">
+                  <span className="font-display text-2xl font-semibold leading-none tabular-nums text-heading">{fmt(stats.avgCalories)}</span>
+                  <span className="font-body text-xs text-muted">קל'</span>
+                </span>
+                <span className="flex items-baseline gap-1">
+                  <span className="font-display text-2xl font-semibold leading-none tabular-nums text-macro-protein">{fmt(stats.avgProtein)}g</span>
+                  <span className="font-body text-xs text-muted">חלבון</span>
+                </span>
+              </span>
+            )}
+          </div>
 
-        <DayDetailSheet
-          dateStr={selectedDate}
-          totals={selectedTotals}
-          onClose={handleClose}
-        />
+          {/* Legend that also counts the month */}
+          <ul aria-label="מקרא" className="flex flex-wrap gap-2">
+            {(['green', 'orange', 'red'] as const).map((c) => (
+              <li key={c} className="flex items-center gap-2 rounded-full bg-surface2 px-3 py-1.5 font-body text-sm text-text-col">
+                <span aria-hidden className={`h-2.5 w-2.5 rounded-full ${DOT[c]}`} />
+                {DAY_COLOR_LABEL[c]}
+                {!loading && <span className="tabular-nums text-muted">{counts[c]}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section aria-labelledby="export-heading" className="flex flex-col gap-2">
+          <h2 id="export-heading" className="font-body text-base font-medium text-text-col">ייצוא נתונים</h2>
+          <div className="overflow-hidden rounded-2xl border border-border-col bg-surface">
+            <ExportRow
+              icon={copied ? <Check size={20} strokeWidth={2.25} /> : <ClipboardCopy size={20} strokeWidth={1.75} />}
+              title={copied ? 'הועתק ללוח' : 'העתקת נתונים'}
+              desc="קובץ JSON להדבקה בצ׳אט או לגיבוי"
+              done={copied}
+              disabled={busy}
+              onClick={() => setExportTarget('json')}
+            />
+            <div aria-hidden className="mx-4 h-px bg-border-col" />
+            <ExportRow
+              icon={<FileDown size={20} strokeWidth={1.75} />}
+              title="הורדת דוח PDF"
+              desc="כל הארוחות וסיכום לכל יום"
+              disabled={busy}
+              onClick={() => setExportTarget('pdf')}
+            />
+          </div>
+        </section>
       </div>
+
+      <DayDetailSheet dateStr={selected?.date ?? null} totals={selected?.totals ?? null} onClose={() => setSelected(null)} />
 
       <ExportRangeModal
         isOpen={exportTarget !== null}
         onClose={() => setExportTarget(null)}
-        title={exportTarget === 'json' ? 'העתק JSON — בחר טווח' : 'הורד PDF — בחר טווח'}
+        title={exportTarget === 'json' ? 'איזה טווח להעתיק?' : 'איזה טווח לייצא ל-PDF?'}
+        confirmLabel={exportTarget === 'json' ? 'העתק' : 'הורד PDF'}
         onSelect={handleExportSelect}
       />
     </>
   )
 }
 
-function LegendItem({ color, label }: { color: string; label: string }) {
+function ExportRow({ icon, title, desc, done, disabled, onClick }: {
+  icon: React.ReactNode; title: string; desc: string; done?: boolean; disabled?: boolean; onClick: () => void
+}) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', direction: 'rtl' }}>
-      <div
-        style={{
-          width: '12px',
-          height: '12px',
-          borderRadius: '3px',
-          background: color,
-          opacity: color === '#516070' ? 1 : 0.7,
-        }}
-      />
-      <span
-        style={{
-          fontFamily: '"DM Sans", sans-serif',
-          fontSize: '11px',
-          color: '#8C9AAB',
-        }}
-      >
-        {label}
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className="flex min-h-[64px] w-full items-center gap-3.5 px-4 py-3 text-right transition-colors duration-150 hover:bg-surface2 disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent [-webkit-tap-highlight-color:transparent]"
+    >
+      <span aria-hidden className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${done ? 'bg-accent text-bg' : 'bg-accent-soft text-accent'}`}>
+        {icon}
       </span>
-    </div>
+      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <span aria-live="polite" className="font-body text-[15px] font-medium text-heading">{title}</span>
+        <span className="truncate font-body text-sm text-muted">{desc}</span>
+      </span>
+      <ChevronLeft size={18} strokeWidth={2} aria-hidden className="flex-shrink-0 text-subtle" />
+    </button>
   )
 }

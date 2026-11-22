@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { DayColor } from './calendarUtils'
 
 interface CalendarDayProps {
@@ -6,54 +5,37 @@ interface CalendarDayProps {
   color: DayColor
   isToday: boolean
   isFuture: boolean
+  /** Spoken description: date, calories, status */
+  label: string
   onClick: () => void
 }
 
-const COLOR_STYLES: Record<DayColor, { bg: string; border: string; text: string }> = {
-  green:  { bg: 'rgba(74,222,128,0.15)',  border: 'rgba(74,222,128,0.4)',  text: '#4ade80' },
-  orange: { bg: 'rgba(251,146,60,0.15)',  border: 'rgba(251,146,60,0.4)',  text: '#fb923c' },
-  red:    { bg: 'rgba(248,113,113,0.15)',   border: 'rgba(248,113,113,0.4)',   text: '#F87171' },
-  gray:   { bg: '#2C3545',               border: 'rgba(255,255,255,0.08)',                  text: '#8C9AAB'    },
+const TONE: Record<DayColor, string> = {
+  green: 'border-accent/30 bg-accent/15 text-accent hover:border-accent/70',
+  orange: 'border-macro-fat/30 bg-macro-fat/15 text-macro-fat hover:border-macro-fat/70',
+  red: 'border-danger/30 bg-danger/15 text-danger hover:border-danger/70',
+  gray: 'border-transparent bg-surface2/60 text-muted',
 }
 
-export function CalendarDay({ dayNumber, color, isToday, isFuture, onClick }: CalendarDayProps) {
-  const [pressed, setPressed] = useState(false)
-  const { bg, border, text } = COLOR_STYLES[color]
-  const isInteractive = color !== 'gray' && !isFuture
+const base = 'flex h-11 items-center justify-center rounded-xl border font-display text-lg font-semibold leading-none tabular-nums select-none'
 
+export function CalendarDay({ dayNumber, color, isToday, isFuture, label, onClick }: CalendarDayProps) {
+  const ring = isToday ? 'ring-2 ring-accent ring-offset-2 ring-offset-surface' : ''
+
+  if (isFuture) {
+    return <div aria-hidden className={`${base} border-transparent text-subtle`}>{dayNumber}</div>
+  }
+  if (color === 'gray') {
+    return <div aria-label={label} className={`${base} ${TONE.gray} ${ring}`}>{dayNumber}</div>
+  }
   return (
-    <div
-      role={isInteractive ? 'button' : undefined}
-      onClick={isInteractive ? onClick : undefined}
-      onPointerDown={() => isInteractive && setPressed(true)}
-      onPointerUp={() => setPressed(false)}
-      onPointerLeave={() => setPressed(false)}
-      style={{
-        aspectRatio: '1',
-        borderRadius: '8px',
-        border: `1px solid ${border}`,
-        background: pressed ? `rgba(255,255,255,0.04)` : bg,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        cursor: isInteractive ? 'pointer' : 'default',
-        opacity: isFuture ? 0.3 : 1,
-        outline: isToday ? '2px solid #96C828' : 'none',
-        outlineOffset: '2px',
-        transition: 'background 0.12s',
-        userSelect: 'none',
-      }}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className={`${base} ${TONE[color]} ${ring} transition-[border-color,transform] duration-150 ease-out active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent [-webkit-tap-highlight-color:transparent]`}
     >
-      <span
-        style={{
-          fontFamily: '"Bebas Neue", cursive',
-          fontSize: '16px',
-          color: text,
-          lineHeight: 1,
-        }}
-      >
-        {dayNumber}
-      </span>
-    </div>
+      {dayNumber}
+    </button>
   )
 }

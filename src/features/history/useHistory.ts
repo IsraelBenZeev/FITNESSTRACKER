@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import type { DayTotals, NutritionLog } from '../../types/nutrition'
 import { getDaysInMonth, localDateStr } from './calendarUtils'
-import { daysAgoLocal, todayLocal } from '../../lib/date'
+import { daysAgoLocal, todayLocal, toLocalDateStr } from '../../lib/date'
 import { useMealGroups } from '../nutrition/hooks'
 import { fetchEntries } from '../nutrition/api'
 import { groupEntries, groupToLog } from '../nutrition/foodMath'
@@ -34,12 +34,25 @@ export function useHistory(daysBack = 14): UseHistoryResult {
   return { days, loading, error }
 }
 
-export function useCalendarMonth(year: number, month: number): { dayMap: Map<string, DayTotals>; loading: boolean } {
+/**
+ * A month's days. Also loads the neighbouring days that share its first/last week,
+ * so a week that crosses months averages over all 7 days (`weekDayMap`).
+ * `dayMap` holds only the month's own days (month stats, calendar colors).
+ */
+export function useCalendarMonth(year: number, month: number): { dayMap: Map<string, DayTotals>; weekDayMap: Map<string, DayTotals>; loading: boolean } {
   const firstDay = localDateStr(year, month, 1)
   const lastDay = localDateStr(year, month, getDaysInMonth(year, month))
-  const { entries, loading } = useMealGroups(firstDay, lastDay)
-  const dayMap = useMemo(() => toDayMap(entries), [entries])
-  return { dayMap, loading }
+  const first = new Date(year, month - 1, 1)
+  const last = new Date(year, month - 1, getDaysInMonth(year, month))
+  const weekStart = toLocalDateStr(new Date(year, month - 1, 1 - first.getDay()))
+  const weekEnd = toLocalDateStr(new Date(year, month - 1, last.getDate() + (6 - last.getDay())))
+  const { entries, loading } = useMealGroups(weekStart, weekEnd)
+  const weekDayMap = useMemo(() => toDayMap(entries), [entries])
+  const dayMap = useMemo(
+    () => new Map([...weekDayMap].filter(([d]) => d >= firstDay && d <= lastDay)),
+    [weekDayMap, firstDay, lastDay],
+  )
+  return { dayMap, weekDayMap, loading }
 }
 
 /** Export: one row per meal (group) in the legacy shape the PDF/JSON exporters use */

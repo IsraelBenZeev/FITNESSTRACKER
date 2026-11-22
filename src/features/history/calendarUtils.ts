@@ -10,7 +10,32 @@ export const HEBREW_MONTHS = [
 // RTL grid: index 0 renders on the right → Sunday (ראשון) rightmost = correct Hebrew layout
 export const HEBREW_DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
+/** Column headers for the calendar grid (same order as HEBREW_DAY_NAMES) */
+export const HEBREW_DAY_SHORT = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
+
 export type DayColor = 'green' | 'orange' | 'red' | 'gray'
+
+export const DAY_COLOR_LABEL: Record<DayColor, string> = {
+  green: 'עמידה ביעד',
+  orange: 'קרוב ליעד',
+  red: 'רחוק מהיעד',
+  gray: 'אין תיעוד',
+}
+
+/** "22.11", plus ".25" when the date is not in the current year */
+export function shortDate(dateStr: string): string {
+  const [y, m, d] = dateStr.split('-')
+  const sameYear = Number(y) === new Date().getFullYear()
+  return `${Number(d)}.${Number(m)}${sameYear ? '' : `.${y!.slice(2)}`}`
+}
+
+/** Inclusive number of calendar days between two YYYY-MM-DD dates */
+export function daysBetween(from: string, to: string): number {
+  const toUtc = (s: string) => { const [y, m, d] = s.split('-').map(Number); return Date.UTC(y!, m! - 1, d!) }
+  return Math.round((toUtc(to) - toUtc(from)) / 86_400_000) + 1
+}
+
+export const daysLabel = (n: number) => (n === 1 ? 'יום אחד' : `${n.toLocaleString('he-IL')} ימים`)
 
 /**
  * מחשב צבע יום לפי הישגי הארוחות מול היעד הרלוונטי לאותו יום (אימון / מנוחה).
