@@ -44,17 +44,17 @@ export function AddOptionsFab({ onAddFood, onAddMeal }: AddOptionsFabProps) {
     {
       key: 'food', label: 'מאכל', aria: 'הוסף מאכל', hint: 'חיפוש במאגר ובמאכלים שלך', onClick: pick(onAddFood),
       icon: <Search size={20} strokeWidth={2.25} aria-hidden />,
-      tone: 'border-violet-300/50 bg-[rgb(71,69,110)] text-violet-100', size: 'h-[58px] w-[58px]',
+      tone: 'border-2 border-violet-300/80 bg-bg/85 text-violet-200 backdrop-blur-md', size: 'h-[58px] w-[58px]',
     },
     {
       key: 'meal', label: 'ארוחה', aria: 'הוסף ארוחה', hint: 'ארוחה שמורה או ארוחה חדשה', onClick: pick(onAddMeal),
       icon: <UtensilsCrossed size={20} strokeWidth={2.25} aria-hidden />,
-      tone: 'border-orange-300/50 bg-[rgb(95,71,56)] text-orange-100', size: 'h-[58px] w-[58px]',
+      tone: 'border-2 border-orange-300/80 bg-bg/85 text-orange-200 backdrop-blur-md', size: 'h-[58px] w-[58px]',
     },
     {
       key: 'ai', label: 'AI', aria: 'צילום ארוחה עם AI — עדיין לא זמין', hint: 'בקרוב', disabled: true,
       icon: <Camera size={24} strokeWidth={2.25} aria-hidden />,
-      tone: 'border-accent/60 bg-[rgb(63,91,45)] text-lime-300', size: 'h-[72px] w-[72px]',
+      tone: 'border-2 border-accent/80 bg-bg/85 text-lime-300 backdrop-blur-md', size: 'h-[72px] w-[72px]',
     },
   ]
 
@@ -83,7 +83,7 @@ export function AddOptionsFab({ onAddFood, onAddMeal }: AddOptionsFabProps) {
                   aria-label={o.aria}
                   title={o.disabled ? 'בקרוב' : o.hint}
                   tabIndex={open ? 0 : -1}
-                  className={`relative flex flex-col items-center justify-center gap-0.5 rounded-full border shadow-[0_6px_10px_rgba(0,0,0,0.35)] transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 disabled:grayscale-[60%] ${o.size} ${o.tone} ${focusRing}`}
+                  className={`relative flex flex-col items-center justify-center gap-0.5 rounded-full shadow-[0_6px_10px_rgba(0,0,0,0.35)] transition-transform duration-150 active:scale-95 disabled:cursor-not-allowed disabled:opacity-45 disabled:grayscale-[60%] ${o.size} ${o.tone} ${focusRing}`}
                 >
                   {o.icon}
                   <span className="font-body text-xs font-semibold leading-none">{o.label}</span>
@@ -100,7 +100,7 @@ export function AddOptionsFab({ onAddFood, onAddMeal }: AddOptionsFabProps) {
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
             aria-label={open ? 'סגור תפריט הוספה' : 'פתח תפריט הוספת מאכל או ארוחה'}
-            className={`flex h-16 w-16 items-center justify-center rounded-full border border-accent/50 bg-accent/20 text-lime-300 shadow-[0_6px_14px_rgba(0,0,0,0.45)] backdrop-blur-md transition-transform duration-150 active:scale-95 ${focusRing}`}
+            className={`flex h-16 w-16 items-center justify-center rounded-full border-2 border-accent bg-bg/85 text-lime-300 shadow-[0_6px_14px_rgba(0,0,0,0.45)] backdrop-blur-md transition-transform duration-150 active:scale-95 ${focusRing}`}
           >
             <Plus size={30} strokeWidth={2.5} aria-hidden className={`transition-transform duration-200 ${open ? 'rotate-45' : 'rotate-0'}`} />
           </button>

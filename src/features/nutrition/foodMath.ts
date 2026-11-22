@@ -127,7 +127,8 @@ export function normalizeEntry(row: Record<string, unknown>): NutritionEntry {
 }
 
 /** The DB row for logging one cart item (same columns the BodyBuddy app writes) */
-export function entryRow(item: CartItem, ctx: { userId: string; date: string; groupId: string; groupName: string; createdAt: string }) {
+/** groupId/groupName null = a single food, not part of a meal (like the app's "add food") */
+export function entryRow(item: CartItem, ctx: { userId: string; date: string; groupId: string | null; groupName: string | null; createdAt: string }) {
   const m = nutrientsFor(item.food, item.amount)
   const isUnits = item.food.measurement === 'units'
   const hasUnit = !isUnits && !!item.food.unitWeightG && !!item.food.unitName

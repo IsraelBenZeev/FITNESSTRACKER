@@ -64,7 +64,7 @@ function CartRow({ item, onChange, onRemove }: { item: CartItem; onChange: (amou
             <div role="radiogroup" aria-label={`יחידת כמות ל${food.name}`} className="flex gap-0.5 rounded-full bg-bg p-0.5">
               {([['grams', food.amountUnit === 'ml' ? 'מ״ל' : 'גרם'], ['units', food.unitName!]] as const).map(([k, l]) => (
                 <button key={k} type="button" role="radio" aria-checked={mode === k} onClick={() => setMode(k)}
-                  className={`h-7 rounded-full px-2.5 font-body text-xs transition-colors duration-150 ${focusRing} ${mode === k ? 'bg-accent font-medium text-bg' : 'text-muted hover:text-text-col'}`}>
+                  className={`h-7 rounded-full border px-2.5 font-body text-xs transition-colors duration-150 ${focusRing} ${mode === k ? 'border-accent bg-accent-soft font-medium text-accent' : 'border-transparent text-muted hover:text-text-col'}`}>
                   {l}
                 </button>
               ))}

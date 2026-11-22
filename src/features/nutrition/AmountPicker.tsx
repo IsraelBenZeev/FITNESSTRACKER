@@ -51,8 +51,8 @@ export function AmountPicker({ food, amount, onChange }: AmountPickerProps) {
               role="radio"
               aria-checked={byUnits === o.v}
               onClick={() => setByUnits(o.v)}
-              className={`h-10 truncate rounded-lg px-2 font-body text-sm transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent
-                ${byUnits === o.v ? 'bg-accent font-medium text-bg' : 'text-muted hover:text-text-col'}`}
+              className={`h-10 truncate rounded-lg border px-2 font-body text-sm transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent
+                ${byUnits === o.v ? 'border-accent bg-accent-soft font-medium text-accent' : 'border-transparent text-muted hover:text-text-col'}`}
             >
               {o.label}
             </button>

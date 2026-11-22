@@ -41,6 +41,13 @@ export async function addMeal(userId: string, items: CartItem[], opts: { date: s
   await Promise.all(items.map((it) => trackFoodUsage(userId, it.food).catch(() => undefined)))
 }
 
+/** One food on its own (no group_id / group_name) — what the app writes for "add food" */
+export async function addSingleFood(userId: string, item: CartItem, opts: { date: string; createdAt: string }) {
+  const { error } = await bb().from('nutrition_entries').insert(entryRow(item, { userId, date: opts.date, groupId: null, groupName: null, createdAt: opts.createdAt }))
+  if (error) throw new Error(error.message)
+  await trackFoodUsage(userId, item.food).catch(() => undefined)
+}
+
 export async function deleteEntry(userId: string, id: string) {
   const { error } = await bb().from('nutrition_entries').delete().eq('id', id).eq('user_id', userId)
   if (error) throw new Error(error.message)

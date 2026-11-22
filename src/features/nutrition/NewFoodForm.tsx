@@ -49,7 +49,7 @@ export function NewFoodForm({ initialName, pending, onSubmit }: NewFoodFormProps
       <div role="radiogroup" aria-label="איך מודדים" className="grid grid-cols-2 gap-1 rounded-xl bg-bg p-1">
         {([['grams', 'לפי משקל'], ['units', 'לפי יחידה']] as const).map(([v, l]) => (
           <button key={v} type="button" role="radio" aria-checked={measurement === v} onClick={() => setMeasurement(v)}
-            className={`h-10 rounded-lg font-body text-sm transition-colors duration-150 ${focusRing} ${measurement === v ? 'bg-accent font-medium text-bg' : 'text-muted hover:text-text-col'}`}>
+            className={`h-10 rounded-lg border font-body text-sm transition-colors duration-150 ${focusRing} ${measurement === v ? 'border-accent bg-accent-soft font-medium text-accent' : 'border-transparent text-muted hover:text-text-col'}`}>
             {l}
           </button>
         ))}

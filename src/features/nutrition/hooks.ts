@@ -84,6 +84,13 @@ export function useAddMealEntries() {
   )
 }
 
+export function useAddSingleFood() {
+  return useBbMutation(
+    (uid, a: { item: CartItem; date: string; createdAt: string }) => api.addSingleFood(uid, a.item, { date: a.date, createdAt: a.createdAt }),
+    { ok: 'המאכל נוסף בהצלחה', fail: 'שגיאה בהוספה ליומן' },
+  )
+}
+
 export function useDeleteEntry() {
   return useBbMutation((uid, id: string) => api.deleteEntry(uid, id), { ok: 'הפריט נמחק', fail: 'שגיאה במחיקה' })
 }

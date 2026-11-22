@@ -11,7 +11,7 @@ import { CartRows } from './CartRows'
 import { CategoryGroups, FoodCard, RecentStrip, ResultRows } from './BrowseFoods'
 import { amountLabel, defaultAmountFor, nutrientsFor, sumMacros } from './foodMath'
 import {
-  useAddMealEntries, useCatalog, useCreateFood, useCreateSavedMeal, useMyFoods, useRecentFoods, useSavedMeals, useSaveCatalogFood,
+  useAddMealEntries, useAddSingleFood, useCatalog, useCreateFood, useCreateSavedMeal, useMyFoods, useRecentFoods, useSavedMeals, useSaveCatalogFood,
 } from './hooks'
 import type { CartItem, Food, SavedMeal } from './types'
 
@@ -69,6 +69,9 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
   const mine = useMyFoods(isOpen)
   const meals = useSavedMeals(isOpen)
   const addEntries = useAddMealEntries()
+  const addSingle = useAddSingleFood()
+  // "Add food" like the app: one food straight to the log, no meal group. "Add meal" (and appending) uses the cart.
+  const singleMode = mode === 'food' && !appendTo
   const createFood = useCreateFood()
   const saveCatalog = useSaveCatalogFood()
   const saveMeal = useCreateSavedMeal()
@@ -93,6 +96,12 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
   const commitPick = () => {
     if (view.kind !== 'pick' || view.amount <= 0) return
     const { food, amount, editKey } = view
+    if (singleMode && !editKey) {
+      if (addSingle.isPending) return
+      const createdAt = new Date(`${date}T${time}:00`).toISOString()
+      addSingle.mutate({ item: { key: crypto.randomUUID(), food, amount }, date, createdAt }, { onSuccess: onClose })
+      return
+    }
     setCart((c) => (editKey ? c.map((it) => (it.key === editKey ? { ...it, amount } : it)) : [...c, { key: crypto.randomUUID(), food, amount }]))
     setQuery('')
     setView({ kind: 'browse' })
@@ -124,15 +133,15 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
   let footer: React.ReactNode
   if (view.kind === 'pick') {
     footer = (
-      <button type="button" onClick={commitPick} disabled={view.amount <= 0}
-        className={`flex h-[52px] w-full items-center justify-center rounded-2xl bg-accent font-body text-base font-semibold text-bg transition-transform duration-150 active:scale-[0.98] disabled:opacity-50 ${focusRing}`}>
-        {view.editKey ? 'עדכן כמות' : `הוסף · ${fmt(nutrientsFor(view.food, view.amount).calories)} קל'`}
+      <button type="button" onClick={commitPick} disabled={view.amount <= 0 || addSingle.isPending}
+        className={`flex h-[52px] w-full items-center justify-center rounded-2xl border border-accent bg-transparent font-body text-base font-semibold text-accent hover:bg-accent-soft active:bg-accent-soft transition-transform duration-150 active:scale-[0.98] disabled:opacity-50 ${focusRing}`}>
+        {view.editKey ? 'עדכן כמות' : singleMode ? (addSingle.isPending ? 'מוסיף…' : `הוסף ליומן · ${fmt(nutrientsFor(view.food, view.amount).calories)} קל'`) : `הוסף לארוחה · ${fmt(nutrientsFor(view.food, view.amount).calories)} קל'`}
       </button>
     )
   } else if (view.kind === 'new') {
     footer = (
       <button type="submit" form="new-food-form" disabled={createFood.isPending}
-        className={`flex h-[52px] w-full items-center justify-center rounded-2xl bg-accent font-body text-base font-semibold text-bg disabled:opacity-60 ${focusRing}`}>
+        className={`flex h-[52px] w-full items-center justify-center rounded-2xl border border-accent bg-transparent font-body text-base font-semibold text-accent hover:bg-accent-soft active:bg-accent-soft disabled:opacity-60 ${focusRing}`}>
         {createFood.isPending ? 'שומר…' : 'שמור והמשך לכמות'}
       </button>
     )
@@ -140,10 +149,12 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
     footer = (
       <button type="button" disabled={!mealTitle.trim() || saveMeal.isPending}
         onClick={() => saveMeal.mutate({ name: mealTitle, items: cart }, { onSuccess: () => setView({ kind: 'browse' }) })}
-        className={`flex h-[52px] w-full items-center justify-center rounded-2xl bg-accent font-body text-base font-semibold text-bg disabled:opacity-50 ${focusRing}`}>
+        className={`flex h-[52px] w-full items-center justify-center rounded-2xl border border-accent bg-transparent font-body text-base font-semibold text-accent hover:bg-accent-soft active:bg-accent-soft disabled:opacity-50 ${focusRing}`}>
         {saveMeal.isPending ? 'שומר…' : 'שמור ארוחה'}
       </button>
     )
+  } else if (singleMode && !cart.length) {
+    footer = undefined // single food: the "add" button lives on the amount screen
   } else {
     const before = dayTotals.calories
     footer = (
@@ -163,7 +174,7 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
         )}
         <button type="button" onClick={submit} disabled={!cart.length || addEntries.isPending}
           className={`flex h-[52px] w-full items-center justify-center rounded-2xl font-body text-base font-semibold transition-[background-color,transform] duration-200 active:scale-[0.98] ${focusRing}
-            ${cart.length ? 'bg-accent text-bg shadow-[0_8px_24px_-10px_rgba(150,200,40,0.7)]' : 'bg-surface2 text-muted'}`}>
+            ${cart.length ? 'border border-accent text-accent hover:bg-accent-soft active:bg-accent-soft' : 'border border-border-col text-muted'}`}>
           {addEntries.isPending ? 'שומר…' : cart.length ? `${appendTo ? 'הוסף לארוחה' : 'רשום ארוחה'} · ${fmt(cartTotals.calories)} קל'` : 'בחר מאכלים'}
         </button>
       </div>
@@ -215,7 +226,7 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
 
       {view.kind === 'browse' && (
         <div className="flex flex-col gap-5">
-          {!appendTo && (
+          {!appendTo && (!singleMode || cart.length > 0) && (
             <div role="radiogroup" aria-label="סוג ארוחה" className="hide-scrollbar -mx-5 flex gap-1.5 overflow-x-auto px-5">
               {MEAL_TYPES.map((t) => (
                 <button key={t} type="button" role="radio" aria-checked={mealName === t} onClick={() => setMealName(t)}
