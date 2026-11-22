@@ -3,7 +3,8 @@ import { useToday } from './useToday'
 import { useGoals } from '../../lib/useGoals'
 import { DailySummary } from './DailySummary'
 import { DayTimeline } from './DayTimeline'
-import { QuickAddDock, suggestedMeal } from './QuickAddDock'
+import { AddOptionsFab } from '../nutrition/AddOptionsFab'
+import { suggestedMeal } from '../nutrition/suggestedMeal'
 import { AddFoodSheet } from '../nutrition/AddFoodSheet'
 import { MealGroupSheet } from '../nutrition/MealGroupSheet'
 import { AccountMismatchBanner } from '../nutrition/ConnectBodyBuddy'
@@ -14,7 +15,9 @@ import type { MealGroup } from '../nutrition/types'
 export function TodayPage() {
   const { meals, groups, totals, loading } = useToday()
   const { goalCalories, goalProtein, isTrainingDay } = useGoals()
+  const [addMode, setAddMode] = useState<'food' | 'meal' | null>(null)
   const [addMealName, setAddMealName] = useState<string | null>(null)
+  const openAdd = (mode: 'food' | 'meal') => { setAddMealName(suggestedMeal()); setAddMode(mode) }
   const [editGoalsOpen, setEditGoalsOpen] = useState(false)
   const [openGroup, setOpenGroup] = useState<MealGroup | null>(null)
   const [appendTo, setAppendTo] = useState<MealGroup | null>(null)
@@ -22,8 +25,8 @@ export function TodayPage() {
 
   return (
     <>
-      {/* pb: dock (~68px) above the TabBar padding <main> already reserves */}
-      <div className="flex flex-col gap-7 px-4 pb-24 pt-4">
+      {/* pb: room for the + button above the TabBar */}
+      <div className="flex flex-col gap-7 px-4 pb-32 pt-4">
         <AccountMismatchBanner />
         {loading ? (
           <TodaySkeleton />
@@ -52,7 +55,7 @@ export function TodayPage() {
               {meals.length === 0 ? (
                 <div className="flex flex-col gap-1 rounded-2xl border border-dashed border-border-col px-5 py-8 text-center">
                   <p className="font-body text-[15px] text-text-col">עוד לא רשמת ארוחות היום</p>
-                  <p className="font-body text-sm text-muted">בחר סוג ארוחה בסרגל למטה כדי להתחיל</p>
+                  <p className="font-body text-sm text-muted">לחץ על + כדי להוסיף מאכל או ארוחה</p>
                 </div>
               ) : (
                 <DayTimeline meals={meals} onSelect={selectMeal} />
@@ -62,11 +65,12 @@ export function TodayPage() {
         )}
       </div>
 
-      <QuickAddDock onAdd={setAddMealName} />
+      <AddOptionsFab onAddFood={() => openAdd('food')} onAddMeal={() => openAdd('meal')} />
 
       <AddFoodSheet
         isOpen={addMealName != null || appendTo != null}
-        onClose={() => { setAddMealName(null); setAppendTo(null) }}
+        onClose={() => { setAddMealName(null); setAddMode(null); setAppendTo(null) }}
+        mode={addMode ?? 'food'}
         presetMealName={addMealName ?? suggestedMeal()}
         appendTo={appendTo && appendTo.groupId ? { groupId: appendTo.groupId, groupName: appendTo.name, date: appendTo.date, calories: appendTo.calories, protein: appendTo.protein } : undefined}
         dayTotals={{ calories: totals.calories, protein: totals.protein }}
@@ -74,7 +78,6 @@ export function TodayPage() {
       <MealGroupSheet
         group={openGroup && (groups.find((g) => g.key === openGroup.key) ?? null)}
         onClose={() => setOpenGroup(null)}
-        onAddMore={(g) => { setOpenGroup(null); setAppendTo(g) }}
       />
       <EditGoalsModal isOpen={editGoalsOpen} onClose={() => setEditGoalsOpen(false)} />
     </>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, BookmarkPlus, Clock, Pencil, Plus, Search, Star, Trash2, X } from 'lucide-react'
+import { ArrowRight, Bookmark, BookmarkPlus, Clock, Info, Plus, PlusCircle, Search, Star, X } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
 import { MealIcon } from '../../shared/icons/MealIcon'
 import { useGoals } from '../../lib/useGoals'
@@ -7,6 +7,8 @@ import { todayLocal } from '../../lib/date'
 import { DayFillBar } from '../today/nutritionVisuals'
 import { AmountPicker } from './AmountPicker'
 import { NewFoodForm } from './NewFoodForm'
+import { CartRows } from './CartRows'
+import { CategoryGroups, FoodCard, RecentStrip, ResultRows } from './BrowseFoods'
 import { amountLabel, defaultAmountFor, nutrientsFor, sumMacros } from './foodMath'
 import {
   useAddMealEntries, useCatalog, useCreateFood, useCreateSavedMeal, useMyFoods, useRecentFoods, useSavedMeals, useSaveCatalogFood,
@@ -20,15 +22,8 @@ const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:o
 const fmt = (n: number) => Math.round(n).toLocaleString('he-IL')
 const nowHHMM = () => new Date().toTimeString().slice(0, 5)
 
-type Tab = 'catalog' | 'recent' | 'mine' | 'meals'
-
-/** Catalog categories (foods.nutrition_category), in the app's order and wording */
-const CATEGORIES: { id: string; label: string }[] = [
-  { id: 'meat', label: 'עוף ובשר' }, { id: 'eggs', label: 'ביצים' }, { id: 'fish', label: 'דגים' }, { id: 'dairy', label: 'מוצרי חלב' },
-  { id: 'carbs', label: 'פחמימה' }, { id: 'vegetables', label: 'ירקות' }, { id: 'fruits', label: 'פירות' }, { id: 'fats', label: 'שומן' },
-  { id: 'beverages', label: 'שתייה' }, { id: 'sweets', label: 'מתוק' }, { id: 'snacks', label: 'חטיפים' }, { id: 'proteins', label: 'תוספי חלבון' },
-  { id: 'sauces', label: 'רטבים' },
-]
+/** Browse panel: the app's search screen (recents + catalog by category) or "my foods & meals" */
+type Panel = 'search' | 'mine'
 type View = { kind: 'browse' } | { kind: 'pick'; food: Food; amount: number; editKey?: string } | { kind: 'new' } | { kind: 'save-meal' }
 
 interface AddFoodSheetProps {
@@ -40,15 +35,17 @@ interface AddFoodSheetProps {
   appendTo?: { groupId: string; groupName: string; date: string; calories: number; protein: number }
   /** Today's totals so far (for the "what's left" bar) */
   dayTotals: { calories: number; protein: number }
+  /** Which + option opened the sheet: 'food' (search a food) or 'meal' (saved meals first), like the app */
+  mode?: 'food' | 'meal'
 }
 
 /** Log food the way the BodyBuddy app does: catalog, my foods, saved meals, recents — then amounts. */
-export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTotals }: AddFoodSheetProps) {
+export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTotals, mode = 'food' }: AddFoodSheetProps) {
   const [mealName, setMealName] = useState<string>(presetMealName ?? MEAL_TYPES[0])
   const [time, setTime] = useState(nowHHMM)
   const [cart, setCart] = useState<CartItem[]>([])
-  const [tab, setTab] = useState<Tab>('catalog')
-  const [category, setCategory] = useState<string>('all')
+  const [panel, setPanel] = useState<Panel>('search')
+  const [mineTab, setMineTab] = useState<'foods' | 'meals'>('foods')
   const [query, setQuery] = useState('')
   const [view, setView] = useState<View>({ kind: 'browse' })
   const [mealTitle, setMealTitle] = useState('')
@@ -63,7 +60,9 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
     setCart([])
     setQuery('')
     setView({ kind: 'browse' })
-  }, [isOpen, presetMealName, appendGroupId, appendGroupName])
+    setPanel(mode === 'meal' ? 'mine' : 'search')
+    setMineTab(mode === 'meal' ? 'meals' : 'foods')
+  }, [isOpen, presetMealName, appendGroupId, appendGroupName, mode])
 
   const catalog = useCatalog(isOpen)
   const recent = useRecentFoods(isOpen)
@@ -86,10 +85,6 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
     const catHits = (catalog.data ?? []).filter((f) => hit(f) && !mineCatalogIds.has(f.id)).sort((a, b) => starts(a) - starts(b))
     return [...mineHits, ...catHits].slice(0, 40)
   }, [q, mine.data, catalog.data])
-  const catalogShown = useMemo(
-    () => (catalog.data ?? []).filter((f) => category === 'all' || f.category === category),
-    [catalog.data, category],
-  )
 
   const myIds = useMemo(() => new Set((mine.data ?? []).map((f) => `${f.source}:${f.id}`)), [mine.data])
   const cartTotals = useMemo(() => sumMacros(cart.map((c) => nutrientsFor(c.food, c.amount))), [cart])
@@ -175,7 +170,7 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
     )
   }
 
-  const title = view.kind === 'pick' ? view.food.name : view.kind === 'new' ? 'מאכל חדש' : view.kind === 'save-meal' ? 'שמירה כארוחה קבועה' : appendTo ? `הוספה ל${appendTo.groupName}` : 'ארוחה חדשה'
+  const title = view.kind === 'pick' ? view.food.name : view.kind === 'new' ? 'מאכל חדש' : view.kind === 'save-meal' ? 'שמירה כארוחה קבועה' : appendTo ? `הוספה ל${appendTo.groupName}` : mode === 'meal' ? 'הוספת ארוחה' : 'הוספת מאכל'
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title} headerAction={view.kind === 'browse' ? timeChip : undefined} footer={footer}>
@@ -235,84 +230,99 @@ export function AddFoodSheet({ isOpen, onClose, presetMealName, appendTo, dayTot
 
           {cart.length > 0 && (
             <section aria-label="בארוחה" className="flex flex-col gap-2">
-              <div className="flex items-baseline justify-between">
-                <h3 className="font-body text-sm font-medium text-text-col">בארוחה · {cart.length}</h3>
-                <button type="button" onClick={() => { setMealTitle(''); setView({ kind: 'save-meal' }) }}
-                  className={`flex h-9 items-center gap-1 rounded-lg px-1 font-body text-sm text-muted hover:text-text-col ${focusRing}`}>
-                  <BookmarkPlus size={15} strokeWidth={2} aria-hidden />
-                  שמור כארוחה קבועה
-                </button>
+              <div className="flex items-center justify-between">
+                <h3 className="font-body text-base font-semibold text-heading">מרכיבי הארוחה</h3>
+                <span className="rounded-full bg-accent-soft px-2.5 py-0.5 font-body text-xs font-semibold text-accent">{cart.length} מרכיבים</span>
               </div>
-              <ul className="flex flex-col divide-y divide-white/[0.06] rounded-2xl border border-border-col bg-bg">
-                {cart.map((c) => {
-                  const m = nutrientsFor(c.food, c.amount)
-                  return (
-                    <li key={c.key} className="flex items-center gap-2 py-2 pe-1.5 ps-3.5">
-                      <button type="button" onClick={() => setView({ kind: 'pick', food: c.food, amount: c.amount, editKey: c.key })}
-                        className={`flex min-w-0 flex-1 flex-col items-start gap-0.5 rounded-lg text-right ${focusRing}`} aria-label={`שינוי כמות ${c.food.name}`}>
-                        <span className="w-full truncate font-body text-[15px] text-text-col">{c.food.name}</span>
-                        <span className="font-body text-xs tabular-nums text-muted">
-                          {amountLabel(c.food, c.amount)} · <span className="text-heading">{fmt(m.calories)}</span> קל' · <span className="text-macro-protein">{fmt(m.protein)}g</span>
-                        </span>
-                      </button>
-                      <Pencil size={14} strokeWidth={2} className="flex-shrink-0 text-subtle" aria-hidden />
-                      <button type="button" onClick={() => setCart((cc) => cc.filter((x) => x.key !== c.key))} aria-label={`הסר ${c.food.name}`}
-                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl text-muted hover:text-danger ${focusRing}`}>
-                        <Trash2 size={16} strokeWidth={2} />
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
+              <CartRows
+                items={cart}
+                onChange={(key, amount) => setCart((cc) => cc.map((x) => (x.key === key ? { ...x, amount } : x)))}
+                onRemove={(key) => setCart((cc) => cc.filter((x) => x.key !== key))}
+              />
+              <button type="button" onClick={() => { setMealTitle(''); setView({ kind: 'save-meal' }) }}
+                className={`flex h-9 items-center gap-1 self-start rounded-lg px-1 font-body text-sm text-muted hover:text-text-col ${focusRing}`}>
+                <BookmarkPlus size={15} strokeWidth={2} aria-hidden />
+                שמור כארוחה קבועה
+              </button>
             </section>
           )}
 
-          <div className="flex h-14 items-center gap-2.5 rounded-2xl border border-border-col bg-bg px-4 focus-within:border-accent-line">
-            <Search size={18} strokeWidth={2} className="flex-shrink-0 text-muted" aria-hidden />
-            <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="חפש מאכל במאגר או במאכלים שלי" aria-label="חיפוש מאכל"
-              className="h-full min-w-0 flex-1 bg-transparent font-body text-base text-heading outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:hidden" />
-            {query && (
-              <button type="button" onClick={() => setQuery('')} aria-label="נקה חיפוש" className={`-me-2 flex h-10 w-10 items-center justify-center rounded-xl text-muted ${focusRing}`}>
-                <X size={16} strokeWidth={2} />
-              </button>
-            )}
-          </div>
+          {panel === 'search' ? (
+            <>
+              <div className="flex flex-col gap-3 rounded-3xl border border-white/[0.05] bg-white/[0.03] p-4">
+                <div className={`flex h-14 items-center gap-2.5 rounded-2xl border bg-bg px-4 ${q ? 'border-accent-line' : 'border-border-col'}`}>
+                  <Search size={18} strokeWidth={2} className="flex-shrink-0 text-muted" aria-hidden />
+                  <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="חפש מאכל..." aria-label="חיפוש מאכל"
+                    className="h-full min-w-0 flex-1 bg-transparent font-body text-base text-heading outline-none placeholder:text-muted [&::-webkit-search-cancel-button]:hidden" />
+                  {query && (
+                    <button type="button" onClick={() => setQuery('')} aria-label="נקה חיפוש" className={`-me-2 flex h-10 w-10 items-center justify-center rounded-xl text-muted ${focusRing}`}>
+                      <X size={16} strokeWidth={2} />
+                    </button>
+                  )}
+                </div>
+                <p className="text-center font-body text-xs text-muted">הקלד שם מאכל — חיפוש במאגר ובמאכלים שלך</p>
+              </div>
 
-          {q ? (
-            <FoodList
-              foods={results}
-              loading={mine.isLoading || catalog.isLoading}
-              empty="לא נמצא. אפשר ליצור מאכל חדש."
-              onPick={openPick}
-              myIds={myIds}
-            />
+              <button type="button" onClick={() => setPanel('mine')}
+                className={`flex h-11 items-center justify-center gap-2 rounded-full border border-accent-line font-body text-sm font-medium text-accent hover:bg-accent-soft ${focusRing}`}>
+                <Bookmark size={16} strokeWidth={2} aria-hidden />
+                המאכלים והארוחות שלי
+              </button>
+
+              <p className="flex items-center justify-center gap-1.5 px-2 text-center font-body text-xs text-muted">
+                <Info size={14} strokeWidth={2} className="flex-shrink-0" aria-hidden />
+                הערכים הם הערכה כללית. במקרה של ספק, יש להסתמך על התווית שעל האריזה.
+              </p>
+
+              {q ? (
+                <>
+                  {results.length > 0
+                    ? <ResultRows foods={results} onPick={openPick} />
+                    : !(mine.isLoading || catalog.isLoading) && (
+                      <div className="flex flex-col items-center gap-1 rounded-3xl border border-white/[0.05] bg-white/[0.03] p-5">
+                        <p className="font-body text-base text-muted">לא נמצאו תוצאות</p>
+                        <p className="font-body text-xs text-muted">עבור &quot;{query.trim()}&quot;</p>
+                      </div>
+                    )}
+                  <button type="button" onClick={() => setView({ kind: 'new' })}
+                    className={`flex min-h-12 items-center justify-center gap-2 rounded-3xl border border-accent-line bg-accent-soft px-6 py-3 font-body text-base text-accent ${focusRing}`}>
+                    <PlusCircle size={20} strokeWidth={2} aria-hidden />
+                    הוסף &quot;{query.trim()}&quot; כמאכל מותאם אישית
+                  </button>
+                </>
+              ) : (
+                <>
+                  <RecentStrip foods={recent.data} loading={recent.isLoading} onPick={openPick} />
+                  <CategoryGroups foods={catalog.data} loading={catalog.isLoading} onPick={openPick} />
+                </>
+              )}
+            </>
           ) : (
             <>
-              <div role="tablist" aria-label="מקור" className="grid grid-cols-4 gap-1 rounded-xl bg-bg p-1">
-                {([['catalog', 'מאגר'], ['recent', 'אחרונים'], ['mine', 'שלי'], ['meals', 'ארוחות']] as const).map(([k, l]) => (
-                  <button key={k} type="button" role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-                    className={`h-10 rounded-lg font-body text-sm transition-colors duration-150 ${focusRing} ${tab === k ? 'bg-surface2 font-medium text-heading' : 'text-muted hover:text-text-col'}`}>
+              <button type="button" onClick={() => setPanel('search')}
+                className={`-ms-1 flex h-9 items-center gap-1 self-start rounded-lg px-1 font-body text-sm text-muted hover:text-text-col ${focusRing}`}>
+                <ArrowRight size={16} strokeWidth={2} aria-hidden />
+                לחיפוש ולמאגר
+              </button>
+              <div role="tablist" aria-label="המאכלים והארוחות שלי" className="grid grid-cols-2 gap-1 rounded-xl bg-bg p-1">
+                {([['foods', 'מאכלים'], ['meals', 'ארוחות']] as const).map(([k, l]) => (
+                  <button key={k} type="button" role="tab" aria-selected={mineTab === k} onClick={() => setMineTab(k)}
+                    className={`h-10 rounded-lg font-body text-sm transition-colors duration-150 ${focusRing} ${mineTab === k ? 'bg-surface2 font-medium text-heading' : 'text-muted hover:text-text-col'}`}>
                     {l}
+                    {k === 'foods' && mine.data ? <span className="ms-1 tabular-nums text-muted">{mine.data.length}</span> : null}
                   </button>
                 ))}
               </div>
-              {tab === 'catalog' && (
-                <>
-                  <div role="radiogroup" aria-label="קטגוריה" className="hide-scrollbar -mx-5 -mt-2 flex gap-1.5 overflow-x-auto px-5">
-                    {[{ id: 'all', label: 'הכול' }, ...CATEGORIES].map((c) => (
-                      <button key={c.id} type="button" role="radio" aria-checked={category === c.id} onClick={() => setCategory(c.id)}
-                        className={`h-9 flex-shrink-0 rounded-full border px-3 font-body text-sm transition-colors duration-150 ${focusRing}
-                          ${category === c.id ? 'border-accent bg-accent-soft text-accent' : 'border-border-col text-text-col hover:border-subtle'}`}>
-                        {c.label}
-                      </button>
-                    ))}
-                  </div>
-                  <FoodList foods={catalogShown} loading={catalog.isLoading} empty="אין מאכלים בקטגוריה הזו." onPick={openPick} myIds={myIds} />
-                </>
+              {mineTab === 'foods' ? (
+                mine.isLoading ? <p className="py-6 text-center font-body text-sm text-muted" aria-busy="true">טוען…</p>
+                  : mine.data?.length ? (
+                    <ul className="flex flex-col gap-3">
+                      {mine.data.map((f) => <li key={`${f.source}:${f.id}`}><FoodCard food={f} onPick={openPick} /></li>)}
+                    </ul>
+                  ) : <p className="py-6 text-center font-body text-sm text-muted">עדיין לא נוספו מאכלים.</p>
+              ) : (
+                <MealList meals={meals.data} loading={meals.isLoading} onAdd={addSavedMeal} />
               )}
-              {tab === 'recent' && <FoodList foods={recent.data} loading={recent.isLoading} empty="עוד אין מאכלים אחרונים." onPick={openPick} myIds={myIds} />}
-              {tab === 'mine' && <FoodList foods={mine.data} loading={mine.isLoading} empty="אין עדיין מאכלים שמורים." onPick={openPick} myIds={myIds} />}
-              {tab === 'meals' && <MealList meals={meals.data} loading={meals.isLoading} onAdd={addSavedMeal} />}
             </>
           )}
 
@@ -343,35 +353,6 @@ function SourceTag({ source }: { source: Food['source'] }) {
     <span className={`rounded-full px-2 py-0.5 font-body text-xs ${source === 'personal' ? 'bg-accent-soft text-accent' : 'bg-surface2 text-muted'}`}>
       {source === 'personal' ? 'שלי' : 'מאגר'}
     </span>
-  )
-}
-
-function FoodList({ foods, loading, empty, onPick, myIds }: { foods: Food[] | undefined; loading: boolean; empty: string; onPick: (f: Food) => void; myIds: Set<string> }) {
-  if (loading) return <p className="py-6 text-center font-body text-sm text-muted" aria-busy="true">טוען…</p>
-  if (!foods?.length) return <p className="py-6 text-center font-body text-sm text-muted">{empty}</p>
-  return (
-    <ul className="flex flex-col divide-y divide-white/[0.06] overflow-hidden rounded-2xl border border-border-col bg-bg">
-      {foods.map((f) => {
-        const v = f.measurement === 'units' ? f.perUnit : f.per100
-        const saved = f.source === 'catalog' && myIds.has(`catalog:${f.id}`)
-        return (
-          <li key={`${f.source}:${f.id}`}>
-            <button type="button" onClick={() => onPick(f)}
-              className={`flex min-h-14 w-full items-center gap-3 px-3.5 py-2 text-right transition-colors duration-100 hover:bg-surface/60 active:bg-surface ${focusRing}`}>
-              <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="truncate font-body text-[15px] text-text-col">{f.name}</span>
-                <span className="font-body text-xs tabular-nums text-muted">
-                  {v ? `${fmt(v.calories)} קל' ${f.measurement === 'units' ? `ל${f.unitName ?? 'יחידה'}` : 'ל-100'}` : ''}
-                  {v && v.protein > 0 ? ` · ${Math.round(v.protein * 10) / 10}g חלבון` : ''}
-                </span>
-              </span>
-              {saved ? <Star size={14} strokeWidth={2} className="flex-shrink-0 text-accent" aria-label="שמור במאכלים שלי" /> : <SourceTag source={f.source} />}
-              <Plus size={18} strokeWidth={2} className="flex-shrink-0 text-muted" aria-hidden />
-            </button>
-          </li>
-        )
-      })}
-    </ul>
   )
 }
 
