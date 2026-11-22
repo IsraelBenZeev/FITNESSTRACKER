@@ -4,7 +4,7 @@ import { ArrowRight, Play, Dumbbell, Calendar, Pencil, Download, Copy, Check } f
 import { usePlanDetail } from './usePlanDetail'
 import { initSession, hasActiveSession, clearSession, getSession, formatSessionAge } from './workoutSession'
 import { CreatePlanModal } from './CreatePlanModal'
-import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { ConfirmDialog } from '../../ui/ConfirmDialog'
 import { downloadPlanPdf, copyPlanAsJson } from './exportWorkoutPlan'
 
 const DAY_NAMES = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳']
@@ -322,8 +322,9 @@ export function PlanDetailPage() {
       />
 
       <ConfirmDialog
-        isOpen={confirmNewOpen}
-        message={`יש אימון פעיל: "${getSession()?.planName ?? ''}" (${formatSessionAge()}). האם להתחיל אימון חדש ולבטל את הקיים?`}
+        visible={confirmNewOpen}
+        title="יש אימון פעיל"
+        message={`אימון: "${getSession()?.planName ?? ''}" (${formatSessionAge()}). האם להתחיל אימון חדש ולבטל את הקיים?`}
         confirmLabel="התחל חדש"
         cancelLabel="המשך קיים"
         onConfirm={handleConfirmNew}

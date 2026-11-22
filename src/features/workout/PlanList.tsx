@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Plus, Trash2, Dumbbell } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../../shared/components/Card'
-import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { ConfirmDialog } from '../../ui/ConfirmDialog'
 import { CreatePlanModal } from './CreatePlanModal'
 import { useWorkoutPlans } from './useWorkoutPlans'
 import { useDeletePlan } from './useDeletePlan'
@@ -111,8 +111,9 @@ function PlanRow({ plan }: { plan: WorkoutPlan }) {
     </Card>
     </div>
     <ConfirmDialog
-      isOpen={confirmOpen}
-      message="האם למחוק את התכנית?"
+      visible={confirmOpen}
+      title="למחוק את התכנית?"
+      message="התכנית והתרגילים שבה יימחקו."
       onConfirm={() => { setConfirmOpen(false); deletePlan(plan.id) }}
       onCancel={() => setConfirmOpen(false)}
     />

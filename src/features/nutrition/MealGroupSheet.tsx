@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Clock, Trash2 } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
-import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { ConfirmDialog } from '../../ui/ConfirmDialog'
 import { entryAmountLabel } from './foodMath'
 import { useDeleteEntry, useDeleteGroup } from './hooks'
 import type { MealGroup, NutritionEntry } from './types'
@@ -100,8 +100,9 @@ export function MealGroupSheet({ group, onClose }: MealGroupSheetProps) {
       </div>
 
       <ConfirmDialog
-        isOpen={pending != null}
-        message={pending?.kind === 'entry' ? `להסיר את "${pending.entry.food_name}" מהיומן?` : `למחוק את "${group.name}" (${group.entries.length} פריטים)?`}
+        visible={pending != null}
+        title={pending?.kind === 'entry' ? `להסיר את "${pending.entry.food_name}"?` : `למחוק את "${group.name}"?`}
+        message={pending?.kind === 'entry' ? 'המאכל יוסר מהארוחה ביומן.' : `${group.entries.length} מאכלים יימחקו מהיומן. אי אפשר לבטל את זה.`}
         confirmLabel={pending?.kind === 'entry' ? 'הסר' : 'מחק'}
         onCancel={() => setPending(null)}
         onConfirm={confirm}

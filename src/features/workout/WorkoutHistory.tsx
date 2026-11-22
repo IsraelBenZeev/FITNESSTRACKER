@@ -4,7 +4,7 @@ import { Card } from '../../shared/components/Card'
 import { useWorkoutHistory, useDeleteWorkoutLog, fetchWorkoutLogsForExport } from './useWorkoutLog'
 import { useToast } from '../../shared/context/ToastContext'
 import { copyWorkoutLogsAsJsonFromPromise, downloadWorkoutLogsPdf } from './exportWorkoutLogs'
-import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { ConfirmDialog } from '../../ui/ConfirmDialog'
 import { ExportRangeModal } from '../history/ExportRangeModal'
 import type { ExportRange } from '../history/ExportRangeModal'
 import type { WorkoutLog } from '../../types/workout'
@@ -140,8 +140,9 @@ function LogCard({ log, onDelete }: { log: WorkoutLog; onDelete: (id: string) =>
       )}
 
       <ConfirmDialog
-        isOpen={confirmOpen}
-        message="למחוק את האימון?"
+        visible={confirmOpen}
+        title="למחוק את האימון?"
+        message="האימון וכל הסטים שלו יימחקו מההיסטוריה."
         onConfirm={() => { onDelete(log.id); setConfirmOpen(false) }}
         onCancel={() => setConfirmOpen(false)}
       />

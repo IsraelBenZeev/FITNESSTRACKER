@@ -4,7 +4,7 @@ import { useForm, useFieldArray, useWatch, Control, Controller } from 'react-hoo
 import { ChevronRight, ChevronLeft, Plus, Trash2, Check, X, Minimize2, Dumbbell } from 'lucide-react'
 import { getSession, saveSession, clearSession, WorkoutSessionData } from './workoutSession'
 import { useLogWorkout, usePreviousExerciseSets } from './useWorkoutLog'
-import { ConfirmDialog } from '../../shared/components/ConfirmDialog'
+import { ConfirmDialog } from '../../ui/ConfirmDialog'
 import type { WorkoutSetLog } from '../../types/workout'
 import { todayLocal } from '../../lib/date'
 
@@ -887,8 +887,10 @@ export function WorkoutSessionPage() {
       )}
 
       <ConfirmDialog
-        isOpen={showLeave}
-        message="האם לעזוב את האימון? ההתקדמות שלך שמורה — תוכל לחזור בכל עת."
+        visible={showLeave}
+        variant="info"
+        title="לעזוב את האימון?"
+        message="ההתקדמות שלך שמורה — תוכל לחזור בכל עת."
         confirmLabel="עזוב"
         cancelLabel="המשך אימון"
         onConfirm={() => { setShowLeave(false); navigate('/workout', { replace: true }) }}
