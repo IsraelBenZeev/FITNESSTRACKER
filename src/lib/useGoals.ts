@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { GOAL_CALORIES, GOAL_PROTEIN } from './constants'
 import { supabase } from './supabase'
+import { useGoalHistory } from '../features/history/useGoalHistory'
 
 export type GoalsConfig = {
   trainingCalories: number
@@ -94,7 +95,13 @@ export function useGoals() {
     })
   }, [loaded])
 
-  const { goalCalories, goalProtein, isTrainingDay } = goalsForDate(config, new Date())
+  // The goal of record lives in BodyBuddy (nutrition_goals, same as the app);
+  // the old FitnessTracker config is only a fallback until a BodyBuddy goal exists.
+  const { current } = useGoalHistory()
+  const legacy = goalsForDate(config, new Date())
+  const goalCalories = current?.calories ?? legacy.goalCalories
+  const goalProtein = current?.protein ?? legacy.goalProtein
+  const isTrainingDay = legacy.isTrainingDay
 
   return {
     goalCalories,

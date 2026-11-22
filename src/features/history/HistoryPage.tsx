@@ -10,7 +10,7 @@ import { DayDetailSheet } from './DayDetailSheet'
 import { ExportRangeModal } from './ExportRangeModal'
 import type { ExportRange } from './ExportRangeModal'
 import { copyNutritionAsJsonFromPromise, downloadNutritionPdf } from './exportNutrition'
-import { DAY_COLOR_LABEL, HEBREW_MONTHS, daysLabel, getDayColor } from './calendarUtils'
+import { DAY_COLOR_LABEL, HEBREW_MONTHS, daysLabel, getDayColor, shortDate } from './calendarUtils'
 import type { DayColor } from './calendarUtils'
 import type { DayTotals } from '../../types/nutrition'
 
@@ -34,7 +34,7 @@ export function HistoryPage() {
   const [busy, setBusy] = useState(false)
   const { showSuccess, showError } = useToast()
 
-  const { dayMap, weekDayMap, loading } = useCalendarMonth(year, month)
+  const { dayMap, weekDayMap, monthGoals, loading } = useCalendarMonth(year, month)
   const { goalsConfig } = useGoals()
 
   const stats = useMemo(() => {
@@ -132,24 +132,40 @@ export function HistoryPage() {
             loading={loading}
           />
 
-          {/* Monthly average, under the month */}
-          <div className="flex items-center justify-between gap-3 rounded-2xl bg-bg px-4 py-3">
-            <span className="font-body text-sm font-medium text-text-col">ממוצע חודשי</span>
-            {loading ? (
-              <span aria-hidden className="h-6 w-36 animate-pulse rounded bg-surface2" />
-            ) : logged === 0 ? (
-              <span className="font-body text-sm text-muted">אין תיעוד</span>
-            ) : (
-              <span className="flex items-baseline gap-4" aria-label={`ממוצע חודשי: ${fmt(stats.avgCalories)} קלוריות ו-${fmt(stats.avgProtein)} גרם חלבון ביום`}>
-                <span className="flex items-baseline gap-1">
-                  <span className="font-display text-2xl font-semibold leading-none tabular-nums text-heading">{fmt(stats.avgCalories)}</span>
-                  <span className="font-body text-xs text-muted">קל'</span>
+          {/* Monthly average next to the month's goal(s) */}
+          <div className="flex flex-col rounded-2xl bg-bg px-4">
+            <div className="flex min-h-[52px] items-center justify-between gap-3 py-3">
+              <span className="font-body text-sm font-medium text-text-col">ממוצע חודשי</span>
+              {loading ? (
+                <span aria-hidden className="h-6 w-36 animate-pulse rounded bg-surface2" />
+              ) : logged === 0 ? (
+                <span className="font-body text-sm text-muted">אין תיעוד</span>
+              ) : (
+                <CalProtein calories={stats.avgCalories} protein={stats.avgProtein} label="ממוצע חודשי" strong />
+              )}
+            </div>
+
+            {!loading && monthGoals.length > 0 && (
+              <div className="flex flex-col gap-2 border-t border-border-col py-3">
+                <span className="flex items-center gap-2 font-body text-sm font-medium text-text-col">
+                  {monthGoals.length === 1 ? 'היעד החודש' : 'היעדים החודש'}
+                  {monthGoals.length > 1 && (
+                    <span className="rounded-full bg-macro-fat/15 px-2 py-0.5 font-body text-xs font-medium text-macro-fat">
+                      התחלף ב-{shortDate(monthGoals[1]!.from)}
+                    </span>
+                  )}
                 </span>
-                <span className="flex items-baseline gap-1">
-                  <span className="font-display text-2xl font-semibold leading-none tabular-nums text-macro-protein">{fmt(stats.avgProtein)}g</span>
-                  <span className="font-body text-xs text-muted">חלבון</span>
-                </span>
-              </span>
+                <ul className="flex flex-col gap-1.5">
+                  {monthGoals.map((g) => (
+                    <li key={g.from} className="flex items-center justify-between gap-3">
+                      <span className="font-body text-sm tabular-nums text-muted">
+                        {monthGoals.length === 1 ? 'כל החודש' : `${shortDate(g.from)}–${shortDate(g.to)}`}
+                      </span>
+                      <CalProtein calories={g.calories} protein={g.protein} label={`יעד ${shortDate(g.from)}–${shortDate(g.to)}`} />
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
@@ -198,6 +214,22 @@ export function HistoryPage() {
         onSelect={handleExportSelect}
       />
     </>
+  )
+}
+
+function CalProtein({ calories, protein, label, strong }: { calories: number; protein: number; label: string; strong?: boolean }) {
+  const size = strong ? 'text-2xl' : 'text-xl'
+  return (
+    <span className="flex items-baseline gap-4" aria-label={`${label}: ${fmt(calories)} קלוריות ו-${fmt(protein)} גרם חלבון ביום`}>
+      <span className="flex items-baseline gap-1">
+        <span className={`font-display ${size} font-semibold leading-none tabular-nums ${strong ? 'text-heading' : 'text-text-col'}`}>{fmt(calories)}</span>
+        <span className="font-body text-xs text-muted">קל'</span>
+      </span>
+      <span className="flex items-baseline gap-1">
+        <span className={`font-display ${size} font-semibold leading-none tabular-nums text-macro-protein`}>{fmt(protein)}g</span>
+        <span className="font-body text-xs text-muted">חלבון</span>
+      </span>
+    </span>
   )
 }
 

@@ -109,12 +109,12 @@ function crossMonthNote(dates: string[], year: number, month: number, map: Map<s
 
 function WeekAverage({ avg, weighted }: { avg: { calories: number; protein: number; days: number } | null; weighted?: boolean }) {
   if (!avg) {
-    return <div aria-label="אין תיעוד בשבוע הזה" className="flex items-center justify-center rounded-xl bg-bg/50 font-body text-sm text-subtle">–</div>
+    return <div aria-label="אין תיעוד בשבוע הזה" className="flex h-9 items-center justify-center rounded-xl bg-bg/50 font-body text-sm text-subtle">–</div>
   }
   return (
     <div
       aria-label={`ממוצע שבועי: ${fmt(avg.calories)} קלוריות ו-${fmt(avg.protein)} גרם חלבון ביום, לפי ${avg.days} ימים${weighted ? ", כולל ימים מחודש סמוך" : ""}`}
-      className="flex flex-col items-center justify-center gap-0.5 rounded-xl bg-bg px-0.5"
+      className="flex h-9 flex-col items-center justify-center gap-0.5 rounded-xl bg-bg px-0.5"
     >
       <span className="font-display text-base font-semibold leading-none tabular-nums text-text-col">{fmt(avg.calories)}</span>
       <span className="font-display text-sm leading-none tabular-nums text-macro-protein">{fmt(avg.protein)}g</span>

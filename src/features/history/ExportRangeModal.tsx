@@ -92,7 +92,7 @@ export function ExportRangeModal({ isOpen, onClose, title, onSelect, confirmLabe
       type="button"
       onClick={confirmCustom}
       disabled={!customValid}
-      className={`flex h-12 w-full items-center justify-center rounded-2xl bg-accent font-body text-base font-semibold text-bg transition-[background-color,opacity] duration-150 hover:bg-accent/90 disabled:opacity-40 ${focusRing}`}
+      className={`flex h-12 w-full items-center justify-center rounded-2xl border border-accent bg-transparent font-body text-base font-semibold text-accent transition-[background-color,opacity] duration-150 hover:bg-accent-soft active:bg-accent-soft disabled:opacity-40 ${focusRing}`}
     >
       {confirmLabel}
     </button>
@@ -127,7 +127,7 @@ export function ExportRangeModal({ isOpen, onClose, title, onSelect, confirmLabe
           {custom === 'day' ? (
             <DateField label="תאריך" value={day} max={today} onChange={(v) => v && setDay(v)} />
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-3">
               <DateField label="מתאריך" value={from} max={today} onChange={changeFrom} />
               <DateField label="עד תאריך" value={to} max={today} onChange={changeTo} />
             </div>
@@ -173,7 +173,7 @@ function CustomTile({ icon, title, desc, onClick }: { icon: React.ReactNode; tit
     <button
       type="button"
       onClick={onClick}
-      className={`flex flex-col items-start gap-3 rounded-2xl border border-accent-line/50 bg-accent-soft p-3.5 text-right transition-colors duration-200 hover:border-accent ${focusRing} [-webkit-tap-highlight-color:transparent]`}
+      className={`flex flex-col items-start gap-3 rounded-2xl border border-accent-line bg-transparent p-3.5 text-right hover:bg-accent-soft transition-colors duration-200 hover:border-accent ${focusRing} [-webkit-tap-highlight-color:transparent]`}
     >
       <span className="text-accent" aria-hidden>{icon}</span>
       <span className="flex flex-col gap-0.5">
@@ -184,17 +184,31 @@ function CustomTile({ icon, title, desc, onClick }: { icon: React.ReactNode; tit
   )
 }
 
+/**
+ * A date field that always fits: the date is shown as Hebrew text, and the native picker
+ * (transparent, covering the whole field) opens on tap — no browser-drawn input to overflow.
+ */
 function DateField({ label, value, max, onChange }: { label: string; value: string; max: string; onChange: (v: string) => void }) {
+  const shown = value
+    ? new Date(`${value}T00:00:00`).toLocaleDateString('he-IL', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
+    : 'בחר תאריך'
   return (
     <label className="flex min-w-0 flex-col gap-1.5">
       <span className="px-1 font-body text-sm text-muted">{label}</span>
-      <input
-        type="date"
-        value={value}
-        max={max}
-        onChange={(e) => onChange(e.target.value)}
-        className="h-12 w-full min-w-0 rounded-xl border border-border-col bg-bg px-3 font-body text-base tabular-nums text-text-col transition-colors duration-150 [color-scheme:dark] hover:border-accent-line focus:border-accent focus:outline-none"
-      />
+      <span className="relative flex h-14 w-full min-w-0 items-center gap-3 rounded-2xl border border-border-col bg-bg px-4 transition-colors duration-150 hover:border-accent-line focus-within:border-accent">
+        <CalendarDays size={20} strokeWidth={1.75} className="flex-shrink-0 text-accent" aria-hidden />
+        <span className="min-w-0 flex-1 truncate font-body text-base tabular-nums text-heading">{shown}</span>
+        <ChevronLeft size={18} strokeWidth={2} className="flex-shrink-0 text-subtle" aria-hidden />
+        <input
+          type="date"
+          value={value}
+          max={max}
+          onChange={(e) => onChange(e.target.value)}
+          onClick={(e) => { try { e.currentTarget.showPicker() } catch { /* older browsers open it themselves */ } }}
+          aria-label={`${label}: ${shown}`}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0 [color-scheme:dark]"
+        />
+      </span>
     </label>
   )
 }
