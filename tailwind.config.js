@@ -20,9 +20,9 @@ export default {
         muted: '#8C9AAB',          // "text-2": secondary text, 5.5:1 on bg
         subtle: '#516070',         // "muted": decorative / disabled only (fails 4.5:1 for text)
         danger: '#F87171',         // "warning"
-        // Data series: macros (≥4.5:1 on surface)
-        'macro-protein': '#96C828',
-        'macro-carbs': '#6FA8DC',
+        // Data series: macros (≥4.5:1 on surface) — protein blue and carbs orange, like the BodyBuddy app
+        'macro-protein': '#60A5FA',
+        'macro-carbs': '#FB923C',
         'macro-fat': '#E0B354',
       },
       fontFamily: {

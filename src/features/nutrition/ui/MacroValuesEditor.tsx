@@ -5,7 +5,7 @@ import { QuantityStepper } from './QuantityStepper'
 import { focusRing } from './styles'
 
 const ROWS: { key: keyof Macros; label: string; unit: string; dot: string }[] = [
-  { key: 'calories', label: 'קלוריות', unit: 'קק״ל', dot: 'bg-heading' },
+  { key: 'calories', label: 'קלוריות', unit: 'קק״ל', dot: 'bg-accent' },
   { key: 'protein', label: 'חלבון', unit: 'g', dot: 'bg-macro-protein' },
   { key: 'carbs', label: 'פחמימות', unit: 'g', dot: 'bg-macro-carbs' },
   { key: 'fat', label: 'שומן', unit: 'g', dot: 'bg-macro-fat' },

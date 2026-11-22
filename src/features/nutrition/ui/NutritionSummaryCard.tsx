@@ -14,7 +14,7 @@ interface NutritionSummaryCardProps {
 }
 
 /**
- * The app's summary card: a double ring (outer = share of the calorie goal, inner = share of the protein goal)
+ * The app's summary card: a double ring (outer (lime) = share of the calorie goal, inner (blue) = share of the protein goal)
  * around the calories, the macros beside it, and "what will be left for today" under it.
  */
 export function NutritionSummaryCard({ totals, goals, consumed, baseTotals }: NutritionSummaryCardProps) {
@@ -61,7 +61,7 @@ export function NutritionSummaryCard({ totals, goals, consumed, baseTotals }: Nu
         <div className="flex flex-col gap-2 border-t border-white/[0.08] pt-3" aria-live="polite">
           <span className="font-body text-xs font-semibold uppercase tracking-widest text-muted">מה יישאר לך להיום</span>
           <p className="font-body text-sm text-muted">
-            <span className={`text-base font-semibold tabular-nums ${caloriesLeft < 0 ? 'text-danger' : 'text-heading'}`}>{fmtAbs(caloriesLeft)}</span>
+            <span className={`text-base font-semibold tabular-nums ${caloriesLeft < 0 ? 'text-danger' : 'text-accent'}`}>{fmtAbs(caloriesLeft)}</span>
             {caloriesLeft < 0 ? ' קלוריות מעל היעד להיום' : ' קלוריות יישארו לך להיום'}
           </p>
           <p className="font-body text-sm text-muted">
@@ -84,7 +84,7 @@ function DoubleRing({ outer, inner }: { outer: number; inner: number }) {
   const innerR = outerR - STROKE - 2
   return (
     <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`} className="absolute inset-0 -rotate-90" aria-hidden>
-      <Arc c={c} r={outerR} progress={outer} color="stroke-heading" delay="delay-0" />
+      <Arc c={c} r={outerR} progress={outer} color="stroke-accent" delay="delay-0" />
       <Arc c={c} r={innerR} progress={inner} color="stroke-macro-protein" delay="delay-150" />
     </svg>
   )
