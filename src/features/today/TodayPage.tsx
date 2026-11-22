@@ -4,8 +4,9 @@ import { useGoals } from '../../lib/useGoals'
 import { DailySummary } from './DailySummary'
 import { DayTimeline } from './DayTimeline'
 import { AddOptionsFab } from '../nutrition/AddOptionsFab'
-import { suggestedMeal } from '../nutrition/suggestedMeal'
-import { AddFoodSheet } from '../nutrition/AddFoodSheet'
+import { AddFoodFlow } from '../nutrition/AddFoodFlow'
+import { MyListSheet, type MyListTab } from '../nutrition/MyListSheet'
+import { MealBuilderSheet } from '../nutrition/MealBuilderSheet'
 import { MealGroupSheet } from '../nutrition/MealGroupSheet'
 import { AccountMismatchBanner } from '../nutrition/ConnectBodyBuddy'
 import { useNavigate } from 'react-router-dom'
@@ -15,12 +16,13 @@ import type { MealGroup } from '../nutrition/types'
 export function TodayPage() {
   const { meals, groups, totals, loading } = useToday()
   const { goalCalories, goalProtein, isTrainingDay } = useGoals()
-  const [addMode, setAddMode] = useState<'food' | 'meal' | null>(null)
-  const [addMealName, setAddMealName] = useState<string | null>(null)
-  const openAdd = (mode: 'food' | 'meal') => { setAddMealName(suggestedMeal()); setAddMode(mode) }
   const navigate = useNavigate()
   const [openGroup, setOpenGroup] = useState<MealGroup | null>(null)
-  const [appendTo, setAppendTo] = useState<MealGroup | null>(null)
+  // The app's add flow: "מאכל" → food search; "ארוחה" → my meals; both reach my list and the meal builder
+  const [foodFlowOpen, setFoodFlowOpen] = useState(false)
+  const [myList, setMyList] = useState<{ tab: MyListTab; overSearch: boolean } | null>(null)
+  const [builderOpen, setBuilderOpen] = useState(false)
+  const closeAll = () => { setFoodFlowOpen(false); setMyList(null); setBuilderOpen(false) }
   const selectMeal = (m: NutritionLog) => setOpenGroup(groups.find((g) => g.key === m.id) ?? null)
 
   return (
@@ -65,16 +67,26 @@ export function TodayPage() {
         )}
       </div>
 
-      <AddOptionsFab onAddFood={() => openAdd('food')} onAddMeal={() => openAdd('meal')} />
+      <AddOptionsFab onAddFood={() => setFoodFlowOpen(true)} onAddMeal={() => setMyList({ tab: 'meals', overSearch: false })} />
 
-      <AddFoodSheet
-        isOpen={addMealName != null || appendTo != null}
-        onClose={() => { setAddMealName(null); setAddMode(null); setAppendTo(null) }}
-        mode={addMode ?? 'food'}
-        presetMealName={addMealName ?? suggestedMeal()}
-        appendTo={appendTo && appendTo.groupId ? { groupId: appendTo.groupId, groupName: appendTo.name, date: appendTo.date, calories: appendTo.calories, protein: appendTo.protein } : undefined}
-        dayTotals={{ calories: totals.calories, protein: totals.protein }}
+      <AddFoodFlow
+        isOpen={foodFlowOpen}
+        onClose={closeAll}
+        mode="standalone"
+        level={1}
+        onOpenMyList={() => setMyList({ tab: 'foods', overSearch: true })}
       />
+      <MyListSheet
+        isOpen={myList != null}
+        initialTab={myList?.tab ?? 'foods'}
+        level={myList?.overSearch ? 2 : 1}
+        onClose={() => setMyList(null)}
+        onDone={closeAll}
+        // Opened from the search: just go back to it. Opened from "ארוחה": open the search
+        onAddNewFood={() => { setMyList(null); setFoodFlowOpen(true) }}
+        onCreateMeal={() => { closeAll(); setBuilderOpen(true) }}
+      />
+      <MealBuilderSheet isOpen={builderOpen} onClose={() => setBuilderOpen(false)} />
       <MealGroupSheet
         group={openGroup && (groups.find((g) => g.key === openGroup.key) ?? null)}
         onClose={() => setOpenGroup(null)}

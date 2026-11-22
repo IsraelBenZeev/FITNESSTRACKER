@@ -3,8 +3,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useBodyBuddyAuth } from '../../lib/BodyBuddyAuthContext'
 import { useToast } from '../../shared/context/ToastContext'
 import * as api from './api'
-import { groupEntries } from './foodMath'
-import type { CartItem } from './types'
+import { groupEntries, sumMacros } from './foodMath'
+import type { CartItem, Food } from './types'
+import { useGoals } from '../../lib/useGoals'
+import { todayLocal } from '../../lib/date'
 
 /** All BodyBuddy queries live under ['bb', ...] so a sign-in/out refreshes them together */
 export const bbKeys = {
@@ -112,4 +114,25 @@ export function useCreateSavedMeal() {
     ok: 'הארוחה נשמרה בארוחות השמורות',
     fail: 'שגיאה בשמירת הארוחה',
   })
+}
+
+export function useDeleteMyFood() {
+  return useBbMutation((uid, food: Food) => api.deleteMyFood(uid, food), { ok: 'המאכל נמחק מהרשימה', fail: 'שגיאה במחיקת המאכל' })
+}
+
+export function useDeleteSavedMeal() {
+  return useBbMutation((uid, mealId: string) => api.deleteSavedMeal(uid, mealId), { ok: 'הארוחה נמחקה מהרשימה', fail: 'שגיאה במחיקת הארוחה' })
+}
+
+export function useUpdateMealItems() {
+  return useBbMutation((_uid, a: { mealId: string; changes: api.MealItemsChanges }) => api.updateMealItems(a.mealId, a.changes), { fail: 'שגיאה בעדכון הארוחה' })
+}
+
+/** Today's goals and what was already eaten today — what the summary card's "what's left" uses */
+export function useDayProgress() {
+  const { goalCalories, goalProtein } = useGoals()
+  const today = todayLocal()
+  const { entries } = useMealGroups(today, today)
+  const consumed = useMemo(() => sumMacros(entries), [entries])
+  return { goals: { calories: goalCalories, protein: goalProtein }, consumed }
 }

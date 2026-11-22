@@ -66,6 +66,8 @@ export interface Food {
   category: string | null
   /** Lower-cased name + English name + aliases, for instant local search */
   keywords: string
+  /** When it joined "my foods" (created, or saved from the catalog) — for newest-first lists */
+  createdAt: string | null
 }
 
 /** A food with an amount, ready to be logged */
@@ -75,8 +77,16 @@ export interface CartItem {
   amount: number
 }
 
+export interface SavedMealItem {
+  /** meal_items.id */
+  id: string
+  food: Food
+  amount: number
+}
+
 export interface SavedMeal {
   id: string
   name: string
-  items: { food: Food; amount: number }[]
+  createdAt: string
+  items: SavedMealItem[]
 }

@@ -12,13 +12,20 @@ interface ModalProps {
   /** Compact control shown in the header next to the title (e.g. a time chip) */
   headerAction?: React.ReactNode
   zIndexOverride?: number
+  /** Stacking level for sheets opened over other sheets (1 = base) */
+  level?: SheetLevel
 }
+
+export type SheetLevel = 1 | 2 | 3 | 4
+const LEVEL_Z = { 1: 'z-[100]', 2: 'z-[120]', 3: 'z-[140]', 4: 'z-[160]' } as const
+/** The level above a sheet (capped at the top level) */
+export const nextLevel = (l: SheetLevel): SheetLevel => Math.min(4, l + 1) as SheetLevel
 
 /**
  * Bottom sheet. Content scrolls; header and footer stay put,
  * so the primary action is always under the thumb.
  */
-export function Modal({ isOpen, onClose, title, children, footer, headerAction, zIndexOverride }: ModalProps) {
+export function Modal({ isOpen, onClose, title, children, footer, headerAction, zIndexOverride, level }: ModalProps) {
   const titleId = useId()
 
   useEffect(() => {
@@ -35,7 +42,7 @@ export function Modal({ isOpen, onClose, title, children, footer, headerAction, 
   return ReactDOM.createPortal(
     <div
       // Stacked sheets (e.g. exercise detail over the picker) pass a higher layer
-      className={`fixed inset-0 flex items-end ${zIndexOverride != null && zIndexOverride > 100 ? 'z-[120]' : 'z-[100]'}`}
+      className={`fixed inset-0 flex items-end ${level ? LEVEL_Z[level] : zIndexOverride != null && zIndexOverride > 100 ? 'z-[120]' : 'z-[100]'}`}
     >
       <div onClick={onClose} aria-hidden className="absolute inset-0 bg-black/60 backdrop-blur-[3px]" />
 

@@ -39,6 +39,43 @@ export function entryAmountLabel(e: NutritionEntry): string {
   return `${n} ${e.portion_unit === 'ml' ? 'מ״ל' : 'גרם'}`
 }
 
+/** A gram/ml food that is also counted (egg = 60 g) — the app's "typical unit" */
+export interface TypicalUnit {
+  weight: number
+  name: string
+  plural: string
+}
+
+export function typicalUnitOf(food: Pick<Food, 'measurement' | 'unitWeightG' | 'unitName' | 'unitNamePlural'>): TypicalUnit | null {
+  if (food.measurement === 'units') return null
+  const weight = Number(food.unitWeightG ?? 0)
+  const name = food.unitName?.trim()
+  if (!(weight > 0) || !name) return null
+  return { weight, name, plural: food.unitNamePlural?.trim() || name }
+}
+
+/** Opening amount when a food is picked, like the app: units food 1, counted food one unit, else 100 */
+export function baseAmountFor(food: Food): number {
+  if (food.measurement === 'units') return 1
+  return typicalUnitOf(food)?.weight ?? 100
+}
+
+export const unitLabel = (u: 'g' | 'ml') => (u === 'ml' ? 'מ״ל' : 'גרם')
+
+/** The amount label under a stepper: "גרם" / "מ״ל" / "יח׳" */
+export const amountUnitLabel = (food: Pick<Food, 'measurement' | 'amountUnit'>) => (food.measurement === 'units' ? 'יח׳' : unitLabel(food.amountUnit))
+
+/** Limits shared with the app/server */
+export const LIMITS = { maxGrams: 2000, maxUnits: 50, maxUnitWeight: 2000, maxCaloriesPer100: 900, maxMacroPer100: 100 } as const
+export const maxAmountFor = (food: Pick<Food, 'measurement'>) => (food.measurement === 'units' ? LIMITS.maxUnits : LIMITS.maxGrams)
+
+/** "מחושב לפי 165 קק״ל ו-31 גרם חלבון ל-100 גרם" */
+export function referenceLine(food: Food): string {
+  const base = nutrientsFor(food, food.measurement === 'units' ? 1 : 100)
+  const per = food.measurement === 'units' ? 'ליחידה' : `ל-100 ${unitLabel(food.amountUnit)}`
+  return `מחושב לפי ${Math.round(base.calories)} קק״ל ו-${r1(base.protein)} גרם חלבון ${per}`
+}
+
 /** Sensible starting amount when a food is picked */
 export function defaultAmountFor(food: Food): number {
   if (food.defaultAmount && food.defaultAmount > 0) return food.defaultAmount
@@ -73,6 +110,7 @@ export function normalizeFoodItem(row: Record<string, unknown>): Food {
     defaultAmount: num(row.default_amount),
     category: (row.category as string | null) ?? null,
     keywords: String(row.name ?? '').toLowerCase(),
+    createdAt: (row.created_at as string | null) ?? null,
   }
 }
 
@@ -100,6 +138,7 @@ export function normalizeCatalogFood(row: Record<string, unknown>): Food {
     defaultAmount: !countable && serving != null && serving > 0 ? serving : null,
     category: ((row.nutrition_category as string | null) ?? (row.culinary_category as string | null)) ?? null,
     keywords: [row.name, row.name_en, ...(Array.isArray(row.aliases) ? row.aliases : [])].filter(Boolean).join(' ').toLowerCase(),
+    createdAt: null,
   }
 }
 

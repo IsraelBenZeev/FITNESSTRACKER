@@ -1,7 +1,7 @@
 import { bb } from '../../lib/supabaseBodyBuddy'
 import { fetchAllRows } from '../../lib/fetchAllRows'
 import { entryRow, normalizeCatalogFood, normalizeEntry, normalizeFoodItem } from './foodMath'
-import type { CartItem, Food, NutritionEntry, SavedMeal } from './types'
+import type { CartItem, Food, NutritionEntry, SavedMeal, SavedMealItem } from './types'
 
 const FOOD_ITEM_COLS = `id, name, category, is_active, user_id, measurement_type, amount_unit, default_amount, unit_weight_g, unit_name, unit_name_plural,
   calories_per_100, protein_per_100, carbs_per_100, fat_per_100, calories_per_unit, protein_per_unit, carbs_per_unit, fat_per_unit, created_at`
@@ -38,14 +38,15 @@ export async function addMeal(userId: string, items: CartItem[], opts: { date: s
   const { error } = await bb().from('nutrition_entries').insert(rows)
   if (error) throw new Error(error.message)
   // "Recent foods" like the app (best effort)
-  await Promise.all(items.map((it) => trackFoodUsage(userId, it.food).catch(() => undefined)))
+  await Promise.all(items.filter((it) => it.food.id).map((it) => trackFoodUsage(userId, it.food).catch(() => undefined)))
 }
 
 /** One food on its own (no group_id / group_name) — what the app writes for "add food" */
 export async function addSingleFood(userId: string, item: CartItem, opts: { date: string; createdAt: string }) {
   const { error } = await bb().from('nutrition_entries').insert(entryRow(item, { userId, date: opts.date, groupId: null, groupName: null, createdAt: opts.createdAt }))
   if (error) throw new Error(error.message)
-  await trackFoodUsage(userId, item.food).catch(() => undefined)
+  // A food that was only logged (not saved) has no id to track
+  if (item.food.id) await trackFoodUsage(userId, item.food).catch(() => undefined)
 }
 
 export async function deleteEntry(userId: string, id: string) {
@@ -76,10 +77,19 @@ export async function fetchMyFoods(userId: string): Promise<Food[]> {
   if (items.error) throw new Error(items.error.message)
   if (saved.error) throw new Error(saved.error.message)
   const catalog = (saved.data ?? [])
-    .map((r) => r.foods as unknown as Record<string, unknown> | null)
-    .filter((f): f is Record<string, unknown> => f != null)
-    .map(normalizeCatalogFood)
-  return [...(items.data ?? []).map(normalizeFoodItem), ...catalog].sort((a, b) => a.name.localeCompare(b.name, 'he'))
+    .filter((r) => r.foods != null)
+    .map((r) => ({ ...normalizeCatalogFood(r.foods as unknown as Record<string, unknown>), createdAt: (r.created_at as string | null) ?? null }))
+  // Newest first, like the app
+  return [...(items.data ?? []).map(normalizeFoodItem), ...catalog].sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+}
+
+/** Remove from "my foods": a personal food is deactivated (soft delete), a saved catalog food is unsaved — like the app */
+export async function deleteMyFood(userId: string, food: Food) {
+  const { error } =
+    food.source === 'catalog'
+      ? await bb().from('user_saved_foods').delete().eq('user_id', userId).eq('food_id', food.id)
+      : await bb().from('food_items').update({ is_active: false }).eq('id', food.id).eq('user_id', userId)
+  if (error) throw new Error(error.message)
 }
 
 export async function fetchRecentFoods(userId: string): Promise<Food[]> {
@@ -122,6 +132,7 @@ export interface NewFoodInput {
   amountUnit: 'g' | 'ml'
   values: { calories: number; protein: number; carbs: number; fat: number }
   unitName?: string | null
+  unitNamePlural?: string | null
   unitWeightG?: number | null
   defaultAmount?: number | null
 }
@@ -150,7 +161,7 @@ export async function createFoodItem(userId: string, input: NewFoodInput): Promi
       fat_per_unit: isGrams ? null : v.fat,
       unit_weight_g: input.unitWeightG && input.unitWeightG > 0 ? input.unitWeightG : null,
       unit_name: input.unitName?.trim() || null,
-      unit_name_plural: null,
+      unit_name_plural: input.unitNamePlural?.trim() || null,
     })
     .select(FOOD_ITEM_COLS)
     .single()
@@ -177,13 +188,15 @@ export async function fetchSavedMeals(userId: string): Promise<SavedMeal[]> {
   return (data ?? []).map((m) => ({
     id: String(m.id),
     name: m.name_meal ?? '',
-    items: (m.meal_items ?? [])
+    createdAt: String(m.created_at ?? ''),
+    items: [...(m.meal_items ?? [])]
+      .sort((a, b) => String(a.id).localeCompare(String(b.id)))
       .map((i) => {
         const fi = i.food_items as unknown as Record<string, unknown> | null
         const food = fi ? normalizeFoodItem(fi) : i.food_id ? catalog.get(i.food_id) : undefined
-        return food && (food.source === 'catalog' || (fi && fi.is_active !== false)) ? { food, amount: Number(i.amount_g ?? 0) } : null
+        return food && (food.source === 'catalog' || (fi && fi.is_active !== false)) ? { id: String(i.id), food, amount: Number(i.amount_g ?? 0) } : null
       })
-      .filter((x): x is { food: Food; amount: number } => x != null),
+      .filter((x): x is SavedMealItem => x != null),
   }))
 }
 
@@ -197,5 +210,35 @@ export async function createSavedMeal(userId: string, name: string, items: CartI
   if (ie) {
     await bb().from('meals').delete().eq('id', mealId)
     throw new Error(ie.message)
+  }
+}
+
+export async function deleteSavedMeal(userId: string, mealId: string) {
+  const { error } = await bb().from('meals').delete().eq('id', mealId).eq('user_id', userId)
+  if (error) throw new Error(error.message)
+  const { error: ie } = await bb().from('meal_items').delete().eq('meal_id', mealId)
+  if (ie) throw new Error(ie.message)
+}
+
+export interface MealItemsChanges {
+  removeIds: string[]
+  updates: { id: string; amount: number }[]
+  additions: { food: Food; amount: number }[]
+}
+
+/** Save edits made while reviewing a saved meal ("עדכן את הארוחה"), like the app */
+export async function updateMealItems(mealId: string, changes: MealItemsChanges) {
+  if (changes.additions.length) {
+    const { error } = await bb()
+      .from('meal_items')
+      .insert(changes.additions.map((a) => ({ meal_id: mealId, food_item_id: a.food.source === 'personal' ? a.food.id : null, food_id: a.food.source === 'catalog' ? a.food.id : null, amount_g: a.amount })))
+    if (error) throw new Error(error.message)
+  }
+  const results = await Promise.all(changes.updates.map((u) => bb().from('meal_items').update({ amount_g: u.amount }).eq('id', u.id).eq('meal_id', mealId)))
+  const ue = results.find((r) => r.error)?.error
+  if (ue) throw new Error(ue.message)
+  if (changes.removeIds.length) {
+    const { error } = await bb().from('meal_items').delete().eq('meal_id', mealId).in('id', changes.removeIds)
+    if (error) throw new Error(error.message)
   }
 }

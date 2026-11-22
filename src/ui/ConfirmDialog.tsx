@@ -93,7 +93,7 @@ export function ConfirmDialog({
             <Icon size={28} strokeWidth={1.75} />
           </span>
           <h2 id={titleId} className="font-body text-lg font-semibold text-heading [text-wrap:balance]">{title}</h2>
-          {message && <p id={messageId} className="mt-2 font-body text-[15px] leading-relaxed text-muted [text-wrap:pretty]">{message}</p>}
+          {message && <p id={messageId} className="mt-2 whitespace-pre-line font-body text-[15px] leading-relaxed text-muted [text-wrap:pretty]">{message}</p>}
         </div>
 
         <div className="flex border-t border-white/10">
