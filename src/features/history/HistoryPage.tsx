@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Check, ChevronLeft, ClipboardCopy, FileDown } from 'lucide-react'
 import { useCalendarMonth, fetchNutritionForExport } from './useHistory'
-import { useGoals } from '../../lib/useGoals'
 import { useToast } from '../../shared/context/ToastContext'
 import { todayLocal } from '../../lib/date'
 import { CalendarHeader } from './CalendarHeader'
@@ -35,7 +34,6 @@ export function HistoryPage() {
   const { showSuccess, showError } = useToast()
 
   const { dayMap, weekDayMap, monthGoals, loading } = useCalendarMonth(year, month)
-  const { goalsConfig } = useGoals()
 
   const stats = useMemo(() => {
     const today = todayLocal()
@@ -44,14 +42,14 @@ export function HistoryPage() {
     let protein = 0
     for (const [date, totals] of dayMap) {
       if (date > today) continue
-      const c = getDayColor(totals, date, goalsConfig)
+      const c = getDayColor(totals, date)
       if (c !== 'gray') counts[c]++
       calories += totals.calories
       protein += totals.protein
     }
     const logged = counts.green + counts.orange + counts.red
     return { counts, logged, avgCalories: logged ? calories / logged : 0, avgProtein: logged ? protein / logged : 0 }
-  }, [dayMap, goalsConfig])
+  }, [dayMap])
 
   function handlePrev() {
     if (month === 1) { setMonth(12); setYear((y) => y - 1) } else setMonth((m) => m - 1)
@@ -128,7 +126,6 @@ export function HistoryPage() {
             dayMap={dayMap}
             weekDayMap={weekDayMap}
             onDayPress={(date, totals) => setSelected({ date, totals })}
-            goalsConfig={goalsConfig}
             loading={loading}
           />
 

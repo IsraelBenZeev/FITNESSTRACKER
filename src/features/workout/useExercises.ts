@@ -1,16 +1,16 @@
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { supabaseBodyBuddy } from '../../lib/supabaseBodyBuddy'
-import type { Exercise } from '../../types/workout'
+import type { Exercise, ExerciseInputField } from '../../types/workout'
 
 const PAGE_SIZE = 40
 
-// Hebrew body-part label → English bodyParts values in DB
+// Hebrew body-part label → bodyParts values in BodyBuddy's exercises_v2
 const HE_TO_PARTS: Record<string, string[]> = {
   חזה: ['chest'],
   גב: ['back'],
   כתפיים: ['shoulders'],
-  רגליים: ['legs', 'upper legs', 'lower legs'],
-  ידיים: ['arms', 'upper arms', 'lower arms'],
+  רגליים: ['upper legs', 'lower legs', 'glutes'],
+  ידיים: ['upper arms', 'lower arms'],
   בטן: ['waist'],
   קרדיו: ['cardio'],
   צוואר: ['neck'],
@@ -30,8 +30,8 @@ const SELECT_FIELDS = [
   'equipments_he',
   'instructions',
   'instructions_he',
-  'gifUrl',
-  'gif_available',
+  'imageUrls',
+  'input_fields',
 ].join(',')
 
 interface ExercisePage {
@@ -39,9 +39,12 @@ interface ExercisePage {
   nextPage: number | null
 }
 
+type V2Row = Omit<Exercise, 'gifUrl'> & { imageUrls: string[] | null; input_fields: ExerciseInputField[] | null }
+
+/** The app's exercise catalog (exercises_v2, active only — the same list the app shows) */
 export function useExercises(search: string = '', bodyPartHe: string = '') {
   return useInfiniteQuery({
-    queryKey: ['bodybuddy', 'exercises', search.trim(), bodyPartHe],
+    queryKey: ['bb', 'exercises-v2', search.trim(), bodyPartHe],
     initialPageParam: 0,
     queryFn: async ({ pageParam }): Promise<ExercisePage> => {
       if (!supabaseBodyBuddy) return { data: [], nextPage: null }
@@ -50,9 +53,9 @@ export function useExercises(search: string = '', bodyPartHe: string = '') {
       const to = from + PAGE_SIZE - 1
 
       let q = supabaseBodyBuddy
-        .from('exercises')
+        .from('exercises_v2')
         .select(SELECT_FIELDS)
-        .eq('gif_available', true)
+        .eq('status', 'active')
         .order('sort_order', { ascending: true })
         .range(from, to)
 
@@ -71,7 +74,11 @@ export function useExercises(search: string = '', bodyPartHe: string = '') {
       const { data, error } = await q
       if (error) throw new Error(error.message)
 
-      const exercises = (data ?? []) as unknown as Exercise[]
+      const exercises = ((data ?? []) as unknown as V2Row[]).map(({ imageUrls, input_fields, ...rest }) => ({
+        ...rest,
+        gifUrl: imageUrls?.[0],
+        input_fields: input_fields ?? [],
+      }))
       return {
         data: exercises,
         nextPage: exercises.length === PAGE_SIZE ? (pageParam as number) + 1 : null,

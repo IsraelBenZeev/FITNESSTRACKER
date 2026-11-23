@@ -1,7 +1,6 @@
 import { buildCalendarCells, getDayColor, DAY_COLOR_LABEL, HEBREW_DAY_SHORT, HEBREW_DAY_NAMES, HEBREW_MONTHS } from './calendarUtils'
 import type { CalendarCell } from './calendarUtils'
 import { CalendarDay } from './CalendarDay'
-import type { GoalsConfig } from '../../lib/useGoals'
 import type { DayTotals } from '../../types/nutrition'
 import { todayLocal, toLocalDateStr } from '../../lib/date'
 
@@ -12,7 +11,6 @@ interface CalendarGridProps {
   /** dayMap plus the neighbouring-month days of the first/last week (for weekly averages) */
   weekDayMap?: Map<string, DayTotals>
   onDayPress: (dateStr: string, totals: DayTotals) => void
-  goalsConfig?: GoalsConfig
   loading?: boolean
 }
 
@@ -34,7 +32,7 @@ export function averageOf(dates: string[], dayMap: Map<string, DayTotals>): { ca
 }
 
 /** Month grid with a weekly average beside every week. Logged days are tappable. */
-export function CalendarGrid({ year, month, dayMap, weekDayMap = dayMap, onDayPress, goalsConfig, loading }: CalendarGridProps) {
+export function CalendarGrid({ year, month, dayMap, weekDayMap = dayMap, onDayPress, loading }: CalendarGridProps) {
   const todayStr = todayLocal()
   const cells = buildCalendarCells(year, month)
   const weeks: CalendarCell[][] = []
@@ -62,7 +60,7 @@ export function CalendarGrid({ year, month, dayMap, weekDayMap = dayMap, onDayPr
 
                 const { dateStr, dayNumber } = cell
                 const totals = loading ? undefined : dayMap.get(dateStr)
-                const color = getDayColor(totals, dateStr, goalsConfig)
+                const color = getDayColor(totals, dateStr)
                 const weekday = HEBREW_DAY_NAMES[new Date(year, month - 1, dayNumber).getDay()]
                 const label = totals
                   ? `יום ${weekday}, ${dayNumber} ב${HEBREW_MONTHS[month]}: ${fmt(totals.calories)} קלוריות, ${DAY_COLOR_LABEL[color]}`

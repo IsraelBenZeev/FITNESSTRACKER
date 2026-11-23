@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { CalendarCheck, Flame, LogIn, LogOut, Pencil, RefreshCw, Scale } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
-import { useAuth } from '../../lib/AuthContext'
 import { useBodyBuddyAuth } from '../../lib/BodyBuddyAuthContext'
 import { useStreak } from '../today/useStreak'
 import { useEntryDates } from '../nutrition/hooks'
@@ -16,9 +15,8 @@ const fmt = (n: number) => Math.round(n).toLocaleString('he-IL')
 const one = (n: number) => n.toLocaleString('he-IL', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 
-/** The user's screen: who, goals (view + edit + history), connected accounts, sign out. */
+/** The user's screen: who, goals (view + edit + history), the BodyBuddy account, sign out. */
 export function ProfilePage() {
-  const { user, signOut } = useAuth()
   const { bbUser, connect, disconnect, configured } = useBodyBuddyAuth()
   const streak = useStreak()
   const { data: entryDates } = useEntryDates()
@@ -27,7 +25,7 @@ export function ProfilePage() {
   const [editOpen, setEditOpen] = useState(false)
   const [confirmSignOut, setConfirmSignOut] = useState(false)
 
-  const person = bbUser ?? user
+  const person = bbUser
   const name = (person?.user_metadata?.full_name as string | undefined) ?? person?.email ?? 'משתמש'
   const loggedDays = useMemo(() => new Set(entryDates ?? []).size, [entryDates])
   const latestWeight = useMemo(() => [...stats].reverse().find((s) => s.weight_kg != null)?.weight_kg ?? null, [stats])
@@ -36,7 +34,6 @@ export function ProfilePage() {
   async function handleSignOut() {
     setConfirmSignOut(false)
     await disconnect()
-    await signOut()
   }
 
   return (
@@ -120,9 +117,9 @@ export function ProfilePage() {
 
         {/* Accounts */}
         <section aria-labelledby="accounts-heading" className="flex flex-col gap-2">
-          <h2 id="accounts-heading" className="font-body text-base font-medium text-text-col">חשבונות מחוברים</h2>
+          <h2 id="accounts-heading" className="font-body text-base font-medium text-text-col">חשבון מחובר</h2>
           <div className="overflow-hidden rounded-2xl border border-border-col bg-surface">
-            <AccountRow name="BodyBuddy" purpose="תזונה, שקילות ויעדים — כמו באפליקציה" account={bbUser}>
+            <AccountRow name="BodyBuddy" purpose="תזונה, אימונים, שקילות ויעדים — כמו באפליקציה" account={bbUser}>
               {!configured ? (
                 <span className="font-body text-xs text-danger">חסרות הגדרות</span>
               ) : bbUser ? (
@@ -131,8 +128,6 @@ export function ProfilePage() {
                 <SmallButton onClick={() => void connect()} icon={<LogIn size={15} strokeWidth={2} />}>התחבר</SmallButton>
               )}
             </AccountRow>
-            <div aria-hidden className="mx-4 h-px bg-border-col" />
-            <AccountRow name="FitnessTracker" purpose="אימונים" account={user} />
           </div>
         </section>
 
@@ -150,7 +145,7 @@ export function ProfilePage() {
       <ConfirmDialog
         visible={confirmSignOut}
         title="להתנתק?"
-        message="תתנתק משני החשבונות במכשיר הזה. הנתונים שלך נשארים שמורים."
+        message="תתנתק מחשבון BodyBuddy במכשיר הזה. הנתונים שלך נשארים שמורים."
         icon={LogOut}
         confirmLabel="התנתק"
         onConfirm={() => void handleSignOut()}

@@ -13,8 +13,6 @@ interface DailySummaryProps {
   totals: Totals
   goalCalories: number
   goalProtein: number
-  /** @deprecated goals are no longer split by training / rest day */
-  isTrainingDay?: boolean
   onEditGoals: () => void
 }
 

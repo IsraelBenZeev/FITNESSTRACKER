@@ -1,23 +1,25 @@
+import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BodyBuddyLogo, LOGO_INTRO_MS } from './shared/components/BodyBuddyLogo'
 import { Header } from './shared/components/Header'
 import { TabBar } from './shared/components/TabBar'
 import { TodayPage } from './features/today/TodayPage'
 import { HistoryPage } from './features/history/HistoryPage'
 import { BodyPage } from './features/body/BodyPage'
-import { WorkoutPage } from './features/workout/WorkoutPage'
-import { PlanDetailPage } from './features/workout/PlanDetailPage'
-import { WorkoutSessionPage } from './features/workout/WorkoutSessionPage'
+import { WorkoutsPage } from './features/workouts/WorkoutsPage'
+import { PlanScreen } from './features/workouts/PlanScreen'
+import { ArchivePage } from './features/workouts/ArchivePage'
+import { PlanForm } from './features/workouts/form/PlanForm'
+import { ActiveWorkoutBubble } from './features/workouts/ActiveWorkoutBubble'
 import { ProfilePage } from './features/profile/ProfilePage'
 import { LoginPage } from './features/auth/LoginPage'
-import { AuthProvider, useAuth } from './lib/AuthContext'
-import { BodyBuddyAuthProvider } from './lib/BodyBuddyAuthContext'
-import { RequireBodyBuddy } from './features/nutrition/ConnectBodyBuddy'
+import { BodyBuddyAuthProvider, useBodyBuddyAuth } from './lib/BodyBuddyAuthContext'
 import { ToastProvider } from './shared/context/ToastContext'
 
 // Routes that hide the TabBar and Header for a focused experience
-const FULLSCREEN_ROUTES = ['/workout/session']
-// Routes where the page manages its own internal scroll (main must not overflow)
-const CONTAINED_ROUTES = ['/workout/plan/']
+// (the plan / active-workout screen, like the app's stack screen over the tabs)
+const FULLSCREEN_ROUTES = ['/workout/plan/', '/workout/form/']
+const CONTAINED_ROUTES: string[] = []
 
 function AnimatedRoutes() {
   const { pathname } = useLocation()
@@ -41,45 +43,38 @@ function AnimatedRoutes() {
       >
         <Routes>
           <Route path="/" element={<Navigate to="/today" replace />} />
-          <Route path="/today" element={<RequireBodyBuddy what="התזונה והשקילות"><TodayPage /></RequireBodyBuddy>} />
-          <Route path="/history" element={<RequireBodyBuddy what="היסטוריית התזונה"><HistoryPage /></RequireBodyBuddy>} />
-          <Route path="/body" element={<RequireBodyBuddy what="השקילות ומדדי הגוף"><BodyPage /></RequireBodyBuddy>} />
+          <Route path="/today" element={<TodayPage />} />
+          <Route path="/history" element={<HistoryPage />} />
+          <Route path="/body" element={<BodyPage />} />
           <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/workout" element={<WorkoutPage />} />
-          <Route path="/workout/plan/:planId" element={<PlanDetailPage />} />
-          <Route path="/workout/session" element={<WorkoutSessionPage />} />
+          <Route path="/workout" element={<WorkoutsPage />} />
+          <Route path="/workout/archive" element={<ArchivePage />} />
+          <Route path="/workout/plan/:planId" element={<PlanScreen />} />
+          <Route path="/workout/form/:mode/:planId?" element={<PlanForm />} />
           <Route path="*" element={<Navigate to="/today" replace />} />
         </Routes>
       </main>
       {!isFullscreen && <TabBar />}
+      <ActiveWorkoutBubble />
     </>
   )
 }
 
 function AppContent() {
-  const { user, loading } = useAuth()
+  const { bbUser: user, bbLoading: loading } = useBodyBuddyAuth()
+  const [introDone, setIntroDone] = useState(false)
 
-  if (loading) {
+  // Like the app's intro screen: the logo animation plays once on entry, then the app (or sign-in) opens
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const id = setTimeout(() => setIntroDone(true), reduced ? 400 : LOGO_INTRO_MS)
+    return () => clearTimeout(id)
+  }, [])
+
+  if (!introDone || loading) {
     return (
-      <div
-        style={{
-          minHeight: '100dvh',
-          background: '#1A2030',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: '28px',
-            color: '#96C828',
-            letterSpacing: '0.05em',
-          }}
-        >
-          FITNESS
-        </div>
+      <div className="flex min-h-dvh items-center justify-center bg-bg">
+        <BodyBuddyLogo animated className="h-[255px] w-[220px]" />
       </div>
     )
   }
@@ -91,14 +86,12 @@ function AppContent() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BodyBuddyAuthProvider>
+    <BodyBuddyAuthProvider>
       <div style={{ minHeight: '100dvh', background: '#1A2030', display: 'flex', flexDirection: 'column' }}>
         <ToastProvider>
           <AppContent />
         </ToastProvider>
       </div>
-      </BodyBuddyAuthProvider>
-    </AuthProvider>
+    </BodyBuddyAuthProvider>
   )
 }

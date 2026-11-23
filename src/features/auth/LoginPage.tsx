@@ -1,70 +1,32 @@
 import { LogIn } from 'lucide-react'
-import { useAuth } from '../../lib/AuthContext'
+import { useBodyBuddyAuth } from '../../lib/BodyBuddyAuthContext'
+import { BodyBuddyLogo } from '../../shared/components/BodyBuddyLogo'
 
+/** Sign-in with the BodyBuddy account — all data (nutrition, workouts, body stats) lives there */
 export function LoginPage() {
-  const { signInWithGoogle } = useAuth()
+  const { connect, configured } = useBodyBuddyAuth()
 
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        background: '#1A2030',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '24px',
-        gap: '40px',
-      }}
-    >
-      <div style={{ textAlign: 'center' }}>
-        <div
-          style={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontSize: '64px',
-            color: '#96C828',
-            letterSpacing: '0.05em',
-            lineHeight: 1,
-          }}
-        >
-          FITNESS
-        </div>
-        <div
-          style={{
-            fontFamily: '"DM Sans", sans-serif',
-            fontSize: '14px',
-            color: '#8C9AAB',
-            marginTop: '10px',
-          }}
-        >
-          מעקב תזונה ואימונים
-        </div>
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-10 bg-bg p-6">
+      <div className="flex flex-col items-center gap-2.5 text-center">
+        <BodyBuddyLogo className="h-[186px] w-[160px]" />
+        <span className="font-body text-sm text-muted">התחבר עם חשבון ה-BodyBuddy שלך</span>
       </div>
 
-      <button
-        onClick={signInWithGoogle}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          background: '#96C828',
-          color: '#1A2030',
-          border: 'none',
-          borderRadius: '14px',
-          padding: '15px 32px',
-          fontFamily: '"DM Sans", sans-serif',
-          fontSize: '16px',
-          fontWeight: 700,
-          cursor: 'pointer',
-          width: '100%',
-          maxWidth: '320px',
-          justifyContent: 'center',
-          letterSpacing: '0.01em',
-        }}
-      >
-        <LogIn size={18} strokeWidth={2.5} />
-        המשך עם Google
-      </button>
+      {configured ? (
+        <button
+          type="button"
+          onClick={() => void connect()}
+          className="flex h-14 w-full max-w-[320px] items-center justify-center gap-2.5 rounded-2xl bg-accent font-body text-base font-bold text-bg transition-transform duration-150 active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <LogIn size={18} strokeWidth={2.5} aria-hidden />
+          המשך עם Google
+        </button>
+      ) : (
+        <p className="max-w-[320px] text-center font-body text-sm text-danger">
+          חסרות הגדרות BodyBuddy (VITE_BODYBUDDY_SUPABASE_URL / _ANON_KEY).
+        </p>
+      )}
     </div>
   )
 }

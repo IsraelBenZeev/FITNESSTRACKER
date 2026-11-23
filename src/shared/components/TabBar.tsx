@@ -1,8 +1,7 @@
 import { Zap, BarChart2, Activity, Dumbbell } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useState, useEffect } from 'react'
 import type { Tab } from '../../types/common'
-import { hasActiveSession } from '../../features/workout/workoutSession'
+import { shouldShowWorkoutBubble, useDraftStore } from '../../features/workouts/draftStore'
 
 const tabs: { id: Tab; label: string; path: string; Icon: React.FC<{ size: number; color: string; strokeWidth: number }> }[] = [
   { id: 'today', label: 'היום', path: '/today', Icon: Zap },
@@ -14,17 +13,8 @@ const tabs: { id: Tab; label: string; path: string; Icon: React.FC<{ size: numbe
 export function TabBar() {
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const [hasSession, setHasSession] = useState(hasActiveSession)
-
-  useEffect(() => {
-    const check = () => setHasSession(hasActiveSession())
-    const id = setInterval(check, 2000)
-    window.addEventListener('storage', check)
-    return () => {
-      clearInterval(id)
-      window.removeEventListener('storage', check)
-    }
-  }, [])
+  const draft = useDraftStore((s) => s.draft)
+  const hasSession = shouldShowWorkoutBubble(draft)
 
   const active: Tab = pathname.startsWith('/history')
     ? 'history'

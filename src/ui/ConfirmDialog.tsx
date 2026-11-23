@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef } from 'react'
 import ReactDOM from 'react-dom'
-import { Info, Loader2, Trash2, X } from 'lucide-react'
+import { Check, Info, Loader2, Trash2, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
 export type ConfirmDialogVariant = 'danger' | 'info'
@@ -22,6 +22,14 @@ interface ConfirmDialogProps {
   showCloseButton?: boolean
   /** false = a message with a single (confirm) button */
   showCancel?: boolean
+  /** Blue note under the message (the app's infoNote) */
+  infoNote?: string
+  /** Checkbox row (e.g. "also delete the history") */
+  checkboxLabel?: string
+  checkboxChecked?: boolean
+  onCheckboxChange?: (checked: boolean) => void
+  /** Extra full-width action above the footer (e.g. "start over") */
+  secondaryAction?: { label: string; onPress: () => void; tone?: 'danger' | 'neutral' }
 }
 
 const VARIANTS: Record<ConfirmDialogVariant, { iconBg: string; iconText: string; confirm: string; icon: LucideIcon; label: string }> = {
@@ -46,6 +54,11 @@ export function ConfirmDialog({
   isLoading = false,
   showCloseButton = false,
   showCancel = true,
+  infoNote,
+  checkboxLabel,
+  checkboxChecked = false,
+  onCheckboxChange,
+  secondaryAction,
 }: ConfirmDialogProps) {
   const titleId = useId()
   const messageId = useId()
@@ -95,6 +108,40 @@ export function ConfirmDialog({
           <h2 id={titleId} className="font-body text-lg font-semibold text-heading [text-wrap:balance]">{title}</h2>
           {message && <p id={messageId} className="mt-2 whitespace-pre-line font-body text-[15px] leading-relaxed text-muted [text-wrap:pretty]">{message}</p>}
         </div>
+
+        {infoNote && (
+          <div className="mx-4 mb-4 flex items-start gap-2 rounded-2xl border border-macro-protein/20 bg-macro-protein/10 p-3">
+            <Info size={18} className="mt-0.5 flex-shrink-0 text-macro-protein" aria-hidden />
+            <p className="font-body text-xs leading-5 text-macro-protein">{infoNote}</p>
+          </div>
+        )}
+
+        {checkboxLabel && onCheckboxChange && (
+          <button
+            type="button"
+            role="checkbox"
+            aria-checked={checkboxChecked}
+            onClick={() => onCheckboxChange(!checkboxChecked)}
+            disabled={isLoading}
+            className={`mx-4 mb-4 flex min-h-[44px] w-[calc(100%-2rem)] items-center gap-3 rounded-2xl border p-3 text-start ${variant === 'danger' ? 'border-danger/20 bg-danger/10' : 'border-accent/25 bg-accent/10'}`}
+          >
+            <span className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border-2 ${checkboxChecked ? (variant === 'danger' ? 'border-danger bg-danger text-bg' : 'border-accent bg-accent text-bg') : 'border-white/30'}`}>
+              {checkboxChecked && <Check size={16} strokeWidth={3} />}
+            </span>
+            <span className={`font-body text-xs leading-5 ${variant === 'danger' ? 'text-danger' : 'text-accent'}`}>{checkboxLabel}</span>
+          </button>
+        )}
+
+        {secondaryAction && (
+          <button
+            type="button"
+            onClick={secondaryAction.onPress}
+            disabled={isLoading}
+            className={`${footerBtn} w-full border-t border-white/10 ${secondaryAction.tone === 'danger' ? 'text-danger hover:bg-danger/10' : 'text-heading hover:bg-white/[0.04]'}`}
+          >
+            {secondaryAction.label}
+          </button>
+        )}
 
         <div className="flex border-t border-white/10">
           {showCancel && (

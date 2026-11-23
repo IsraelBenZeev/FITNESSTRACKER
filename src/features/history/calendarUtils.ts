@@ -1,5 +1,4 @@
 import { GOAL_CALORIES, GOAL_PROTEIN } from '../../lib/constants'
-import type { GoalsConfig } from '../../lib/useGoals'
 import type { DayTotals } from '../../types/nutrition'
 
 export const HEBREW_MONTHS = [
@@ -38,13 +37,12 @@ export function daysBetween(from: string, to: string): number {
 export const daysLabel = (n: number) => (n === 1 ? 'יום אחד' : `${n.toLocaleString('he-IL')} ימים`)
 
 /**
- * מחשב צבע יום לפי הישגי הארוחות מול היעד הרלוונטי לאותו יום (אימון / מנוחה).
+ * מחשב צבע יום לפי הישגי הארוחות מול היעד שהיה בתוקף באותו יום.
  * @param dateStr  תאריך בפורמט YYYY-MM-DD
  */
 export function getDayColor(
   totals: DayTotals | undefined,
-  dateStr: string,
-  goalsConfig?: GoalsConfig
+  _dateStr: string,
 ): DayColor {
   if (!totals) return 'gray'
 
@@ -55,12 +53,6 @@ export function getDayColor(
     // Goal that was in effect that day (snapshot) — immune to later goal changes
     goalCal = totals.goalCalories
     goalPro = totals.goalProtein
-  } else if (goalsConfig) {
-    // Legacy rows without a snapshot
-    const dow = new Date(dateStr + 'T00:00:00').getDay()
-    const isTraining = goalsConfig.trainingDays.includes(dow)
-    goalCal = isTraining ? goalsConfig.trainingCalories : goalsConfig.restCalories
-    goalPro = isTraining ? goalsConfig.trainingProtein  : goalsConfig.restProtein
   }
 
   const cal = totals.calories / goalCal

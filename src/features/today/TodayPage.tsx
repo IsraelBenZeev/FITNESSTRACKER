@@ -8,14 +8,13 @@ import { AddFoodFlow } from '../nutrition/AddFoodFlow'
 import { MyListSheet, type MyListTab } from '../nutrition/MyListSheet'
 import { MealBuilderSheet } from '../nutrition/MealBuilderSheet'
 import { MealGroupSheet } from '../nutrition/MealGroupSheet'
-import { AccountMismatchBanner } from '../nutrition/ConnectBodyBuddy'
 import { useNavigate } from 'react-router-dom'
 import type { NutritionLog } from '../../types/nutrition'
 import type { MealGroup } from '../nutrition/types'
 
 export function TodayPage() {
   const { meals, groups, totals, loading } = useToday()
-  const { goalCalories, goalProtein, isTrainingDay } = useGoals()
+  const { goalCalories, goalProtein } = useGoals()
   const navigate = useNavigate()
   const [openGroup, setOpenGroup] = useState<MealGroup | null>(null)
   // The app's add flow: "מאכל" → food search; "ארוחה" → my meals; both reach my list and the meal builder
@@ -29,7 +28,6 @@ export function TodayPage() {
     <>
       {/* pb: room for the + button above the TabBar */}
       <div className="flex flex-col gap-7 px-4 pb-32 pt-4">
-        <AccountMismatchBanner />
         {loading ? (
           <TodaySkeleton />
         ) : (
@@ -38,7 +36,6 @@ export function TodayPage() {
               totals={totals}
               goalCalories={goalCalories}
               goalProtein={goalProtein}
-              isTrainingDay={isTrainingDay}
               onEditGoals={() => navigate("/profile")}
             />
 
