@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Minus, Plus } from 'lucide-react'
+import { snapStep } from '../../lib/snapStep'
 
 interface StepperProps {
   value: number
@@ -34,7 +35,8 @@ export function Stepper({ value, onChange, min, max, step, stepOptions = [step],
   valueRef.current = value
 
   const clamp = (v: number) => Math.min(max, Math.max(min, parseFloat(v.toFixed(decimals))))
-  const nudge = (dir: 1 | -1) => () => onChange(clamp(valueRef.current + dir * activeStep))
+  // Taps land on multiples of the step, so an odd value (1937) still reaches round ones (1940, 1950)
+  const nudge = (dir: 1 | -1) => () => onChange(clamp(snapStep(valueRef.current, dir * activeStep)))
 
   const stopLongPress = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current)

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Minus, Plus } from 'lucide-react'
+import { StepChips, type StepChipsState } from './StepChips'
 import { focusRing } from './styles'
 
 interface QuantityStepperProps {
@@ -12,6 +13,8 @@ interface QuantityStepperProps {
   name: string
   /** sm for dense rows (macro editor) */
   size?: 'md' | 'sm'
+  /** Step-size pills (1 · 10 · 50) shown under the capsule */
+  stepChips?: StepChipsState
 }
 
 const fmt = (n: number) => (Math.round(n * 10) / 10).toLocaleString('he-IL')
@@ -20,7 +23,17 @@ const fmt = (n: number) => (Math.round(n * 10) / 10).toLocaleString('he-IL')
  * The app's capsule stepper: −, value and unit, +.
  * No typing — every change is a tap; holding a button repeats and speeds up.
  */
-export function QuantityStepper({ value, unit, onIncrease, onDecrease, name, size = 'md' }: QuantityStepperProps) {
+export function QuantityStepper({ stepChips, ...props }: QuantityStepperProps) {
+  if (!stepChips) return <Capsule {...props} />
+  return (
+    <div className="flex flex-shrink-0 flex-col items-center gap-1.5">
+      <Capsule {...props} />
+      <StepChips {...stepChips} label={`גודל קפיצה ל${props.name}`} />
+    </div>
+  )
+}
+
+function Capsule({ value, unit, onIncrease, onDecrease, name, size = 'md' }: Omit<QuantityStepperProps, 'stepChips'>) {
   const btn = size === 'sm' ? 'h-10 w-10' : 'h-11 w-11'
   return (
     <div className="flex flex-shrink-0 items-center rounded-full border border-white/[0.08] bg-white/[0.05] p-[3px]">

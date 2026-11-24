@@ -9,7 +9,9 @@ import { useAddSingleFood, useCatalog, useCreateFood, useDayProgress, useMyFoods
 import type { Food, Macros } from './types'
 import { MacroValuesEditor } from './ui/MacroValuesEditor'
 import { NutritionSummaryCard } from './ui/NutritionSummaryCard'
+import { snapStep } from '../../lib/snapStep'
 import { QuantityStepper } from './ui/QuantityStepper'
+import { useStepChip } from './ui/StepChips'
 import { ActionButton, SegmentedActionBar } from './ui/SegmentedActionBar'
 import { DEFAULT_UNIT_MODE, resolveUnitStepper, TypicalUnitToggle, type UnitMode } from './ui/TypicalUnitToggle'
 import { BackLink, FlowTitle, SearchField } from './ui/FlowParts'
@@ -199,12 +201,17 @@ function CustomFoodDetails({ initialName, mode, baseTotals, onDone, onPickForMea
   const ratio = consumedAmount / 100
   const totals: Macros = { calories: Math.round(values.calories * ratio), protein: values.protein * ratio, carbs: values.carbs * ratio, fat: values.fat * ratio }
 
-  const changeConsumed = (delta: number) => setConsumedAmount((v) => Math.min(LIMITS.maxGrams, Math.max(1, Math.round((v + delta) * 10) / 10)))
+  const clampConsumed = (v: number) => Math.min(LIMITS.maxGrams, Math.max(1, Math.round(v * 10) / 10))
+  const changeConsumed = (delta: number) => setConsumedAmount((v) => clampConsumed(v + delta))
+  const consumedStep = useStepChip(10)
+  const nudgeConsumed = (delta: number) => setConsumedAmount((v) => clampConsumed(snapStep(v, delta)))
+  const unitWeightStep = useStepChip(10)
+  const nudgeUnitWeight = (delta: number) => setUnitWeight((v) => Math.min(LIMITS.maxUnitWeight, Math.max(1, snapStep(v, delta))))
   const stepper = resolveUnitStepper({
     typicalUnit,
     mode: unitMode,
     amount: consumedAmount,
-    gramsStepper: { value: consumedAmount, unit: ul, onIncrease: () => changeConsumed(10), onDecrease: () => changeConsumed(-10) },
+    gramsStepper: { value: consumedAmount, unit: ul, onIncrease: () => nudgeConsumed(consumedStep.value), onDecrease: () => nudgeConsumed(-consumedStep.value), stepChips: consumedStep },
     addDelta: changeConsumed,
   })
 
@@ -290,8 +297,8 @@ function CustomFoodDetails({ initialName, mode, baseTotals, onDone, onPickForMea
           <TypicalUnitToggle unit={typicalUnit} amountUnit={amountUnit} mode={unitMode} onChangeMode={setUnitMode} />
         </div>
       )}
-      <div className="flex items-center justify-between gap-3 px-1">
-        <span className="font-body text-base font-semibold text-heading">
+      <div className="flex items-start justify-between gap-3 px-1">
+        <span className="pt-3 font-body text-base font-semibold text-heading">
           {mode === 'meal-builder' ? 'כמות מנה בארוחה' : amountUnit === 'ml' ? 'כמה שתית' : 'כמה אכלת'}
         </span>
         <QuantityStepper {...stepper} name="כמות" />
@@ -308,11 +315,12 @@ function CustomFoodDetails({ initialName, mode, baseTotals, onDone, onPickForMea
         </label>
         {hasTypicalUnit && (
           <div className="flex flex-col gap-3 pt-3">
-            <div className="flex items-center justify-between">
-              <span className="font-body text-sm text-muted">משקל יחידה אחת</span>
+            <div className="flex items-start justify-between">
+              <span className="pt-3 font-body text-sm text-muted">משקל יחידה אחת</span>
               <QuantityStepper size="sm" value={unitWeight} unit={ul} name="משקל יחידה"
-                onIncrease={() => setUnitWeight((v) => Math.min(LIMITS.maxUnitWeight, Math.round((v + 5) * 10) / 10))}
-                onDecrease={() => setUnitWeight((v) => Math.max(1, Math.round((v - 5) * 10) / 10))} />
+                onIncrease={() => nudgeUnitWeight(unitWeightStep.value)}
+                onDecrease={() => nudgeUnitWeight(-unitWeightStep.value)}
+                stepChips={unitWeightStep} />
             </div>
             <input value={unitName} onChange={(e) => setUnitName(e.target.value)} placeholder={`שם יחידה אחת (למשל: ${name.trim() || 'ביצה'})`} aria-label="שם יחידה אחת"
               className="min-h-12 rounded-3xl border border-white/[0.08] bg-white/[0.03] px-5 font-body text-base text-heading outline-none placeholder:text-subtle focus:border-accent-line" />

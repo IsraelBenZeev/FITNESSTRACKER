@@ -1,4 +1,5 @@
 import { unitLabel, type TypicalUnit } from '../foodMath'
+import type { StepChipsState } from './StepChips'
 import { focusRing } from './styles'
 
 /** How a counted food's amount is stepped: by grams (10) or by whole units (egg = 60 g) */
@@ -12,6 +13,7 @@ export interface StepperValue {
   unit: string
   onIncrease: () => void
   onDecrease: () => void
+  stepChips?: StepChipsState
 }
 
 const r1 = (n: number) => Math.round(n * 10) / 10

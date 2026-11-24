@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { amountUnitLabel, maxAmountFor, nutrientsFor, referenceLine, typicalUnitOf } from './foodMath'
 import type { Food } from './types'
+import { snapStep } from '../../lib/snapStep'
 import { QuantityStepper } from './ui/QuantityStepper'
+import { useStepChip } from './ui/StepChips'
 import { DEFAULT_UNIT_MODE, resolveUnitStepper, TypicalUnitToggle, type UnitMode } from './ui/TypicalUnitToggle'
 import { focusRing } from './ui/styles'
 
-/** Units food: ½ unit; gram food: 10 g; a counted food in units mode: one whole unit */
+/** Units food: ½ unit; gram food: 10 g by default (1 · 10 · 50 pills); a counted food in units mode: one whole unit */
 export const stepFor = (food: Food) => (food.measurement === 'units' ? 0.5 : 10)
 const minFor = (food: Food) => (food.measurement === 'units' ? 0.5 : 1)
 
@@ -29,12 +31,15 @@ export function MealItemRow({ food, amount, onChange, onRemove, showReference }:
   const typicalUnit = typicalUnitOf(food)
   const [unitMode, setUnitMode] = useState<UnitMode>(DEFAULT_UNIT_MODE)
   const change = (delta: number) => onChange(stepAmount(food, amount, delta))
-  const step = stepFor(food)
+  const stepChips = useStepChip(10)
+  const isUnits = food.measurement === 'units'
+  const step = isUnits ? stepFor(food) : stepChips.value
+  const nudge = (delta: number) => onChange(stepAmount(food, snapStep(amount, delta), 0))
   const stepper = resolveUnitStepper({
     typicalUnit,
     mode: unitMode,
     amount,
-    gramsStepper: { value: amount, unit: amountUnitLabel(food), onIncrease: () => change(step), onDecrease: () => change(-step) },
+    gramsStepper: { value: amount, unit: amountUnitLabel(food), onIncrease: () => nudge(step), onDecrease: () => nudge(-step), stepChips: isUnits ? undefined : stepChips },
     addDelta: change,
   })
 

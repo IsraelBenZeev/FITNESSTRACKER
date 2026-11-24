@@ -8,6 +8,7 @@ import ReactDOM from 'react-dom'
 import { Controller, type Control } from 'react-hook-form'
 import { Check, ChevronLeft, History, Minus, Play, Plus, X, type LucideIcon } from 'lucide-react'
 import { formatElapsedTime } from '../draftStore'
+import { snapStep } from '../../../lib/snapStep'
 
 // ---------- elapsed seconds ----------
 
@@ -286,7 +287,8 @@ export function StepInput({ control, name, label, unit, icon: Icon }: { control:
         render={({ field: { onChange, value } }) => {
           const ref = { v: Number(value) || 0 }
           const bump = (d: number) => {
-            const next = Math.max(0, ref.v + d)
+            // Lands on a multiple of the step: 22.5 +10 → 30, 7 +10 → 10
+            const next = Math.max(0, snapStep(ref.v, d))
             if (next === ref.v) return
             ref.v = next
             onChange(next)
@@ -323,14 +325,17 @@ export function DurationInput({ control, name, label, icon: Icon }: { control: C
           const total = Math.max(0, Number(value) || 0)
           const unitBox = (amount: number, unit: string, step: number) => {
             const s = ten ? step * 10 : step
+            // Seconds land on multiples of the step (0:07 +10 → 0:10); minutes keep the seconds as they are
+            const up = step === 1 ? snapStep(total, s) : total + s
+            const down = step === 1 ? snapStep(total, -s) : total - s
             return (
               <div className="flex flex-1 flex-col items-center gap-1">
                 <div className="flex items-center rounded-2xl border border-white/5 bg-zinc-900 p-1">
-                  <button type="button" aria-label={`הפחת ${unit}`} onClick={() => total - s >= 0 && onChange(total - s)} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-background-800 text-heading active:scale-90">
+                  <button type="button" aria-label={`הפחת ${unit}`} onClick={() => down >= 0 && onChange(down)} className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-background-800 text-heading active:scale-90">
                     <Minus size={22} />
                   </button>
                   <span dir="ltr" className="min-w-[44px] text-center text-2xl font-black tabular-nums text-heading">{String(amount).padStart(2, '0')}</span>
-                  <button type="button" aria-label={`הוסף ${unit}`} onClick={() => onChange(total + s)} className="flex h-9 w-9 items-center justify-center rounded-full border border-lime-500/45 bg-lime-500/20 text-lime-300 active:scale-90">
+                  <button type="button" aria-label={`הוסף ${unit}`} onClick={() => onChange(up)} className="flex h-9 w-9 items-center justify-center rounded-full border border-lime-500/45 bg-lime-500/20 text-lime-300 active:scale-90">
                     <Plus size={22} />
                   </button>
                 </div>
