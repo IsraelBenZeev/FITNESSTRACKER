@@ -1,6 +1,6 @@
 /**
- * The BodyBuddy logo, same paths and intro animation as the app (BodyBuddy-Client/src/ui/BodyBuddyLogo.tsx):
- * the hexagon border draws itself, the H pops in, then "Body" (green) and "Buddy" (white) rise into place.
+ * The BodyBuddy logo, same paths as the app (BodyBuddy-Client/src/ui/BodyBuddyLogo.tsx):
+ * intro: the hexagon spins in, the H pops, then "Body" (green) and "Buddy" (white) slide in from both sides.
  */
 
 const OUTER_HEX =
@@ -28,47 +28,24 @@ const BUDDY_PATHS = [
   'M661.031 811.938C662.469 812.875 664.031 813.703 665.719 814.422C667.406 815.141 669.156 815.734 670.969 816.203C672.812 816.672 674.688 817.016 676.594 817.234C678.5 817.484 680.391 817.609 682.266 817.609C688.641 817.609 693.547 816.234 696.984 813.484C700.453 810.766 702.188 806.672 702.188 801.203V799.328C700.969 800.172 699.594 800.953 698.062 801.672C696.562 802.359 694.938 802.953 693.188 803.453C691.469 803.953 689.641 804.344 687.703 804.625C685.797 804.875 683.859 805 681.891 805C677.672 805 673.891 804.391 670.547 803.172C667.234 801.922 664.422 800.109 662.109 797.734C659.828 795.328 658.078 792.375 656.859 788.875C655.641 785.375 655.031 781.375 655.031 776.875V749.688H668.859V773.031C668.859 779.719 670.125 784.656 672.656 787.844C675.219 791 679.25 792.578 684.75 792.578C688.625 792.578 692.047 791.906 695.016 790.562C698.016 789.188 700.406 787.438 702.188 785.312V749.688H716.062V798.672C716.062 803.953 715.312 808.531 713.812 812.406C712.312 816.312 710.125 819.547 707.25 822.109C704.406 824.672 700.906 826.578 696.75 827.828C692.594 829.109 687.875 829.75 682.594 829.75C677.438 829.75 672.625 829.203 668.156 828.109C663.688 827.016 659.594 825.531 655.875 823.656L661.031 811.938Z',
 ]
 
-/** Total intro length in ms (matches the app's intro screen) */
-export const LOGO_INTRO_MS = 2800
+/** Intro length in ms: the ~550ms animation plus a short beat to read the logo */
+export const LOGO_INTRO_MS = 750
 
-/** Full logo: mark above the "Body Buddy" wordmark. `animated` plays the app's intro once. */
+/** Full logo: mark above the "Body Buddy" wordmark. `animated` plays a short intro once. */
 export function BodyBuddyLogo({ animated = false, className = '' }: { animated?: boolean; className?: string }) {
   const a = (cls: string) => (animated ? cls : '')
   return (
     <svg viewBox="0 0 717 830" fill="none" role="img" aria-label="BodyBuddy" className={className}>
-      <defs>
-        <mask id="bb-logo-draw" maskUnits="userSpaceOnUse" x="-200" y="-200" width="1117" height="1100">
-          {/* A thick stroke along the hexagon, revealed with a dash animation, "draws" the border */}
-          <path
-            d={OUTER_HEX}
-            pathLength={1000}
-            stroke="white"
-            strokeWidth={320}
-            strokeDasharray={1000}
-            fill="none"
-            className={a('animate-bb-draw motion-reduce:animate-none')}
-          />
-        </mask>
-      </defs>
-
-      {animated ? (
-        <>
-          <path d={HEX_BORDER} fillRule="evenodd" className="fill-subtle" mask="url(#bb-logo-draw)" />
-          {/* Solid border once drawn — hides the seam a dashed closed path leaves */}
-          <path d={HEX_BORDER} fillRule="evenodd" className="fill-subtle animate-bb-settle motion-reduce:animate-none" />
-        </>
-      ) : (
-        <path d={HEX_BORDER} fillRule="evenodd" className="fill-subtle" />
-      )}
+      <path d={HEX_BORDER} fillRule="evenodd" className={`fill-subtle origin-center [transform-box:fill-box] ${a('animate-bb-hex-in motion-reduce:animate-none')}`} />
 
       <path d={H_MARK} className={`fill-accent origin-center [transform-box:fill-box] ${a('animate-bb-pop motion-reduce:animate-none')}`} />
 
-      <g className={a('animate-bb-rise [animation-delay:1600ms] motion-reduce:animate-none')}>
+      <g className={a('animate-bb-slide-l motion-reduce:animate-none')}>
         {BODY_PATHS.map((d) => (
           <path key={d.slice(0, 24)} d={d} className="fill-accent" />
         ))}
       </g>
-      <g className={a('animate-bb-rise [animation-delay:1800ms] motion-reduce:animate-none')}>
+      <g className={a('animate-bb-slide-r motion-reduce:animate-none')}>
         {BUDDY_PATHS.map((d) => (
           <path key={d.slice(0, 24)} d={d} className="fill-heading" />
         ))}
