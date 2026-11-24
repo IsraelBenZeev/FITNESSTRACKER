@@ -17,7 +17,10 @@ export interface NutritionEntry {
   unit_weight_g: number | null
   unit_name: string | null
   unit_name_plural: string | null
+  /** When it was logged */
   created_at: string
+  /** When it was actually eaten (editable); null on rows from before the column → created_at */
+  eaten_at: string | null
 }
 
 /** A meal = all entries that share a group_id (or a single ungrouped entry) */
@@ -26,8 +29,12 @@ export interface MealGroup {
   groupId: string | null
   date: string
   name: string
-  /** Local HH:MM of the first entry */
+  /** Local HH:MM it was eaten (earliest entry) — the journal is ordered by this */
   time: string
+  /** ISO time it was eaten (earliest entry) */
+  eatenAt: string
+  /** Local HH:MM it was logged */
+  addedTime: string
   createdAt: string
   entries: NutritionEntry[]
   calories: number

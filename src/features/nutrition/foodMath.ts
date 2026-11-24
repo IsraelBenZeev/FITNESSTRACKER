@@ -162,6 +162,7 @@ export function normalizeEntry(row: Record<string, unknown>): NutritionEntry {
     unit_name: (row.unit_name as string | null) ?? null,
     unit_name_plural: (row.unit_name_plural as string | null) ?? null,
     created_at: String(row.created_at),
+    eaten_at: (row.eaten_at as string | null) ?? null,
   }
 }
 
@@ -189,6 +190,8 @@ export function entryRow(item: CartItem, ctx: { userId: string; date: string; gr
     unit_name: isUnits ? item.food.unitName : hasUnit ? item.food.unitName : null,
     unit_name_plural: isUnits || hasUnit ? item.food.unitNamePlural : null,
     created_at: ctx.createdAt,
+    // Eaten now unless edited later from the journal
+    eaten_at: ctx.createdAt,
   }
 }
 
@@ -199,7 +202,16 @@ const hhmm = (iso: string) => {
   return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
 
-/** Entries → meals (by group_id), ordered by time */
+/** When an entry was eaten: the edited time, or when it was logged */
+export const eatenAtOf = (e: Pick<NutritionEntry, 'eaten_at' | 'created_at'>) => e.eaten_at ?? e.created_at
+
+/** ISO timestamp for a local date + "HH:MM" (an eaten time picked in the journal) */
+export const localTimeOn = (date: string, time: string) => new Date(`${date}T${time}:00`).toISOString()
+
+const byEaten = (a: NutritionEntry, b: NutritionEntry) =>
+  new Date(eatenAtOf(a)).getTime() - new Date(eatenAtOf(b)).getTime() || a.created_at.localeCompare(b.created_at)
+
+/** Entries → meals (by group_id), ordered by when they were eaten */
 export function groupEntries(entries: NutritionEntry[]): MealGroup[] {
   const map = new Map<string, NutritionEntry[]>()
   for (const e of entries) {
@@ -210,21 +222,24 @@ export function groupEntries(entries: NutritionEntry[]): MealGroup[] {
   }
   const groups: MealGroup[] = []
   for (const [key, list] of map) {
-    list.sort((a, b) => a.created_at.localeCompare(b.created_at))
+    list.sort(byEaten)
     const first = list[0]!
+    const firstAdded = list.reduce((m, e) => (e.created_at < m ? e.created_at : m), first.created_at)
     const t = sumMacros(list)
     groups.push({
       key,
       groupId: first.group_id,
       date: first.date,
       name: first.group_name || (list.length === 1 ? first.food_name : 'ארוחה'),
-      time: hhmm(first.created_at),
-      createdAt: first.created_at,
+      time: hhmm(eatenAtOf(first)),
+      eatenAt: eatenAtOf(first),
+      addedTime: hhmm(firstAdded),
+      createdAt: firstAdded,
       entries: list,
       ...t,
     })
   }
-  return groups.sort((a, b) => a.date.localeCompare(b.date) || a.createdAt.localeCompare(b.createdAt))
+  return groups.sort((a, b) => a.date.localeCompare(b.date) || new Date(a.eatenAt).getTime() - new Date(b.eatenAt).getTime() || a.createdAt.localeCompare(b.createdAt))
 }
 
 /** A meal group in the legacy NutritionLog shape (timeline cards, history, export) */

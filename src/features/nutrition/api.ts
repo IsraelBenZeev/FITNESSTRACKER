@@ -15,6 +15,7 @@ export async function fetchEntries(userId: string, fromDate: string | null, toDa
     let q = bb().from('nutrition_entries').select('*').eq('user_id', userId)
     if (fromDate) q = q.gte('date', fromDate)
     if (toDate) q = q.lte('date', toDate)
+    // Final order (by eaten time) is set in groupEntries
     return q.order('date', { ascending: true }).order('created_at', { ascending: true }).order('id', { ascending: true }).range(from, to)
   })
   return rows.map(normalizeEntry)
@@ -51,6 +52,12 @@ export async function addSingleFood(userId: string, item: CartItem, opts: { date
 
 export async function deleteEntry(userId: string, id: string) {
   const { error } = await bb().from('nutrition_entries').delete().eq('id', id).eq('user_id', userId)
+  if (error) throw new Error(error.message)
+}
+
+/** Set when entries were eaten (a whole meal, or one food) */
+export async function updateEatenAt(userId: string, ids: string[], eatenAt: string) {
+  const { error } = await bb().from('nutrition_entries').update({ eaten_at: eatenAt }).in('id', ids).eq('user_id', userId)
   if (error) throw new Error(error.message)
 }
 

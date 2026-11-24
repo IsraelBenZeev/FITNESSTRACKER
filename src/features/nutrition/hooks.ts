@@ -97,6 +97,10 @@ export function useDeleteEntry() {
   return useBbMutation((uid, id: string) => api.deleteEntry(uid, id), { ok: 'הפריט נמחק', fail: 'שגיאה במחיקה' })
 }
 
+export function useUpdateEatenAt() {
+  return useBbMutation((uid, a: { ids: string[]; eatenAt: string }) => api.updateEatenAt(uid, a.ids, a.eatenAt), { ok: 'שעת האכילה עודכנה', fail: 'שגיאה בעדכון השעה' })
+}
+
 export function useDeleteGroup() {
   return useBbMutation((uid, groupId: string) => api.deleteGroup(uid, groupId), { ok: 'הארוחה נמחקה', fail: 'שגיאה במחיקת הארוחה' })
 }

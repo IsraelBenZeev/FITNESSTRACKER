@@ -1,13 +1,18 @@
 import { useState } from 'react'
-import { Clock, Trash2 } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
 import { ConfirmDialog } from '../../ui/ConfirmDialog'
-import { entryAmountLabel } from './foodMath'
-import { useDeleteEntry, useDeleteGroup } from './hooks'
+import { eatenAtOf, entryAmountLabel, localTimeOn } from './foodMath'
+import { useDeleteEntry, useDeleteGroup, useUpdateEatenAt } from './hooks'
+import { EatenTimeField } from './ui/EatenTimeField'
 import type { MealGroup, NutritionEntry } from './types'
 
 const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 const fmt = (n: number) => Math.round(n).toLocaleString('he-IL')
+const hhmm = (iso: string) => {
+  const d = new Date(iso)
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
 
 type PendingDelete = { kind: 'group' } | { kind: 'entry'; entry: NutritionEntry }
 
@@ -17,13 +22,14 @@ interface MealGroupSheetProps {
 }
 
 /**
- * A logged meal, read-only — like the app's entry detail: when it was added, the totals,
- * the foods with their amounts and macros, and delete (a food, or the whole meal).
+ * A logged meal — like the app's entry detail: when it was eaten (editable) and added, the totals,
+ * the foods with their amounts, macros and own eaten time, and delete (a food, or the whole meal).
  */
 export function MealGroupSheet({ group, onClose }: MealGroupSheetProps) {
   const [pending, setPending] = useState<PendingDelete | null>(null)
   const delEntry = useDeleteEntry()
   const delGroup = useDeleteGroup()
+  const setTime = useUpdateEatenAt()
   const busy = delEntry.isPending || delGroup.isPending
 
   if (!group) return null
@@ -53,10 +59,19 @@ export function MealGroupSheet({ group, onClose }: MealGroupSheetProps) {
   return (
     <Modal isOpen onClose={onClose} title={group.name} footer={footer}>
       <div className="flex flex-col gap-4">
-        <span className="flex items-center gap-1.5 self-start rounded-full border border-accent-line bg-accent-soft px-3 py-1 font-body text-sm tabular-nums text-accent">
-          <Clock size={15} strokeWidth={2} aria-hidden />
-          נוסף ב-{group.time}
-        </span>
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <span className="flex items-center gap-2">
+            <span className="font-body text-sm text-text-col">{single ? 'נאכל ב-' : 'שעת הארוחה'}</span>
+            <EatenTimeField
+              value={group.time}
+              label={`שעת אכילה של ${group.name}`}
+              saving={setTime.isPending}
+              // The whole meal moves to the new time
+              onSave={(t) => setTime.mutate({ ids: group.entries.map((e) => e.id), eatenAt: localTimeOn(group.date, t) })}
+            />
+          </span>
+          <span className="font-body text-xs tabular-nums text-muted">נוסף ליומן ב-{group.addedTime}</span>
+        </div>
 
         <section aria-label="סיכום הארוחה" className="flex items-end justify-between gap-4 rounded-3xl border border-border-col bg-bg px-4 py-3.5">
           <span className="flex items-baseline gap-1.5">
@@ -83,6 +98,15 @@ export function MealGroupSheet({ group, onClose }: MealGroupSheetProps) {
                 <span className="flex-shrink-0 rounded-full border border-accent/20 bg-accent/10 px-3 py-0.5 font-body text-xs font-semibold tabular-nums text-accent">{fmt(e.calories)} קק״ל</span>
               </span>
               <span className="flex items-center gap-3 font-body text-xs tabular-nums">
+                {!single && (
+                  <EatenTimeField
+                    size="sm"
+                    value={hhmm(eatenAtOf(e))}
+                    label={`שעת אכילה של ${e.food_name}`}
+                    saving={setTime.isPending}
+                    onSave={(t) => setTime.mutate({ ids: [e.id], eatenAt: localTimeOn(e.date, t) })}
+                  />
+                )}
                 <span className="text-muted">{entryAmountLabel(e)}</span>
                 <span className="text-macro-protein">{fmt(e.protein)}</span>
                 <span className="text-macro-carbs">{fmt(e.carbs)}</span>
