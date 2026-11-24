@@ -10,8 +10,7 @@ import { useExercisesByIds, usePlan, wkKeys } from '../hooks'
 import { ActionButton, CloseButton, Loading } from '../ui/primitives'
 import { deriveMuscleKeys } from '../format'
 import { DAY_LETTERS, type DayLetter, type Plan } from '../types'
-import { ExercisePickerSheet } from '../../workout/ExercisePickerSheet'
-import type { Exercise as PickerExercise } from '../../../types/workout'
+import { ExercisePicker } from '../picker/ExercisePicker'
 import { MUSCLE_PARTS, countSelectedSubs, getPartState, isSubSelected, toggleMusclePart, toggleMuscleSub } from './muscles'
 
 interface FormValues {
@@ -188,11 +187,11 @@ export function PlanForm() {
         )}
       </div>
 
-      <ExercisePickerSheet
+      <ExercisePicker
         isOpen={pickerOpen}
-        selectedExercises={ids.map((id, i) => ({ exercise_id: id, exercise_name: exercises.find((e) => e.exerciseId === id)?.name_he ?? '', order_index: i }))}
-        onAdd={(ex: PickerExercise) => setIds((cur) => (cur.includes(ex.exerciseId) ? cur : [...cur, ex.exerciseId]))}
-        onRemove={remove}
+        selectedIds={ids}
+        onToggle={(id) => setIds((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]))}
+        onClear={() => setIds([])}
         onDone={() => setPickerOpen(false)}
       />
     </div>

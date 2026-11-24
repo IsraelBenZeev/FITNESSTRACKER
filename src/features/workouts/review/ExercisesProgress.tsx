@@ -115,7 +115,7 @@ const curve = (pts: { x: number; y: number }[]) => {
 }
 
 /** review/GraphData.tsx — a smooth line per metric, one point per workout, scrolls sideways */
-function GraphData({ sessions, fields }: { sessions: ProgressSession[]; fields: InputField[] }) {
+export function GraphData({ sessions, fields }: { sessions: ProgressSession[]; fields: InputField[] }) {
   const tabs = useMemo(() => [...fields, SETS], [fields])
   const [key, setKey] = useState(tabs[0]?.key ?? 'sets')
   const field = tabs.find((f) => f.key === key) ?? tabs[0]

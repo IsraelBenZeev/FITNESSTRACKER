@@ -6,7 +6,8 @@ interface Props {
   exercise: Exercise | null
   isSelected: boolean
   onClose: () => void
-  onAdd: (ex: Exercise) => void
+  /** Omitted when browsing (no plan to add to) — the add button is hidden */
+  onAdd?: (ex: Exercise) => void
   zIndexOverride?: number
 }
 
@@ -160,6 +161,7 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zInd
         )}
 
         {/* Add button */}
+        {onAdd && (
         <button
           onClick={() => { onAdd(exercise); onClose() }}
           disabled={isSelected}
@@ -187,6 +189,7 @@ export function ExerciseDetailModal({ exercise, isSelected, onClose, onAdd, zInd
             : <><Plus size={18} strokeWidth={2.5} /> הוסף לתכנית</>
           }
         </button>
+        )}
 
       </div>
     </Modal>
