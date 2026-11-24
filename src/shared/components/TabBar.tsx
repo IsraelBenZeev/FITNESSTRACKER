@@ -1,13 +1,17 @@
-import { Zap, BarChart2, Activity, Dumbbell } from 'lucide-react'
+import { Zap, Activity, Dumbbell, User, Home } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import type { Tab } from '../../types/common'
 import { shouldShowWorkoutBubble, useDraftStore } from '../../features/workouts/draftStore'
 
 const tabs: { id: Tab; label: string; path: string; Icon: React.FC<{ size: number; color: string; strokeWidth: number }> }[] = [
-  { id: 'today', label: 'היום', path: '/today', Icon: Zap },
-  { id: 'history', label: 'היסטוריה', path: '/history', Icon: BarChart2 },
+  // First (rightmost in RTL), like the app's tab bar
+  { id: 'profile', label: 'פרופיל', path: '/profile', Icon: User },
+  // The app's home tab: the body avatar (AvatarSelectorScreen)
+  { id: 'exercises', label: 'בית', path: '/exercises', Icon: Home },
   { id: 'body', label: 'גוף', path: '/body', Icon: Activity },
-  { id: 'workout', label: 'כושר', path: '/workout', Icon: Dumbbell },
+  { id: 'workout', label: 'אימון', path: '/workout', Icon: Dumbbell },
+  // Last = leftmost in RTL
+  { id: 'today', label: 'תזונה', path: '/today', Icon: Zap },
 ]
 
 export function TabBar() {
@@ -16,8 +20,10 @@ export function TabBar() {
   const draft = useDraftStore((s) => s.draft)
   const hasSession = shouldShowWorkoutBubble(draft)
 
-  const active: Tab = pathname.startsWith('/history')
-    ? 'history'
+  const active: Tab = pathname.startsWith('/profile')
+    ? 'profile'
+    : pathname.startsWith('/exercises')
+      ? 'exercises'
     : pathname.startsWith('/body')
       ? 'body'
       : pathname.startsWith('/workout')
