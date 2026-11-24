@@ -18,7 +18,7 @@ export function WorkoutsPage() {
   if (isLoading) return <div className="flex flex-1 items-center justify-center bg-background-1200"><Loading size={96} /></div>
 
   return (
-    <div className="flex min-h-full flex-1 flex-col items-center justify-between bg-background-1200 pt-6">
+    <div className="relative flex min-h-0 flex-1 flex-col items-center overflow-hidden bg-background-1200 pt-6">
       <div className="mt-2 flex w-full items-start justify-between px-6">
         <div>
           <h1 className="typo-h1 tracking-tight text-heading">האימונים שלי</h1>
@@ -58,16 +58,14 @@ export function WorkoutsPage() {
       )}
 
       {!!plans?.length && (
-        <div className="flex w-full justify-end px-10 pb-4">
-          <button
-            type="button"
-            onClick={() => navigate('/workout/form/create')}
-            aria-label="צור אימון חדש"
-            className="flex h-16 w-16 items-center justify-center rounded-full border border-lime-500/50 bg-lime-500/20 text-lime-300 shadow-md shadow-black transition-opacity active:opacity-70"
-          >
-            <ListPlus size={36} />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/workout/form/create')}
+          aria-label="צור אימון חדש"
+          className="absolute bottom-3 left-4 z-20 flex h-14 w-14 items-center justify-center rounded-full border border-lime-500/50 bg-lime-500/20 text-lime-300 shadow-md shadow-black backdrop-blur-sm transition-opacity active:opacity-70"
+        >
+          <ListPlus size={30} />
+        </button>
       )}
     </div>
   )
@@ -104,12 +102,12 @@ function PlansCarousel({ plans }: { plans: NonNullable<ReturnType<typeof usePlan
   const onScroll = useCallback(() => setScrollX(scroller.current?.scrollLeft ?? 0), [])
 
   return (
-    <div className="flex w-full flex-1 items-center">
+    <div className="flex min-h-0 w-full flex-1 items-center">
       <div
         ref={scroller}
         dir="ltr"
         onScroll={onScroll}
-        className="flex w-full snap-x snap-mandatory overflow-x-auto overflow-y-visible pb-24 pt-2 [scrollbar-width:none]"
+        className="flex w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden pb-10 pt-2 [scrollbar-width:none]"
         style={{ paddingInline: pad, gap: GAP }}
         aria-label="תוכניות אימון"
       >

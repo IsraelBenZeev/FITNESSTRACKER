@@ -260,12 +260,24 @@ export function ActiveSession({ plan, initialDraft, exitModeRef, onFinished, onL
   }
 
   const active = exercises?.[activeIndex]
+  // The workout note lives at the end of the last exercise, so the set list gets the full height
+  const notesField = (
+    <label className="flex flex-col gap-1.5">
+      <span className="typo-label text-zinc-400">הערה לאימון</span>
+      <textarea
+        {...register('notes')}
+        rows={2}
+        placeholder="איך היה האימון? משהו לזכור לפעם הבאה"
+        className="typo-input resize-none rounded-2xl border border-white/10 bg-background-800 px-4 py-3 text-heading placeholder:text-zinc-500 focus:border-lime-500/50 focus:outline-none"
+      />
+    </label>
+  )
   return (
     <div className="relative flex min-h-0 flex-1 animate-[pageEnter_0.6s_ease] flex-col bg-background-900">
       <HistoryImportIsland visible={hasHistory && noticeVisible} durationMs={HISTORY_NOTICE_MS} onCancel={cancelHistoryImport} />
 
       <div className={`flex min-h-0 flex-1 flex-col ${locked ? 'pointer-events-none opacity-35' : ''}`}>
-        <div className="mb-3 mt-4 flex items-center justify-between gap-4 px-3">
+        <div className="mb-1 mt-3 flex items-center justify-between gap-4 px-3">
           <h2 className="typo-h3 min-w-0 flex-1 truncate text-heading">{active?.name_he ?? ''}</h2>
           <span className="typo-label flex-shrink-0 text-zinc-400">תרגיל {activeIndex + 1} מתוך {exercises?.length}</span>
         </div>
@@ -279,7 +291,7 @@ export function ActiveSession({ plan, initialDraft, exitModeRef, onFinished, onL
           >
             {(exercises ?? []).map((ex, i) => (
               <div key={`${ex.exerciseId}-${useHistory ? 'history' : 'empty'}`} dir="rtl" className="flex h-full w-full flex-shrink-0 snap-center justify-center">
-                <div className="h-full w-[95%]">
+                <div className="h-full w-[97%]">
                   <ExerciseCard
                     item={ex}
                     isActive={i === activeIndex}
@@ -287,6 +299,7 @@ export function ActiveSession({ plan, initialDraft, exitModeRef, onFinished, onL
                     defaultSets={useHistory ? historyDefaults[ex.exerciseId] ?? NO_SETS : NO_SETS}
                     optionalFieldVisibility={optionalVisibility}
                     onOptionalFieldVisibilityChange={onOptionalChange}
+                    footer={i === (exercises?.length ?? 0) - 1 ? notesField : undefined}
                   />
                 </div>
               </div>
@@ -314,16 +327,7 @@ export function ActiveSession({ plan, initialDraft, exitModeRef, onFinished, onL
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 bg-background-900/95 px-6 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] pt-3">
-          <label className="flex flex-col gap-1.5">
-            <span className="typo-label text-zinc-400">הערה לאימון</span>
-            <textarea
-              {...register('notes')}
-              rows={2}
-              placeholder="איך היה האימון? משהו לזכור לפעם הבאה"
-              className="typo-input resize-none rounded-2xl border border-white/10 bg-background-800 px-4 py-3 text-heading placeholder:text-zinc-500 focus:border-lime-500/50 focus:outline-none"
-            />
-          </label>
+        <div className="flex flex-col bg-background-900/95 px-6 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] pt-2">
           <ActionButton onPress={openFinish} label="סיים אימון" variant="outline" size="md" fullWidth disabled={locked || isPending} loading={isPending} />
         </div>
       </div>

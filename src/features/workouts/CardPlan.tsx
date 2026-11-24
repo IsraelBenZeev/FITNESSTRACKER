@@ -43,7 +43,7 @@ export function CardPlan({ plan, isActive }: { plan: Plan; isActive: boolean }) 
     <div className="relative mt-[30px]">
       <article
         aria-label={plan.title}
-        className={`flex h-[clamp(380px,calc(100dvh-330px),470px)] w-[280px] flex-col justify-between rounded-[40px] border border-white/[0.04] bg-background-900 px-6 pb-6 pt-8 transition-transform duration-500 ease-[cubic-bezier(0.2,0.9,0.3,1)] ${open ? '-translate-y-[100px]' : ''}`}
+        className={`flex h-[clamp(300px,calc(100dvh-390px),470px)] w-[280px] flex-col justify-between rounded-[40px] border border-white/[0.04] bg-background-900 px-6 pb-6 pt-8 transition-transform duration-500 ease-[cubic-bezier(0.2,0.9,0.3,1)] ${open ? '-translate-y-[100px]' : ''}`}
       >
         <h2 className="typo-h2 line-clamp-2 leading-7 text-heading">{plan.title}</h2>
 
