@@ -62,10 +62,12 @@ interface ActionButtonProps {
   disabled?: boolean
   loading?: boolean
   ariaLabel?: string
+  /** 'submit' inside a <form>, so Enter in a field submits it (onPress is then ignored) */
+  type?: 'button' | 'submit'
 }
 
 export function ActionButton({
-  onPress, label, icon: Icon, size = 'md', variant = 'outline', fullWidth, iconOnly, disabled, loading, ariaLabel,
+  onPress, label, icon: Icon, size = 'md', variant = 'outline', fullWidth, iconOnly, disabled, loading, ariaLabel, type = 'button',
 }: ActionButtonProps) {
   const v = disabled ? DISABLED : VARIANT[variant]
   const s = SIZE[size]
@@ -82,8 +84,8 @@ export function ActionButton({
 
   return (
     <button
-      type="button"
-      onClick={onPress}
+      type={type}
+      onClick={type === 'submit' ? undefined : onPress}
       disabled={busy}
       aria-label={ariaLabel}
       aria-busy={loading}

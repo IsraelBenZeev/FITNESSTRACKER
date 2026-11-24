@@ -11,13 +11,21 @@ interface StepperProps {
   label?: string
   unit?: string
   decimals?: number
+  /** protein: blue +/- buttons and step chips, like the protein ring */
+  tone?: 'accent' | 'protein'
 }
 
-const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
-const roundBtn = `flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full text-accent transition-[background-color,opacity] duration-150 hover:bg-accent-soft active:bg-accent-soft disabled:opacity-30 disabled:hover:bg-transparent select-none touch-manipulation [-webkit-tap-highlight-color:transparent] ${focusRing}`
+const TONES = {
+  accent: { btn: 'text-accent hover:bg-accent-soft active:bg-accent-soft focus-visible:outline-accent', chip: 'border-accent bg-accent-soft text-accent', ring: 'focus-visible:outline-accent' },
+  protein: { btn: 'text-macro-protein hover:bg-macro-protein/15 active:bg-macro-protein/15 focus-visible:outline-macro-protein', chip: 'border-macro-protein bg-macro-protein/15 text-macro-protein', ring: 'focus-visible:outline-macro-protein' },
+} as const
+const focusBase = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'
+const roundBase = `flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full transition-[background-color,opacity] duration-150  disabled:opacity-30 disabled:hover:bg-transparent select-none touch-manipulation [-webkit-tap-highlight-color:transparent] ${focusBase}`
 
 /** Capsule stepper: − value + (hold to repeat), with selectable step sizes underneath */
-export function Stepper({ value, onChange, min, max, step, stepOptions = [step], label, unit, decimals = 0 }: StepperProps) {
+export function Stepper({ value, onChange, min, max, step, stepOptions = [step], label, unit, decimals = 0, tone = 'accent' }: StepperProps) {
+  const t = TONES[tone]
+  const roundBtn = `${roundBase} ${t.btn}`
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [activeStep, setActiveStep] = useState(step)
@@ -74,7 +82,7 @@ export function Stepper({ value, onChange, min, max, step, stepOptions = [step],
               role="radio"
               aria-checked={activeStep === option}
               onClick={() => setActiveStep(option)}
-              className={`h-8 min-w-[44px] rounded-full border px-3 font-body text-sm tabular-nums transition-colors duration-150 ${focusRing} ${activeStep === option ? 'border-accent bg-accent-soft font-medium text-accent' : 'border-border-col text-muted hover:text-text-col'}`}
+              className={`h-8 min-w-[44px] rounded-full border px-3 font-body text-sm tabular-nums transition-colors duration-150 ${focusBase} ${t.ring} ${activeStep === option ? `${t.chip} font-medium` : 'border-border-col text-muted hover:text-text-col'}`}
             >
               {option.toLocaleString('he-IL')}
             </button>

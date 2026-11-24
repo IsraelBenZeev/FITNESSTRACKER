@@ -244,11 +244,11 @@ function StepButton({ kind, onStep, stop, label }: { kind: 'minus' | 'plus'; onS
       onPointerLeave={stop}
       onPointerCancel={stop}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onStep(); stop() } }}
-      className={`flex h-10 w-10 flex-shrink-0 touch-none items-center justify-center rounded-full border transition-transform duration-100 active:scale-90 ${
+      className={`flex h-9 w-9 flex-shrink-0 touch-none items-center justify-center rounded-full border transition-transform duration-100 active:scale-90 ${
         kind === 'plus' ? 'border-lime-500/45 bg-lime-500/20 text-lime-300' : 'border-white/10 bg-background-800 text-heading'
       }`}
     >
-      <Icon size={22} strokeWidth={2.5} />
+      <Icon size={20} strokeWidth={2.5} />
     </button>
   )
 }
@@ -273,10 +273,11 @@ export function StepInput({ control, name, label, unit, icon: Icon }: { control:
   const step = ten ? 10 : 1
   const { start, stop } = useHoldRepeat()
   return (
-    <div className="flex w-full flex-col items-center justify-center gap-2">
-      <div className="flex items-center justify-center gap-2">
-        <Icon size={18} className="text-background-300" aria-hidden />
+    <div className="flex w-full flex-col items-center justify-center gap-1">
+      <div className="flex items-center justify-center gap-1.5">
+        <Icon size={16} className="text-background-300" aria-hidden />
         <span className="typo-caption-bold uppercase text-zinc-400">{label}</span>
+        {!!unit && <span className="typo-caption text-zinc-500">{unit}</span>}
         <TenToggle on={ten} onToggle={() => setTen((t) => !t)} />
       </div>
       <Controller
@@ -293,7 +294,7 @@ export function StepInput({ control, name, label, unit, icon: Icon }: { control:
           return (
             <div className="flex items-center rounded-2xl border border-white/5 bg-zinc-900">
               <StepButton kind="minus" label={`הפחת ${label}`} onStep={() => start(() => bump(-step))} stop={stop} />
-              <span className="flex min-w-[30px] items-center justify-center px-4">
+              <span className="flex min-w-[30px] items-center justify-center px-3">
                 <AnimatedNumber value={Number(value) || 0} />
               </span>
               <StepButton kind="plus" label={`הוסף ${label}`} onStep={() => start(() => bump(step))} stop={stop} />
@@ -301,7 +302,6 @@ export function StepInput({ control, name, label, unit, icon: Icon }: { control:
           )
         }}
       />
-      {!!unit && <span className="typo-caption -mt-1 text-zinc-400">{unit}</span>}
     </div>
   )
 }

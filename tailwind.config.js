@@ -47,12 +47,12 @@ export default {
         display: ['"Barlow Condensed"', 'sans-serif'],
         body: ['"Rubik"', 'sans-serif'],
       },
-      // BodyBuddy logo intro (same timing as the app): border draws 0–1.5s, H pops at 1.1s, words rise at 1.6s / 1.8s
+      // BodyBuddy logo intro (~0.55s): hexagon spins in 0–0.45s, H pops at 0.15s, "Body" / "Buddy" slide in from both sides at 0.25s
       keyframes: {
-        'bb-draw': { from: { strokeDashoffset: '1000' }, to: { strokeDashoffset: '0' } },
-        'bb-settle': { from: { opacity: '0' }, to: { opacity: '1' } },
+        'bb-hex-in': { from: { opacity: '0', transform: 'scale(0.6) rotate(-30deg)' }, to: { opacity: '1', transform: 'scale(1) rotate(0deg)' } },
         'bb-pop': { from: { opacity: '0', transform: 'scale(0.3)' }, to: { opacity: '1', transform: 'scale(1)' } },
-        'bb-rise': { from: { opacity: '0', transform: 'translateY(60px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
+        'bb-slide-l': { from: { opacity: '0', transform: 'translateX(-60px)' }, to: { opacity: '1', transform: 'translateX(0)' } },
+        'bb-slide-r': { from: { opacity: '0', transform: 'translateX(60px)' }, to: { opacity: '1', transform: 'translateX(0)' } },
         'bb-fade-out': { from: { opacity: '1' }, to: { opacity: '0' } },
         // Workout screens (ported from the app's reanimated animations)
         'bb-spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
@@ -66,12 +66,14 @@ export default {
         'bb-countdown': { from: { strokeDashoffset: '0' }, to: { strokeDashoffset: 'var(--bb-circ)' } },
         'bb-rise-in': { from: { opacity: '0', transform: 'translateY(-16px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
         'bb-land': { from: { opacity: '0', transform: 'scale(0.9)' }, to: { opacity: '1', transform: 'scale(1)' } },
+        // reanimated FadeInDown (floating selection bar on the avatar screen)
+        'bb-fade-in-down': { from: { opacity: '0', transform: 'translateY(-25px)' }, to: { opacity: '1', transform: 'translateY(0)' } },
       },
       animation: {
-        'bb-draw': 'bb-draw 1500ms ease-in-out both',
-        'bb-settle': 'bb-settle 1ms linear 1500ms both',
-        'bb-pop': 'bb-pop 350ms ease-out 1100ms both',
-        'bb-rise': 'bb-rise 400ms ease-out both',
+        'bb-hex-in': 'bb-hex-in 450ms cubic-bezier(0.34, 1.56, 0.64, 1) both',
+        'bb-pop': 'bb-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) 150ms both',
+        'bb-slide-l': 'bb-slide-l 300ms cubic-bezier(0.2, 0.9, 0.3, 1) 250ms both',
+        'bb-slide-r': 'bb-slide-r 300ms cubic-bezier(0.2, 0.9, 0.3, 1) 250ms both',
         'bb-fade-out': 'bb-fade-out 250ms ease-in both',
         'bb-spin': 'bb-spin 1.3s cubic-bezier(0.34, 1.56, 0.64, 1) infinite',
         'bb-nudge': 'bb-nudge 2.2s ease-in-out infinite',
@@ -84,6 +86,7 @@ export default {
         'bb-countdown': 'bb-countdown linear both',
         'bb-rise-in': 'bb-rise-in 400ms ease-out both',
         'bb-land': 'bb-land 200ms ease-out both',
+        'bb-fade-in-down': 'bb-fade-in-down 220ms ease-out both',
       },
     },
   },
