@@ -49,7 +49,7 @@ export function GoalEditSheet({ isOpen, onClose, current, weight }: GoalEditShee
     <Modal isOpen={isOpen} onClose={onClose} title="עריכת היעד היומי" footer={footer}>
       <div className="flex flex-col gap-6">
         <Stepper label="קלוריות ביום" value={calories} onChange={setCalories} min={1000} max={6000} step={50} stepOptions={[10, 50, 100]} unit="קל'" />
-        <Stepper label="חלבון ביום" value={protein} onChange={setProtein} min={30} max={350} step={1} stepOptions={[1, 5, 10]} unit="גרם" />
+        <Stepper label="חלבון ביום" value={protein} onChange={setProtein} min={30} max={350} step={1} stepOptions={[1, 5, 10]} unit="גרם" tone="protein" />
 
         <section aria-label="חלוקת המאקרו" className="flex flex-col gap-2 rounded-2xl bg-bg px-4 py-3">
           <span className="font-body text-sm font-medium text-text-col">פחמימה ושומן מחושבים אוטומטית</span>
