@@ -2,17 +2,13 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Modal } from '../../shared/components/Modal'
 import { ConfirmDialog } from '../../ui/ConfirmDialog'
-import { eatenAtOf, entryAmountLabel, localTimeOn } from './foodMath'
+import { entryAmountLabel, localTimeOn } from './foodMath'
 import { useDeleteEntry, useDeleteGroup, useUpdateEatenAt } from './hooks'
 import { EatenTimeField } from './ui/EatenTimeField'
 import type { MealGroup, NutritionEntry } from './types'
 
 const focusRing = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent'
 const fmt = (n: number) => Math.round(n).toLocaleString('he-IL')
-const hhmm = (iso: string) => {
-  const d = new Date(iso)
-  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
-}
 
 type PendingDelete = { kind: 'group' } | { kind: 'entry'; entry: NutritionEntry }
 
@@ -23,7 +19,7 @@ interface MealGroupSheetProps {
 
 /**
  * A logged meal — like the app's entry detail: when it was eaten (editable) and added, the totals,
- * the foods with their amounts, macros and own eaten time, and delete (a food, or the whole meal).
+ * the foods with their amounts and macros, and delete (a food, or the whole meal).
  */
 export function MealGroupSheet({ group, onClose }: MealGroupSheetProps) {
   const [pending, setPending] = useState<PendingDelete | null>(null)
@@ -98,15 +94,6 @@ export function MealGroupSheet({ group, onClose }: MealGroupSheetProps) {
                 <span className="flex-shrink-0 rounded-full border border-accent/20 bg-accent/10 px-3 py-0.5 font-body text-xs font-semibold tabular-nums text-accent">{fmt(e.calories)} קק״ל</span>
               </span>
               <span className="flex items-center gap-3 font-body text-xs tabular-nums">
-                {!single && (
-                  <EatenTimeField
-                    size="sm"
-                    value={hhmm(eatenAtOf(e))}
-                    label={`שעת אכילה של ${e.food_name}`}
-                    saving={setTime.isPending}
-                    onSave={(t) => setTime.mutate({ ids: [e.id], eatenAt: localTimeOn(e.date, t) })}
-                  />
-                )}
                 <span className="text-muted">{entryAmountLabel(e)}</span>
                 <span className="text-macro-protein">{fmt(e.protein)}</span>
                 <span className="text-macro-carbs">{fmt(e.carbs)}</span>
