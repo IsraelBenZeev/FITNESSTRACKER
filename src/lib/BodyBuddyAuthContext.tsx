@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import type { User } from '@supabase/supabase-js'
 import { useQueryClient } from '@tanstack/react-query'
 import { supabaseBodyBuddy } from './supabaseBodyBuddy'
+import { recordLatestConsents } from '../features/auth/authService'
 
 interface BodyBuddyAuthValue {
   /** The BodyBuddy user (nutrition + body stats are written under this id) */
@@ -29,9 +30,10 @@ export function BodyBuddyAuthProvider({ children }: { children: React.ReactNode 
       setBbUser(session?.user ?? null)
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
         queryClient.invalidateQueries({ queryKey: ['bb'] })
-        // Drop the `?code=` left by the OAuth callback
+        // Drop the `?code=` left by the OAuth callback; a Google sign-in records consent like the app does
         if (event === 'SIGNED_IN' && window.location.search.includes('code=')) {
           window.history.replaceState(null, '', window.location.pathname + window.location.hash)
+          if (session?.user) void recordLatestConsents(session.user.id)
         }
       }
     })
@@ -43,12 +45,13 @@ export function BodyBuddyAuthProvider({ children }: { children: React.ReactNode 
     await supabaseBodyBuddy.auth.signInWithOAuth({
       provider: 'google',
       // select_account: lets "switch account" pick a different Google account
-      options: { redirectTo: window.location.origin + window.location.pathname, queryParams: { prompt: 'select_account' } },
+      // Back to the app root, not /auth/login: the routes there only exist while signed out
+      options: { redirectTo: window.location.origin + '/today', queryParams: { prompt: 'select_account' } },
     })
   }
 
   const disconnect = async () => {
-    await supabaseBodyBuddy?.auth.signOut()
+    await supabaseBodyBuddy?.auth.signOut({ scope: 'local' })
   }
 
   return (
