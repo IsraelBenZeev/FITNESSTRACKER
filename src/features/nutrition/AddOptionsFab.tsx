@@ -67,7 +67,7 @@ export function AddOptionsFab({ onAddFood, onAddMeal }: AddOptionsFabProps) {
         className={`fixed inset-0 z-40 bg-black/50 backdrop-blur-[2px] transition-opacity duration-200 ${open ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
       />
 
-      <div className="fixed bottom-[calc(57px+env(safe-area-inset-bottom,0px)+12px)] right-[max(16px,env(safe-area-inset-right,0px))] z-50 flex flex-col items-center">
+      <div className="fixed bottom-[calc(57px+env(safe-area-inset-bottom,0px)+12px)] left-[max(16px,env(safe-area-inset-left,0px))] z-50 flex flex-col items-center">
         <div className="relative flex w-[88px] flex-col items-center">
           <ul className="absolute bottom-[76px] flex flex-col-reverse items-center gap-3" aria-hidden={!open}>
             {options.map((o, i) => (

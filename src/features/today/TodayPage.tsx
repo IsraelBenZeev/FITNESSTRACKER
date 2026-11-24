@@ -1,21 +1,45 @@
 import { useState } from 'react'
 import { useToday } from './useToday'
-import { useGoals } from '../../lib/useGoals'
-import { DailySummary } from './DailySummary'
+import { useGoalHistory, splitMacros } from '../history/useGoalHistory'
+import { useProfile } from '../profile/useProfileData'
+import { GOAL_CALORIES, GOAL_PROTEIN } from '../../lib/constants'
+import { useNutritionGoalEdits } from './useNutritionGoalEdits'
+import {
+  GoalInfoCard, HiddenMacrosChips, MacroBar, MacroRingCard, ManualCaloriesDialog, ManualProteinDialog, MotivationCard,
+  motivationMessage, type MacroKey,
+} from './NutritionGoalCards'
 import { DayTimeline } from './DayTimeline'
 import { AddOptionsFab } from '../nutrition/AddOptionsFab'
 import { AddFoodFlow } from '../nutrition/AddFoodFlow'
 import { MyListSheet, type MyListTab } from '../nutrition/MyListSheet'
 import { MealBuilderSheet } from '../nutrition/MealBuilderSheet'
 import { MealGroupSheet } from '../nutrition/MealGroupSheet'
-import { useNavigate } from 'react-router-dom'
 import type { NutritionLog } from '../../types/nutrition'
 import type { MealGroup } from '../nutrition/types'
 
 export function TodayPage() {
   const { meals, groups, totals, loading } = useToday()
-  const { goalCalories, goalProtein } = useGoals()
-  const navigate = useNavigate()
+  const { current } = useGoalHistory()
+  const { data: profile } = useProfile()
+  const edits = useNutritionGoalEdits(profile, current)
+  const [caloriesOpen, setCaloriesOpen] = useState(false)
+  const [proteinOpen, setProteinOpen] = useState(false)
+
+  // Goal of record (nutrition_goals); the constants only until a goal exists
+  const goalCalories = current?.calories ?? GOAL_CALORIES
+  const goalProtein = current?.protein ?? GOAL_PROTEIN
+  const split = splitMacros(goalCalories, goalProtein)
+  const goalCarbs = current?.carbs ?? split.carbs
+  const goalFat = current?.fat ?? split.fat
+  const isManualCalories = profile?.manual_daily_calories != null || (current?.isManual ?? false)
+
+  const progress = goalCalories > 0 ? Math.min(100, Math.round((totals.calories / goalCalories) * 100)) : 0
+  const motivation = motivationMessage(goalCalories - totals.calories, progress)
+
+  const showCarbs = profile?.show_carbs_bar ?? true
+  const showFat = profile?.show_fat_bar ?? true
+  const setShown = (m: MacroKey, shown: boolean) => edits.setDisplay.mutate(m === 'carbs' ? { show_carbs_bar: shown } : { show_fat_bar: shown })
+  const hidden: MacroKey[] = [...(showCarbs ? [] : ['carbs' as const]), ...(showFat ? [] : ['fat' as const])]
   const [openGroup, setOpenGroup] = useState<MealGroup | null>(null)
   // The app's add flow: "מאכל" → food search; "ארוחה" → my meals; both reach my list and the meal builder
   const [foodFlowOpen, setFoodFlowOpen] = useState(false)
@@ -32,12 +56,28 @@ export function TodayPage() {
           <TodaySkeleton />
         ) : (
           <>
-            <DailySummary
-              totals={totals}
-              goalCalories={goalCalories}
-              goalProtein={goalProtein}
-              onEditGoals={() => navigate("/profile")}
-            />
+            {/* The app's nutrition screen: title, motivation line, protein / calories ring, carbs / fat bars, how we calculate */}
+            <div className="rounded-3xl bg-background-950 px-5 py-6 shadow-md shadow-black">
+              <div className="mb-8 mt-2">
+                <h1 className="typo-h1 mb-2 text-heading">תזונה</h1>
+                <span aria-hidden className="block h-[5px] w-[60px] rounded-[10px] bg-lime-500" />
+              </div>
+
+              <MotivationCard content={motivation} progress={progress} />
+              <MacroRingCard
+                proteinConsumed={totals.protein}
+                proteinGoal={goalProtein}
+                caloriesConsumed={totals.calories}
+                caloriesGoal={goalCalories}
+                isManualCalories={isManualCalories}
+                onEditCalories={() => setCaloriesOpen(true)}
+                onEditProtein={() => setProteinOpen(true)}
+              />
+              {showCarbs && <MacroBar macro="carbs" consumed={totals.carbs} goal={goalCarbs} onHide={() => setShown('carbs', false)} />}
+              {showFat && <MacroBar macro="fat" consumed={totals.fat} goal={goalFat} onHide={() => setShown('fat', false)} />}
+              <HiddenMacrosChips hidden={hidden} onShow={(m) => setShown(m, true)} />
+              <GoalInfoCard proteinPerKg={edits.proteinPerKg} weight={edits.weight} isManualCalories={isManualCalories} />
+            </div>
 
             <section aria-labelledby="day-heading" className="flex flex-col gap-2">
               <div className="flex items-baseline justify-between">
@@ -82,6 +122,24 @@ export function TodayPage() {
         // Opened from the search: just go back to it. Opened from "ארוחה": open the search
         onAddNewFood={() => { setMyList(null); setFoodFlowOpen(true) }}
         onCreateMeal={() => { closeAll(); setBuilderOpen(true) }}
+      />
+      <ManualCaloriesDialog
+        open={caloriesOpen}
+        initialValue={goalCalories}
+        isManual={isManualCalories}
+        canReset={edits.canAuto}
+        saving={edits.setCalories.isPending}
+        onClose={() => setCaloriesOpen(false)}
+        onSave={(v) => edits.setCalories.mutate(v, { onSuccess: () => setCaloriesOpen(false) })}
+        onReset={() => edits.setCalories.mutate(null, { onSuccess: () => setCaloriesOpen(false) })}
+      />
+      <ManualProteinDialog
+        open={proteinOpen}
+        initialValue={edits.proteinPerKg}
+        weight={edits.weight}
+        saving={edits.setProteinPerKg.isPending}
+        onClose={() => setProteinOpen(false)}
+        onSave={(v) => edits.setProteinPerKg.mutate(v, { onSuccess: () => setProteinOpen(false) })}
       />
       <MealBuilderSheet isOpen={builderOpen} onClose={() => setBuilderOpen(false)} />
       <MealGroupSheet

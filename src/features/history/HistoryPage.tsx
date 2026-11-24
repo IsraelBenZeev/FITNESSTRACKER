@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react'
-import { Check, ChevronLeft, ClipboardCopy, FileDown } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ArrowRight, Check, ChevronLeft, ClipboardCopy, FileDown } from 'lucide-react'
 import { useCalendarMonth, fetchNutritionForExport } from './useHistory'
 import { useToast } from '../../shared/context/ToastContext'
 import { todayLocal } from '../../lib/date'
@@ -22,9 +23,13 @@ const DOT: Record<Exclude<DayColor, 'gray'>, string> = {
 }
 
 export function HistoryPage() {
+  const navigate = useNavigate()
+  const [params, setParams] = useSearchParams()
+  // ?day=YYYY-MM-DD (from the profile's weekly nutrition card): open on that day's month, then its day sheet
+  const requestedDay = /^\d{4}-\d{2}-\d{2}$/.test(params.get('day') ?? '') ? params.get('day') : null
   const now = new Date()
-  const [year, setYear] = useState(now.getFullYear())
-  const [month, setMonth] = useState(now.getMonth() + 1)
+  const [year, setYear] = useState(requestedDay ? Number(requestedDay.slice(0, 4)) : now.getFullYear())
+  const [month, setMonth] = useState(requestedDay ? Number(requestedDay.slice(5, 7)) : now.getMonth() + 1)
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1
 
   const [selected, setSelected] = useState<{ date: string; totals: DayTotals } | null>(null)
@@ -34,6 +39,13 @@ export function HistoryPage() {
   const { showSuccess, showError } = useToast()
 
   const { dayMap, weekDayMap, monthGoals, loading } = useCalendarMonth(year, month)
+
+  useEffect(() => {
+    if (!requestedDay || loading) return
+    const totals = dayMap.get(requestedDay) ?? { date: requestedDay, calories: 0, protein: 0, carbs: 0, fat: 0 }
+    setSelected({ date: requestedDay, totals })
+    setParams({}, { replace: true }) // once: closing the sheet leaves the calendar
+  }, [requestedDay, loading, dayMap, setParams])
 
   const stats = useMemo(() => {
     const today = todayLocal()
@@ -90,6 +102,17 @@ export function HistoryPage() {
   return (
     <>
       <div className="flex flex-col gap-7 px-4 pb-28 pt-4">
+        <header className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/profile')}
+            aria-label="חזרה לפרופיל"
+            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-border-col bg-surface text-heading transition-colors duration-200 hover:border-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+          >
+            <ArrowRight size={20} strokeWidth={2} aria-hidden />
+          </button>
+          <h1 className="font-body text-2xl font-semibold text-heading">היסטוריית תזונה</h1>
+        </header>
         <section aria-label="לוח חודשי" className="flex flex-col gap-5 rounded-2xl border border-border-col bg-surface px-4 pb-4 pt-2">
           <CalendarHeader
             year={year}
